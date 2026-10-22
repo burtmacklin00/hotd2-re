@@ -1,25 +1,45 @@
-HOTD2RE - GAME OUTPUTS BUILD (hotd2-outputs.exe)
-=================================================
+HOTD2RE - LIGHT GUN EDITION (outputs, 2-player light guns, bezel, presets)
+===========================================================================
 
-hotd2-outputs.exe is HOTD2RE built from the official source (2026 10 21 A) with game
-outputs added for recoil / force-feedback tools, and lightgunHID.ini support. Your original hotd2.exe is untouched.
-Launch with "Play HOTD2.ahk" (AutoHotkey 1.1).
+QUICK START
+  1. Extract this package into your hotd2re game folder (next to game\ and scenes\).
+  2. Plug in your guns and run LightgunSetup.exe once: pull the Player 1 trigger,
+     then Player 2, then Save. (Or edit LightgunHID.ini by hand.)
+  3. Start Hook of the Reaper (copy hotr\hod2re.txt into its defaultLG folder first).
+  4. Run "Play HOTD2.exe".  Tap Esc = pause, HOLD Esc = quit.
+
+WHICH FILE DOES WHAT
+  Play HOTD2.exe            Starts the game. No AutoHotkey needed.
+  Play HOTD2.ahk            Same launcher as a script, for AutoHotkey 1.1 users / front-ends.
+  Play HOTD2.ini            Launcher settings: Hook of the Reaper path, hold-Esc time.
+  LightgunSetup.exe         Pick the Player 1 / Player 2 guns (writes LightgunHID.ini).
+  Swap 4x3 - 16x9.bat       4:3 with bezel  <->  16:9 stretch.
+  Toggle Crosshairs.bat     Crosshairs on <-> off.
+  Graphics - Max.bat        Best quality (DLSS on NVIDIA RTX, FSR 3 otherwise).
+  Graphics - Low.bat        For older graphics cards.
+  Toggle 2x Graphics.bat    Downloads (first time) and switches the official 2x texture pack.
+  hotd2-outputs64.exe       The game, 64-bit (used automatically on 64-bit Windows).
+  hotd2-outputs.exe         The game, 32-bit (for 32-bit Windows).
+  You never need to run the hotd2-outputs exes directly - use Play HOTD2.
+
+TEXTURE PACKS
+  The only released pack is the official 2x pack (Toggle 2x Graphics.bat). Options > Graphics >
+  Packs also shows Material Detail / Model Smoothing: those need a pack with material maps or
+  model rules, and none has been released yet - "Needs pack" there is normal.
 
 64-BIT VERSION (hotd2-outputs64.exe) - recommended on 64-bit Windows
   Same game + outputs + lightgunHID, plus the 64-bit graphics features: native Direct3D 12,
   AMD FSR upscaling and frame generation (works on NVIDIA / AMD / Intel), Intel XeSS and
-  experimental ray shadows, and NVIDIA DLSS (upscaling + frame generation, RTX cards) in
-  the GitHub-built package. The vendor DLLs are included in that package; turn the
-  features on in Options > Graphics (off by default). "Install 64-bit Runtimes.bat" is only
-  needed for a copy without them.
+  experimental ray shadows, and NVIDIA DLSS (upscaling + frame generation, RTX cards).
+  The vendor DLLs are included; "Graphics - Max.bat" turns the features on.
   "Play HOTD2.ahk" picks the 64-bit exe automatically. 32-bit and 64-bit builds have
   different version numbers, so online both players must use the same one.
 
-LAUNCHING (Play HOTD2.ahk, AutoHotkey 1.1) - the only launcher
-  Starts the game (64-bit DLSS build on 64-bit Windows), draws the bezel in 4:3,
-  optionally starts Hook of the Reaper (set HOTR_EXE at the top of the script), and exits
-  when the game closes. Tap Esc = pause, HOLD Esc 1.5 s = quit.
-  Optional argument: 4x3 or 16x9 (switches folders first, see below).
+LAUNCHING (Play HOTD2.exe, or Play HOTD2.ahk with AutoHotkey 1.1)
+  Starts the game, draws the bezel in 4:3, optionally starts Hook of the Reaper
+  (set HotrExe in Play HOTD2.ini), and exits when the game closes.
+  Tap Esc = pause, HOLD Esc 1.5 s = quit. Optional argument: 4x3 or 16x9.
+  Windows may warn about the unsigned exes the first time: More info > Run anyway.
 
 SWITCH FOLDERS
   4x3\  16x9\  "Crosshairs On"\  "Crosshairs Off"\ each hold a settings.ini with only the

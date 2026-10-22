@@ -76,6 +76,19 @@ jobs:
           cmake -S tools/lightgun_setup -B build-setup -A Win32
           cmake --build build-setup --config Release
 
+      - name: Compile Play HOTD2.exe (AutoHotkey 1.1.37.02)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Invoke-WebRequest https://github.com/AutoHotkey/AutoHotkey/releases/download/v1.1.37.02/AutoHotkey_1.1.37.02.zip -OutFile ahk.zip
+          if ((Get-FileHash ahk.zip -Algorithm SHA256).Hash -ne '6F3663F7CDD25063C8C8728F5D9B07813CED8780522FD1F124BA539E2854215F') { throw 'AutoHotkey zip hash mismatch' }
+          Expand-Archive ahk.zip -DestinationPath ahk
+          Copy-Item 'ahk\Compiler\Unicode 32-bit.bin' base32.bin
+          $a = @('/in', '"setup\Play HOTD2.ahk"', '/out', 'PlayHOTD2.exe', '/base', 'base32.bin', '/silent')
+          if (Test-Path 'build-x64\src\port\hotd2.ico') { $a += @('/icon', 'build-x64\src\port\hotd2.ico') }
+          Start-Process -Wait -FilePath 'ahk\Compiler\Ahk2Exe.exe' -ArgumentList $a
+          if (-not (Test-Path PlayHOTD2.exe)) { throw 'Ahk2Exe did not produce PlayHOTD2.exe' }
+
       - name: Package
         shell: pwsh
         run: |
@@ -92,6 +105,7 @@ jobs:
           foreach ($d in 'vendor-licenses','dxc-licenses') { if (Test-Path "$x64\$d") { Copy-Item "$x64\$d" $out -Recurse -Force } }
           Copy-Item 'build\src\port\Release\hotd2.exe' "$out\hotd2-outputs.exe"
           Copy-Item 'build-setup\Release\LightgunSetup.exe' $out
+          Copy-Item PlayHOTD2.exe "$out\Play HOTD2.exe"
           Copy-Item LICENSE "$out\LICENSE-native-code.txt"
           Copy-Item THIRD_PARTY_NOTICES.txt $out
           "Built from $env:GITHUB_SHA by GitHub Actions run $env:GITHUB_RUN_ID" | Set-Content "$out\BUILD-OUTPUTS.txt"

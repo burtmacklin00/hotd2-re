@@ -1,7 +1,7 @@
-; The House of the Dead 2 (HOTD2RE) launcher - AutoHotkey 1.1. This one file launches the game.
+; The House of the Dead 2 (HOTD2RE) launcher - AutoHotkey 1.1. Also shipped compiled as Play HOTD2.exe (no AutoHotkey needed).
 ;
 ; Put it in the hotd2re folder (next to hotd2-outputs64.exe) and run it.
-;   Play HOTD2.ahk           launches in the current display mode
+;   Play HOTD2.ahk / .exe    launches in the current display mode
 ;   Play HOTD2.ahk 4x3       switches to the 4x3 folder's settings first (4:3 with bezel)
 ;   Play HOTD2.ahk 16x9      switches to the 16x9 folder's settings first (16:9 stretch)
 ; In 4:3 mode the bezel is 4x3\bezel.png (your own) or 4x3\bezel-placeholder.png.
@@ -14,11 +14,19 @@ SetWorkingDir %A_ScriptDir%
 DetectHiddenWindows, On
 
 ; ---------------- Settings ----------------
-; Hook of the Reaper: full path to its exe, or leave empty to not start it.
-; Example: HOTR_EXE := "C:\Lightgun\Hook Of The Reaper\HookOfTheReaper.exe"
-HOTR_EXE := ""
-HOTR_CLOSE_AFTER := false   ; true = close Hook of the Reaper when the game exits
-HOLD_TO_QUIT_MS := 1500     ; how long to hold Esc to quit
+; Set these in "Play HOTD2.ini" next to this file (works for Play HOTD2.exe too, which can't be edited):
+;   [Launcher]
+;   HotrExe=C:\Lightgun\Hook Of The Reaper\HookOfTheReaper.exe   (empty = don't start it)
+;   HotrCloseAfter=0      (1 = close Hook of the Reaper when the game exits)
+;   HoldToQuitMs=1500     (how long to hold Esc to quit)
+LAUNCHER_INI := A_ScriptDir . "\Play HOTD2.ini"
+IniRead, HOTR_EXE, %LAUNCHER_INI%, Launcher, HotrExe, %A_Space%
+IniRead, HOTR_CLOSE_AFTER, %LAUNCHER_INI%, Launcher, HotrCloseAfter, 0
+IniRead, HOLD_TO_QUIT_MS, %LAUNCHER_INI%, Launcher, HoldToQuitMs, 1500
+HOTR_EXE := Trim(HOTR_EXE, " `t""")
+HOTR_CLOSE_AFTER := (HOTR_CLOSE_AFTER = "1" || HOTR_CLOSE_AFTER = "true")
+if HOLD_TO_QUIT_MS is not integer
+    HOLD_TO_QUIT_MS := 1500
 ; ------------------------------------------
 
 SETTINGS := A_ScriptDir . "\hotd2re_settings.ini"
