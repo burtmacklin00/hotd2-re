@@ -96,10 +96,15 @@ jobs:
           if ((Get-FileHash ahk.zip -Algorithm SHA256).Hash -ne '6F3663F7CDD25063C8C8728F5D9B07813CED8780522FD1F124BA539E2854215F') { throw 'AutoHotkey zip hash mismatch' }
           Expand-Archive ahk.zip -DestinationPath ahk
           Copy-Item 'ahk\Compiler\Unicode 32-bit.bin' base32.bin
-          $a = @('/in', '"setup\Play HOTD2.ahk"', '/out', 'PlayHOTD2.exe', '/base', 'base32.bin', '/silent')
-          if (Test-Path 'build-x64\src\port\hotd2.ico') { $a += @('/icon', 'build-x64\src\port\hotd2.ico') }
-          Start-Process -Wait -FilePath 'ahk\Compiler\Ahk2Exe.exe' -ArgumentList $a
-          if (-not (Test-Path PlayHOTD2.exe)) { throw 'Ahk2Exe did not produce PlayHOTD2.exe' }
+          # Full paths: Ahk2Exe resolves a relative /out against the script's folder, not the current one.
+          $w = (Get-Location).Path
+          $a = @('/in', "`"$w\setup\Play HOTD2.ahk`"", '/out', "`"$w\PlayHOTD2.exe`"", '/base', "`"$w\base32.bin`"", '/silent')
+          if (Test-Path 'build-x64\src\port\hotd2.ico') { $a += @('/icon', "`"$w\build-x64\src\port\hotd2.ico`"") }
+          Start-Process -Wait -FilePath "$w\ahk\Compiler\Ahk2Exe.exe" -ArgumentList $a
+          if (-not (Test-Path PlayHOTD2.exe)) {
+            Get-ChildItem -Recurse -Filter PlayHOTD2.exe -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found: $($_.FullName)" }
+            throw 'Ahk2Exe did not produce PlayHOTD2.exe'
+          }
 
       - name: Package
         shell: pwsh
