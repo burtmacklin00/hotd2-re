@@ -186,8 +186,9 @@ uint32_t WorldHash(const game::World& w) {
 // The build: shown on the Network screen and exchanged in the netplay handshake (two different builds could run
 // different worlds, so they do not connect). Bump both on every change that affects the game or the protocol.
 #if INTPTR_MAX == INT64_MAX
-constexpr uint32_t kBuildId = 2026102101;
-const char* const kBuildName = "2026 10 21 A";
+// Unofficial MinGW build with game outputs: its own build id so it never shares a room with an official build.
+constexpr uint32_t kBuildId = 2026102192;
+const char* const kBuildName = "2026 10 21 A OUTPUTS64";
 #else
 // Unofficial MinGW build with game outputs: its own build id so it never shares a room with an official build.
 constexpr uint32_t kBuildId = 2026102191;
