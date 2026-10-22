@@ -21,7 +21,10 @@ rem 64-bit build on 64-bit Windows.
 if exist "%~dp0hotd2-outputs64.exe" if defined ProgramFiles(x86) set "EXE=hotd2-outputs64.exe"
 start "" "%~dp0%EXE%"
 
-if "%ASPECT%"=="4:3" if exist "%~dp0bezels\hotd2_4x3.png" (
-    start "" powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0tools\bezel_overlay.ps1" -Bezel "%~dp0bezels\hotd2_4x3.png" -ProcessName "%EXE:~0,-4%"
+rem Your own bezel: bezels\hotd2_4x3.png (1920x1080, art in the outer 240 px each side).
+set "BEZEL=%~dp0bezels\placeholder_4x3.png"
+if exist "%~dp0bezels\hotd2_4x3.png" set "BEZEL=%~dp0bezels\hotd2_4x3.png"
+if "%ASPECT%"=="4:3" if exist "%BEZEL%" (
+    start "" powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0tools\bezel_overlay.ps1" -Bezel "%BEZEL%" -ProcessName "%EXE:~0,-4%"
 )
 endlocal
