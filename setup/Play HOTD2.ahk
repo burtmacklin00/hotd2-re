@@ -105,8 +105,13 @@ return
 #If WinActive("ahk_pid " . GamePid)
 #If
 
+; The game reads the keyboard once per frame, so an instant Esc tap (down + up together) is missed: hold Esc for
+; at least 80 ms, and for as long as the pause key is held.
 SendGameEsc:
-    Send, {Esc}
+    Send, {Esc down}
+    Sleep, 80
+    KeyWait, %PAUSE_KEY%
+    Send, {Esc up}
 return
 
 ; Close with the game; keep the bezel above it.
