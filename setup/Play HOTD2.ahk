@@ -19,7 +19,7 @@ DetectHiddenWindows, On
 ; Set these in "Play HOTD2.ini" next to this file (works for Play HOTD2.exe too, which can't be edited):
 ;   [Launcher]
 ;   HotrExe=C:\Lightgun\Hook Of The Reaper\HookOfTheReaper.exe   (empty = don't start it)
-;   HotrCloseAfter=0      (1 = close Hook of the Reaper when the game exits)
+;   HotrCloseAfter=0      (1 = close Hook of the Reaper when the game exits, also when you started it yourself)
 ;   ExitKey=Esc           (quits the game; empty = no exit key)
 ;   PauseKey=P            (does what Esc normally does in the game: pause / back / cancel)
 LAUNCHER_INI := A_ScriptDir . "\Play HOTD2.ini"
@@ -135,8 +135,8 @@ Finish:
             Process, Close, %GamePid%
     }
     Gui, Bezel: Destroy
-    if (StartedHotr && HOTR_CLOSE_AFTER)
-        Process, Close, %HotrPid%
+    if HOTR_CLOSE_AFTER
+        CloseHotr(HOTR_EXE)
     ExitApp
 return
 
@@ -199,6 +199,30 @@ ShowBezel(image, pid) {
     DllCall("DeleteDC", "Ptr", hdc)
     DllCall("gdiplus\GdiplusShutdown", "Ptr", token)
     BezelShown := true
+}
+
+; Closes Hook of the Reaper however it was started: the HotrExe file name, or any process named like
+; "Hook...Reaper...exe". Asks its windows to close first, then ends whatever is still running after 3 seconds.
+CloseHotr(hotrExe) {
+    names := {}
+    if (hotrExe != "") {
+        SplitPath, hotrExe, n
+        names[n] := true
+    }
+    pids := []
+    for p in ComObjGet("winmgmts:").ExecQuery("SELECT ProcessId, Name FROM Win32_Process")
+        if (names.HasKey(p.Name) || RegExMatch(p.Name, "i)^hook.*reaper.*\.exe$"))
+            pids.Push(p.ProcessId)
+    if !pids.Length()
+        return
+    DetectHiddenWindows, Off
+    for i, pid in pids
+        WinClose, ahk_pid %pid%
+    for i, pid in pids {
+        Process, WaitClose, %pid%, 3
+        if ErrorLevel
+            Process, Close, %pid%
+    }
 }
 
 ; Copies the key=value lines of <folder>\settings.ini into the game's settings file (same keys replaced, others kept).

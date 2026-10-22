@@ -59,7 +59,8 @@ TEXTURE PACKS
 
 LAUNCHING (Play HOTD2.exe, or Play HOTD2.ahk with AutoHotkey 1.1)
   Starts the game, draws the bezel in 4:3, optionally starts Hook of the Reaper
-  (set HotrExe in Play HOTD2.ini), and exits when the game closes.
+  (set HotrExe in Play HOTD2.ini), and exits when the game closes. HotrCloseAfter=1 closes
+  Hook of the Reaper when the game exits, even if you started it yourself.
   Esc = exit the game. P = pause (it sends the game its own Esc, so P also goes back in menus
   and cancels setup screens). Change either key in Play HOTD2.ini. Backspace / right click
   also go back in menus. Optional argument: 4x3 or 16x9.
