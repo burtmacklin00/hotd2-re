@@ -9,7 +9,7 @@ QUICK START
   2. Plug in your guns and run LightgunSetup.exe once: pull the Player 1 trigger,
      then Player 2, then Save. (Or edit LightgunHID.ini by hand.)
   3. Start Hook of the Reaper (copy "Hook of the Reaper\defaultLG\hod2re.txt" into its defaultLG folder first).
-  4. Run "Play HOTD2.exe".  Esc = exit, P = pause (gun pause button / middle mouse also pause).
+  4. Run "Play HOTD2.exe".  Esc = exit, P = pause. The gun's middle / Start button is off (no accidental pauses).
   Later: run "Update HOTD2.bat" to get the newest version (your settings are kept).
 
 WHICH FILE DOES WHAT
@@ -111,6 +111,7 @@ LIGHT GUNS (LightgunHID.ini)
     P2_Lightgun_HID = VID_1209&PID_0002
   - Guns connected: 2-player light-gun mode (Raw Input, each gun its own player).
   - No configured gun connected: 1 player with the mouse (add MouseFallback = 0 to turn off).
+  - StartButton = 1 turns the guns' / mouse's Start button (middle) back on. Default: off.
   - Each launch writes lightgunHID_devices.txt listing connected devices and their IDs.
   - Two identical guns: give both the same ID; Player 2 gets the second one.
   - Remove the file to use the in-game Options > Light Guns assignment instead.
@@ -120,7 +121,9 @@ GUN CONTROLS (defaults; change them per player in Options > Light Guns)
   Trigger (left button)      shoot; also joins a game and continues on the CONTINUE countdown
   Shoot off screen           reload (anywhere outside the game picture, including the bezel)
   Reload (right button)      reload
-  Start / Pause (middle)     start, continue, and pause / resume during play
+  Start / Pause (middle)     OFF in this edition, so nobody pauses by accident: the trigger joins
+                             and continues, P on the keyboard pauses. To turn it back on, add
+                             StartButton = 1 to LightgunHID.ini (then it starts, continues and pauses).
   Confirm (4th button)       Enter in menus
   Keyboard (Play HOTD2):     Esc = quit the game, P = pause
   Which physical button on your gun sends left / right / middle / 4th depends on the gun's own
@@ -276,7 +279,7 @@ Shoot a route choice or use Left/Right. ESC pauses; results unlock after three s
 Left mouse button: shoot. Right mouse button: reload.
 Esc: pause / resume during gameplay, back in selection screens. It never closes the app.
 (With "Play HOTD2.exe": Esc EXITS the game and P does everything Esc does in this file.)
-Enter: confirm menus, start / continue an inactive player. Middle mouse button also pauses.
+Enter: confirm menus, start / continue an inactive player. (Middle mouse button: off in the Light Gun Edition.)
 Menus: arrow keys, Enter, Esc / Backspace, or aim and click. Either player can resume a pause.
 The game and sound continue when you switch to another window. Use manual Pause before
 switching if you want the game stopped. Background keyboard/device input cannot fire or

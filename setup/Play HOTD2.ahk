@@ -7,7 +7,7 @@
 ; In 4:3 mode the bezel is 4x3\bezel.png (your own) or 4x3\bezel-placeholder.png. It is drawn over the whole
 ; screen with its transparency, so art may reach into the game picture.
 ; Esc quits the game. P pauses (it sends the game its own Esc: pause / back / cancel). Both keys can be
-; changed in Play HOTD2.ini. The gun's pause button and the middle mouse button also pause.
+; changed in Play HOTD2.ini. The gun's Start / middle button is off in the game (StartButton in LightgunHID.ini).
 
 #NoEnv
 #SingleInstance Force

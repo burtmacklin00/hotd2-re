@@ -1422,7 +1422,14 @@ int main(int argc, char** argv) {
         wii.Configure();
     }
     input::FocusedGuns focusedGuns(wii);
+#ifdef _WIN32
+    // Light Gun Edition: no device Start button unless lightgunHID.ini says StartButton=1 (no accidental pauses).
+    input::NoStartGuns noStartGuns(focusedGuns);
+    noStartGuns.enabled = !hidConfig.startButton;
+    input::GunSource* guns = headless ? nullptr : &noStartGuns;
+#else
     input::GunSource* guns = headless ? nullptr : &focusedGuns;
+#endif
     if (!headless) printf("play: renderer %s, input %s\n", gpu->Name(), guns ? guns->Name() : "none");
     play::DisplaySettings appliedDisplay = volumes.display;
     port::GpuBudgetController gpuBudget;

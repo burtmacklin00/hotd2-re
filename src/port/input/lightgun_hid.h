@@ -5,6 +5,9 @@
 //   P1_Lightgun_HID = VID_1209&PID_0001
 //   P2_Lightgun_HID = VID_1209&PID_0002
 //   MouseFallback = 1             ; optional (default 1)
+//   StartButton = 0               ; optional (default 0): 1 = the guns' / mouse's Start button (middle by default)
+//                                 ; works; 0 = it does nothing, so nobody pauses by accident (the trigger joins and
+//                                 ; continues; P pauses through Play HOTD2)
 //
 // The older per-player layout is also accepted:
 //
@@ -29,6 +32,7 @@ struct LightgunHidConfig {
     std::string device[2];  // normalised to upper case; empty = slot not configured
     int index[2] = {1, 1};
     bool mouseFallback = true;
+    bool startButton = false;  // StartButton=1: device Start (pause / join / continue) works
     bool Load(const std::string& file);
     bool Configured() const { return !device[0].empty() || !device[1].empty(); }
 };
@@ -46,6 +50,29 @@ std::vector<HidMouseDevice> ListHidMice(bool withNames = true);
 // configured guns that are connected; `slots` gets which player slots have a connected gun.
 int ApplyLightgunHid(const LightgunHidConfig& config, const std::vector<HidMouseDevice>& mice, LightgunSettings& settings,
                      bool slots[2]);
+
+// Wraps the game's gun source and removes the Start button (kStart) from every player's buttons, so a gun's or
+// mouse's Start (middle button by default) can't pause the game. The trigger still joins and continues
+// (play::DeviceWorldInput).
+class NoStartGuns final : public GunSource {
+   public:
+    explicit NoStartGuns(GunSource& source) : source_(source) {}
+    bool enabled = true;
+    const char* Name() const override { return source_.Name(); }
+    PlayerState Player(int player) const override {
+        PlayerState s = source_.Player(player);
+        if (enabled) {
+            s.held &= static_cast<uint8_t>(~kStart);
+            s.pressed &= static_cast<uint8_t>(~kStart);
+            s.released &= static_cast<uint8_t>(~kStart);
+        }
+        return s;
+    }
+    void BeginFrame() override { source_.BeginFrame(); }
+
+   private:
+    GunSource& source_;
+};
 
 bool WriteHidDeviceList(const std::string& file, const std::vector<HidMouseDevice>& mice, const LightgunHidConfig& config);
 
