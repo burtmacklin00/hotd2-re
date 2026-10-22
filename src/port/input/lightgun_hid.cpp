@@ -71,6 +71,15 @@ bool LightgunHidConfig::Load(const std::string& file) {
         if (p >= 0 && key == "DEVICE") c.device[p] = NormaliseDevice(value);
         if (p >= 0 && key == "INDEX") c.index[p] = std::max(1, std::atoi(value.c_str()));
         if (section == "OPTIONS" && key == "MOUSEFALLBACK") c.mouseFallback = std::atoi(value.c_str()) != 0;
+        // [Lightguns] layout: P1_Lightgun_HID = VID_1209&PID_0001 (optional P1_Lightgun_Index, MouseFallback).
+        if (section == "LIGHTGUNS") {
+            for (int q = 0; q < 2; ++q) {
+                const std::string pre = q == 0 ? "P1_" : "P2_";
+                if (key == pre + "LIGHTGUN_HID") c.device[q] = NormaliseDevice(value);
+                if (key == pre + "LIGHTGUN_INDEX") c.index[q] = std::max(1, std::atoi(value.c_str()));
+            }
+            if (key == "MOUSEFALLBACK") c.mouseFallback = std::atoi(value.c_str()) != 0;
+        }
     }
     *this = c;
     return true;

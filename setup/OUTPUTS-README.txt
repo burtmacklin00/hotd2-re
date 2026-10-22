@@ -32,13 +32,16 @@ OUTPUTS (P1_ and P2_ versions of each)
   P1_CtmLmpStart  start-button lamp: blinks while the player can join, off while playing
   Credits         shared credits
 
-LIGHT GUNS (lightgunHID.ini)
-  Set Player 1 and Player 2 guns by hardware ID (VID/PID) in lightgunHID.ini.
+LIGHT GUNS (LightgunHID.ini)
+  Player 1 and Player 2 guns by hardware ID (VID/PID):
+    [Lightguns]
+    P1_Lightgun_HID = VID_1209&PID_0001
+    P2_Lightgun_HID = VID_1209&PID_0002
   - Guns connected: 2-player light-gun mode (Raw Input, each gun its own player).
-  - No configured gun connected: 1 player with the mouse.
-  - Each launch writes lightgunHID_devices.txt listing connected devices and IDs.
-  - Leave every Device= line commented out to use the in-game Options > Light Guns
-    assignment instead (the original behaviour).
+  - No configured gun connected: 1 player with the mouse (add MouseFallback = 0 to turn off).
+  - Each launch writes lightgunHID_devices.txt listing connected devices and their IDs.
+  - Two identical guns: give both the same ID; Player 2 gets the second one.
+  - Remove the file to use the in-game Options > Light Guns assignment instead.
   Buttons and calibration are still set per player in Options > Light Guns.
 
 HOOK OF THE REAPER

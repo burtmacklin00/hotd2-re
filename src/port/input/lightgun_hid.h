@@ -1,6 +1,13 @@
 #pragma once
 // lightgunHID.ini: fixed Player 1 / Player 2 light guns by hardware ID, so a setup can be copied to another PC.
 //
+//   [Lightguns]
+//   P1_Lightgun_HID = VID_1209&PID_0001
+//   P2_Lightgun_HID = VID_1209&PID_0002
+//   MouseFallback = 1             ; optional (default 1)
+//
+// The older per-player layout is also accepted:
+//
 //   [Player1]
 //   Device=VID_16C0&PID_0F01      ; any part of the gun's Windows device ID (case-insensitive);
 //                                 ; "16C0:0F01" is accepted too
