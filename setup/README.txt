@@ -152,8 +152,8 @@ COMMAND-LINE OPTIONS
   --outputs-port N    use a different TCP port
 
 NOTES
-  - The game's own update notice is off in this edition (it points to official builds
-    without outputs); use "Update HOTD2.bat" instead.
+  - No update check or update pop-up at all when the game loads (safe for LaunchBox and other
+    front ends). Updating is only ever done by running "Update HOTD2.bat" yourself.
   - Source: github.com/burtmacklin00/hotd2-re (branch hotd2re-outputs-lightgunhid).
     The native port code is MIT licensed; see LICENSE-native-code.txt.
 

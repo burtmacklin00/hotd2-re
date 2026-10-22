@@ -794,7 +794,9 @@ int main(int argc, char** argv) {
     std::string bloodOverride;
     bool noHud = false;        // --no-hud: 3D only (clean screenshots)
     bool pace = false;         // --pace: a headless run steps at 60 Hz instead of as fast as it can (netplay tests)
-    bool checkUpdates = true;  // --no-update-check: skip the launch-time release check
+    // Light Gun Edition: no launch-time release check or update notice (front ends such as LaunchBox must load
+    // straight into the game; updates come through Update HOTD2.bat).
+    bool checkUpdates = false;  // --no-update-check: skip the launch-time release check
     bool gameOutputs = true;   // --no-outputs: no recoil / lamp outputs on TCP 127.0.0.1:8000
     int gameOutputsPort = 8000;  // --outputs-port N
     int dlssQuality = -1;

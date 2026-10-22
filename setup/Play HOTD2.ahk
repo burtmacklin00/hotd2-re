@@ -76,7 +76,7 @@ if (HOTR_EXE != "" && FileExist(HOTR_EXE)) {
 }
 
 ; Launch the game.
-Run, "%A_ScriptDir%\%GameExe%", %A_ScriptDir%, , GamePid
+Run, "%A_ScriptDir%\%GameExe%" --no-update-check, %A_ScriptDir%, , GamePid   ; never an update notice
 WinWait, ahk_pid %GamePid%, , 30
 WinActivate, ahk_pid %GamePid%
 
