@@ -64,7 +64,8 @@ LAUNCHING (Play HOTD2.exe, or Play HOTD2.ahk with AutoHotkey 1.1)
   Esc = exit the game. P = pause (it sends the game its own Esc, so P also goes back in menus
   and cancels setup screens). Change either key in Play HOTD2.ini. Backspace / right click
   also go back in menus. Optional argument: 4x3 or 16x9.
-  First run on a new PC (no hotd2re_settings.ini yet) starts from the Graphics Low preset.
+  First launch on a new install (no Play HOTD2.ini yet) starts from the Graphics Low preset in
+  borderless fullscreen (the official package starts windowed; the bezel needs fullscreen).
   Windows may warn about the unsigned exes the first time: More info > Run anyway.
 
 SWITCH FOLDERS

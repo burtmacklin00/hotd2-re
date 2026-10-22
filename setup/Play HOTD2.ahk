@@ -24,7 +24,8 @@ DetectHiddenWindows, On
 ;   PauseKey=P            (does what Esc normally does in the game: pause / back / cancel)
 LAUNCHER_INI := A_ScriptDir . "\Play HOTD2.ini"
 ; Your own settings files are never in the package (so updates can't overwrite them): the first run copies
-; the defaults\ versions into place.
+; the defaults\ versions into place. No "Play HOTD2.ini" yet = the first launch on this install.
+FirstRun := !FileExist(LAUNCHER_INI)
 for i, name in ["Play HOTD2.ini", "LightgunHID.ini"]
     if (!FileExist(A_ScriptDir . "\" . name) && FileExist(A_ScriptDir . "\defaults\" . name))
         FileCopy, %A_ScriptDir%\defaults\%name%, %A_ScriptDir%\%name%
@@ -50,9 +51,14 @@ if !FileExist(GameExe) {
     ExitApp
 }
 
-; First run (no settings file yet): start from the light "Graphics Low" preset so any PC can run it.
-if (!FileExist(SETTINGS) && FileExist(A_ScriptDir . "\Graphics Low\settings.ini"))
-    ApplyFolder(A_ScriptDir . "\Graphics Low", SETTINGS)
+; First launch on this install (the official package ships its own hotd2re_settings.ini, windowed): start from the
+; light "Graphics Low" preset so any PC can run it, in borderless fullscreen (defaults\first-run) for the bezel.
+if (FirstRun || !FileExist(SETTINGS)) {
+    if FileExist(A_ScriptDir . "\Graphics Low\settings.ini")
+        ApplyFolder(A_ScriptDir . "\Graphics Low", SETTINGS)
+    if FileExist(A_ScriptDir . "\defaults\first-run\settings.ini")
+        ApplyFolder(A_ScriptDir . "\defaults\first-run", SETTINGS)
+}
 
 ; Optional display folder from the command line (4x3 or 16x9).
 Mode = %1%
