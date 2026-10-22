@@ -100,6 +100,7 @@ jobs:
           $w = (Get-Location).Path
           $a = @('/in', "`"$w\setup\Play HOTD2.ahk`"", '/out', "`"$w\PlayHOTD2.exe`"", '/base', "`"$w\base32.bin`"", '/silent')
           # The game's crosshair icon (drawn by tools/make_icon.py; no original game files are used).
+          python -m pip install --quiet pillow==11.3.0
           python tools/make_icon.py "$w\launcher.ico"
           if (Test-Path "$w\launcher.ico") { $a += @('/icon', "`"$w\launcher.ico`"") } else { Write-Host '::warning::No launcher icon' }
           Start-Process -Wait -FilePath "$w\ahk\Compiler\Ahk2Exe.exe" -ArgumentList $a
