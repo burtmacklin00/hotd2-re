@@ -31,6 +31,14 @@ SWITCH FOLDERS
   Bezel: 4x3\bezel.png (your own, 1920x1080 with art in the outer 240 px each side);
   4x3\bezel-placeholder.png is used if there is none.
 
+GRAPHICS PRESETS
+  "Graphics - Max.bat"  Direct3D 12, DLSS (NVIDIA RTX) or FSR 3 at Native AA, ray shadows,
+                        4096 shadows, contact shading, reflections, light fog, pose smoothing.
+                        No frame generation (it adds aim delay with light guns).
+  "Graphics - Low.bat"  For older cards: Direct3D 11, 2x resolution, FXAA, extra effects off.
+  Each sets only the lines in "Graphics Max\settings.ini" / "Graphics Low\settings.ini";
+  edit those to taste. Aspect, crosshairs, 2x textures and volume are not touched.
+
 HOW TOOLS CONNECT
   Protocol : MAME network outputs (same as MAME / DemulShooter)
   Address  : 127.0.0.1, TCP port 8000 (this PC only; not reachable from the network)

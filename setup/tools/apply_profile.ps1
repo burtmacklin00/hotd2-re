@@ -1,4 +1,5 @@
-# Switches between setting folders (e.g. "4x3" / "16x9", "Crosshairs On" / "Crosshairs Off").
+# Switches between setting folders (e.g. "4x3" / "16x9", "Crosshairs On" / "Crosshairs Off",
+# "Graphics Max" / "Graphics Low").
 # Each folder's settings.ini holds key=value lines; switching copies those lines into hotd2re_settings.ini
 # (replacing the same keys, adding missing ones). Everything else in hotd2re_settings.ini is left alone.
 #   -Profiles "A,B"      the two folders to flip between (the one not currently active is applied)
@@ -50,6 +51,19 @@ if (-not $sets.ContainsKey($target)) { Write-Host "Unknown folder '$target'" -Fo
 
 $lines = @(); if (Test-Path -LiteralPath $ini) { $lines = @(Get-Content -LiteralPath $ini) }
 $want = $sets[$target]
+# Optional nvidia-rtx.ini in the folder: extra lines used only on an NVIDIA RTX card (e.g. DLSS).
+$rtxFile = Join-Path (Join-Path $root $target) 'nvidia-rtx.ini'
+if (Test-Path -LiteralPath $rtxFile) {
+    $gpus = @()
+    try { $gpus = @(Get-CimInstance Win32_VideoController -ErrorAction Stop | ForEach-Object { $_.Name }) } catch { }
+    if ($gpus | Where-Object { $_ -match 'NVIDIA' -and $_ -match 'RTX' }) {
+        $extra = Read-Pairs $rtxFile
+        foreach ($k in $extra.Keys) { $want[$k] = $extra[$k] }
+        Write-Host "NVIDIA RTX card found ($(@($gpus | Where-Object { $_ -match 'RTX' })[0])): using nvidia-rtx.ini too."
+    } elseif ($gpus) {
+        Write-Host "Graphics card: $($gpus -join ', ')"
+    }
+}
 $done = @{}
 $out = foreach ($l in $lines) {
     $eq = $l.IndexOf('=')
