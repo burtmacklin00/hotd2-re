@@ -15,6 +15,11 @@ outputs added for recoil / force-feedback tools, and lightgunHID.ini support. Yo
   "Play HOTD2.bat" picks the 64-bit exe automatically. 32-bit and 64-bit builds have
   different version numbers, so online both players must use the same one.
 
+AUTOHOTKEY LAUNCHER (Play HOTD2.ahk, AutoHotkey 1.1)
+  Same as Play HOTD2.bat, plus: optional Hook of the Reaper start (set HOTR_EXE at the top),
+  hold Esc 1.5 s to quit (a tap still pauses), and it exits when the game closes.
+  Optional argument: 4:3 or stretch.
+
 HOW TOOLS CONNECT
   Protocol : MAME network outputs (same as MAME / DemulShooter)
   Address  : 127.0.0.1, TCP port 8000 (this PC only; not reachable from the network)
