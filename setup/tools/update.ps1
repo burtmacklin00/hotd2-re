@@ -85,7 +85,7 @@ try {
         if (Test-Path -LiteralPath $dst) {
             if ((Get-FileHash -LiteralPath $dst).Hash -eq (Get-FileHash -LiteralPath $f.FullName).Hash) { continue }
             # A text/config file that differs may be your edit: keep a copy (exes and DLLs are just replaced).
-            if ($rel -match '\.(ini|txt|bat|ahk|ps1|png)$' -and $rel -ne 'VERSION.txt') {
+            if ($rel -match '\.(ini|txt|bat|ahk|ps1|png)$' -and $rel -ne 'VERSION.txt' -and $rel -ne 'BUILD-OUTPUTS.txt') {
                 $b = Join-Path $backup $rel
                 New-Item -ItemType Directory -Force -Path (Split-Path $b) | Out-Null
                 Copy-Item -LiteralPath $dst -Destination $b -Force; $backedUp++
