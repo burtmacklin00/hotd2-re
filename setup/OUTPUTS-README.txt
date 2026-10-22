@@ -5,7 +5,7 @@ QUICK START
   1. Extract this package into your hotd2re game folder (next to game\ and scenes\).
   2. Plug in your guns and run LightgunSetup.exe once: pull the Player 1 trigger,
      then Player 2, then Save. (Or edit LightgunHID.ini by hand.)
-  3. Start Hook of the Reaper (copy hotr\hod2re.txt into its defaultLG folder first).
+  3. Start Hook of the Reaper (copy "Hook of the Reaper\defaultLG\hod2re.txt" into its defaultLG folder first).
   4. Run "Play HOTD2.exe".  Tap Esc = pause, HOLD Esc = quit.
 
 WHICH FILE DOES WHAT
@@ -92,7 +92,8 @@ LIGHT GUNS (LightgunHID.ini)
   Buttons and calibration are still set per player in Options > Light Guns.
 
 HOOK OF THE REAPER
-  Copy hotr\hod2re.txt into the defaultLG folder where Hook of the Reaper is installed.
+  Copy "Hook of the Reaper\defaultLG\hod2re.txt" into the defaultLG folder where Hook of
+  the Reaper is installed (or merge this "Hook of the Reaper" folder into that install).
   Recoil: P1_CtmRecoil (Recoil or Recoil_Value) or ammo-based (Ammo_Value).
   Damage -> Damage (rumble), Life -> Death_Value + Display_Life, Ammo -> Display_Ammo.
 
