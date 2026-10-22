@@ -116,6 +116,16 @@ LIGHT GUNS (LightgunHID.ini)
   - Remove the file to use the in-game Options > Light Guns assignment instead.
   Buttons and calibration are still set per player in Options > Light Guns.
 
+GUN CONTROLS (defaults; change them per player in Options > Light Guns)
+  Trigger (left button)      shoot; also joins a game and continues on the CONTINUE countdown
+  Shoot off screen           reload (anywhere outside the game picture, including the bezel)
+  Reload (right button)      reload
+  Start / Pause (middle)     start, continue, and pause / resume during play
+  Confirm (4th button)       Enter in menus
+  Keyboard (Play HOTD2):     Esc = quit the game, P = pause
+  Which physical button on your gun sends left / right / middle / 4th depends on the gun's own
+  software; Options > Light Guns > button capture lets you assign them in game.
+
 HOOK OF THE REAPER
   Copy "Hook of the Reaper\defaultLG\hod2re.txt" into the defaultLG folder where Hook of
   the Reaper is installed (or merge this "Hook of the Reaper" folder into that install).
