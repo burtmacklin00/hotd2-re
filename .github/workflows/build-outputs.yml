@@ -99,7 +99,9 @@ jobs:
           # Full paths: Ahk2Exe resolves a relative /out against the script's folder, not the current one.
           $w = (Get-Location).Path
           $a = @('/in', "`"$w\setup\Play HOTD2.ahk`"", '/out', "`"$w\PlayHOTD2.exe`"", '/base', "`"$w\base32.bin`"", '/silent')
-          if (Test-Path 'build-x64\src\port\hotd2.ico') { $a += @('/icon', "`"$w\build-x64\src\port\hotd2.ico`"") }
+          # The game's crosshair icon (drawn by tools/make_icon.py; no original game files are used).
+          python tools/make_icon.py "$w\launcher.ico"
+          if (Test-Path "$w\launcher.ico") { $a += @('/icon', "`"$w\launcher.ico`"") } else { Write-Host '::warning::No launcher icon' }
           Start-Process -Wait -FilePath "$w\ahk\Compiler\Ahk2Exe.exe" -ArgumentList $a
           if (-not (Test-Path PlayHOTD2.exe)) {
             Get-ChildItem -Recurse -Filter PlayHOTD2.exe -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "Found: $($_.FullName)" }
