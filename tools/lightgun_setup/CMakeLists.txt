@@ -1,0 +1,11 @@
+# LightgunSetup.exe: picks the Player 1 / Player 2 guns and writes LightgunHID.ini (standalone, no dependencies).
+cmake_minimum_required(VERSION 3.20)
+project(lightgun_setup CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+add_executable(LightgunSetup WIN32 lightgun_setup.cpp)
+target_compile_definitions(LightgunSetup PRIVATE UNICODE _UNICODE)
+target_link_libraries(LightgunSetup PRIVATE hid comctl32 shell32)
+if(MINGW)
+  target_link_options(LightgunSetup PRIVATE -municode -static)
+endif()

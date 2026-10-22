@@ -33,7 +33,10 @@ OUTPUTS (P1_ and P2_ versions of each)
   Credits         shared credits
 
 LIGHT GUNS (LightgunHID.ini)
-  Player 1 and Player 2 guns by hardware ID (VID/PID):
+  Easiest: run LightgunSetup.exe, pull the trigger on the Player 1 gun, then the Player 2
+  gun (or "No Player 2 gun"), and click Save. It writes LightgunHID.ini for you.
+  (A desk mouse clicking inside the setup window just operates the app.)
+  Or edit LightgunHID.ini by hand - Player 1 and Player 2 guns by hardware ID (VID/PID):
     [Lightguns]
     P1_Lightgun_HID = VID_1209&PID_0001
     P2_Lightgun_HID = VID_1209&PID_0002

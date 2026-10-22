@@ -70,6 +70,12 @@ jobs:
           cmake -S . -B build -A Win32
           cmake --build build --config Release --target hotd2 --parallel
 
+      - name: Build LightgunSetup.exe
+        shell: pwsh
+        run: |
+          cmake -S tools/lightgun_setup -B build-setup -A Win32
+          cmake --build build-setup --config Release
+
       - name: Package
         shell: pwsh
         run: |
@@ -85,6 +91,7 @@ jobs:
           }
           foreach ($d in 'vendor-licenses','dxc-licenses') { if (Test-Path "$x64\$d") { Copy-Item "$x64\$d" $out -Recurse -Force } }
           Copy-Item 'build\src\port\Release\hotd2.exe' "$out\hotd2-outputs.exe"
+          Copy-Item 'build-setup\Release\LightgunSetup.exe' $out
           Copy-Item LICENSE "$out\LICENSE-native-code.txt"
           Copy-Item THIRD_PARTY_NOTICES.txt $out
           "Built from $env:GITHUB_SHA by GitHub Actions run $env:GITHUB_RUN_ID" | Set-Content "$out\BUILD-OUTPUTS.txt"
