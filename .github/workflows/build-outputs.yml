@@ -158,5 +158,6 @@ jobs:
           if (-not $tag) { $tag = $env:GITHUB_REF_NAME }
           $notes = "Unofficial HOTD2RE Light Gun Edition: game outputs (hod2re), lightgunHID.ini, launcher with bezel, DLSS/FSR/XeSS.`n`n" +
                    "New install: extract into an existing hotd2re folder (next to game\ and scenes\).`n" +
-                   "Already installed: run ""Update HOTD2.bat"" (your settings, gun setup, saves and bezel are kept)."
+                   "Already installed: run ""Update HOTD2.bat"" (your settings, gun setup, saves and bezel are kept).`n`n" +
+                   "Full install steps: https://github.com/burtmacklin00/hotd2-re#readme"
           gh release create $tag hotd2re-outputs-package.zip --target (git rev-parse HEAD) --title "HOTD2RE Light Gun Edition $tag" --notes $notes
