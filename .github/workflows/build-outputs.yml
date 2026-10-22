@@ -13,6 +13,12 @@ on:
   push:
     tags: ['outputs-*']
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Publish a release with this tag (e.g. outputs-v2026.10.21-a); empty = build only'
+        type: string
+        required: false
+        default: ''
   workflow_call:
     inputs:
       ref:
