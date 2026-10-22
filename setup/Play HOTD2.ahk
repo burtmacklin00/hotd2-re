@@ -4,7 +4,8 @@
 ;   Play HOTD2.ahk / .exe    launches in the current display mode
 ;   Play HOTD2.ahk 4x3       switches to the 4x3 folder's settings first (4:3 with bezel)
 ;   Play HOTD2.ahk 16x9      switches to the 16x9 folder's settings first (16:9 stretch)
-; In 4:3 mode the bezel is 4x3\bezel.png (your own) or 4x3\bezel-placeholder.png.
+; In 4:3 mode the bezel is 4x3\bezel.png (your own) or 4x3\bezel-placeholder.png. It is drawn over the whole
+; screen with its transparency, so art may reach into the game picture.
 ; Esc quits the game. P pauses (it sends the game its own Esc: pause / back / cancel). Both keys can be
 ; changed in Play HOTD2.ini. The gun's pause button and the middle mouse button also pause.
 
@@ -114,10 +115,8 @@ WatchGame:
     if !ErrorLevel
         Goto, Finish
     if BezelShown {
-        WinSet, AlwaysOnTop, On, ahk_id %BezelHwndL%
-        WinSet, AlwaysOnTop, On, ahk_id %BezelHwndR%
-        WinSet, Top, , ahk_id %BezelHwndL%
-        WinSet, Top, , ahk_id %BezelHwndR%
+        WinSet, AlwaysOnTop, On, ahk_id %BezelHwnd%
+        WinSet, Top, , ahk_id %BezelHwnd%
     }
 return
 
@@ -135,17 +134,17 @@ Finish:
         if ErrorLevel
             Process, Close, %GamePid%
     }
-    Gui, BezelL: Destroy
-    Gui, BezelR: Destroy
+    Gui, Bezel: Destroy
     if (StartedHotr && HOTR_CLOSE_AFTER)
         Process, Close, %HotrPid%
     ExitApp
 return
 
-; Two borderless, click-through, always-on-top windows over the side bars of the game's monitor. Each shows the
-; whole bezel image scaled to the screen, offset so only its own edge strip is visible.
+; The bezel: one borderless, click-through, always-on-top window covering the game's monitor, showing the whole
+; PNG scaled to the screen with its own transparency. Transparent pixels show the game, so art that reaches into the
+; game area (a character's arm, a gun) is drawn over the picture. Guns and the mouse click straight through it.
 ShowBezel(image, pid) {
-    global BezelShown, BezelHwndL, BezelHwndR, PicBezelL, PicBezelR
+    global BezelShown, BezelHwnd
     ; The monitor the game window is on (the game runs fullscreen there).
     WinGetPos, wx, wy, ww, wh, ahk_pid %pid%
     cx := wx + ww // 2, cy := wy + wh // 2
@@ -158,22 +157,47 @@ ShowBezel(image, pid) {
             break
         }
     }
-    bar := Floor((sw - Round(sh * 4 / 3)) / 2)
-    if (bar <= 0)
+    if (sw - Round(sh * 4 / 3) <= 0)   ; no side bars (a 4:3 screen): no bezel
         return
-    rightX := sx + sw - bar
-    offset := bar - sw
-    for i, side in ["BezelL", "BezelR"] {
-        Gui, %side%: New, +AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x08000020 +LastFound +Hwnd%side%Hwnd
-        Gui, %side%: Margin, 0, 0
-        Gui, %side%: Color, 000000
-        Gui, %side%: Add, Picture, x0 y0 w%sw% h%sh% vPic%side%, %image%
-        WinSet, Transparent, 255   ; layered + E0x20 = mouse / gun clicks pass through
+
+    ; Draw the PNG, scaled to the monitor, into a 32-bit bitmap with GDI+ (built into Windows).
+    hGdip := DllCall("LoadLibrary", "Str", "gdiplus", "Ptr")
+    VarSetCapacity(si, A_PtrSize = 8 ? 24 : 16, 0), NumPut(1, si, 0, "UInt")
+    token := 0, pBmp := 0, G := 0, bits := 0
+    if (DllCall("gdiplus\GdiplusStartup", "Ptr*", token, "Ptr", &si, "Ptr", 0) != 0)
+        return
+    DllCall("gdiplus\GdipCreateBitmapFromFile", "WStr", image, "Ptr*", pBmp)
+    if !pBmp {
+        DllCall("gdiplus\GdiplusShutdown", "Ptr", token)
+        return
     }
-    GuiControl, BezelR: Move, PicBezelR, x%offset% y0 w%sw% h%sh%
-    Gui, BezelL: Show, x%sx% y%sy% w%bar% h%sh% NA
-    Gui, BezelR: Show, x%rightX% y%sy% w%bar% h%sh% NA
-    BezelHwndL := BezelLHwnd, BezelHwndR := BezelRHwnd
+    hdc := DllCall("CreateCompatibleDC", "Ptr", 0, "Ptr")
+    VarSetCapacity(bi, 40, 0)
+    NumPut(40, bi, 0, "UInt"), NumPut(sw, bi, 4, "Int"), NumPut(-sh, bi, 8, "Int")
+    NumPut(1, bi, 12, "UShort"), NumPut(32, bi, 14, "UShort")
+    hbm := DllCall("CreateDIBSection", "Ptr", hdc, "Ptr", &bi, "UInt", 0, "Ptr*", bits, "Ptr", 0, "UInt", 0, "Ptr")
+    obm := DllCall("SelectObject", "Ptr", hdc, "Ptr", hbm, "Ptr")
+    DllCall("gdiplus\GdipCreateFromHDC", "Ptr", hdc, "Ptr*", G)
+    DllCall("gdiplus\GdipSetInterpolationMode", "Ptr", G, "Int", 7)   ; high-quality bicubic
+    DllCall("gdiplus\GdipSetPixelOffsetMode", "Ptr", G, "Int", 4)     ; half-pixel: no edge shift
+    DllCall("gdiplus\GdipDrawImageRectI", "Ptr", G, "Ptr", pBmp, "Int", 0, "Int", 0, "Int", sw, "Int", sh)
+
+    ; Layered (0x80000) + click-through (0x20) + never takes focus (0x8000000).
+    Gui, Bezel: New, +AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x8080020 +HwndBezelHwnd
+    Gui, Bezel: Show, x%sx% y%sy% w%sw% h%sh% NA
+    VarSetCapacity(pt, 8, 0), NumPut(sx, pt, 0, "Int"), NumPut(sy, pt, 4, "Int")
+    VarSetCapacity(sz, 8, 0), NumPut(sw, sz, 0, "Int"), NumPut(sh, sz, 4, "Int")
+    VarSetCapacity(src, 8, 0)
+    ; BLENDFUNCTION: AC_SRC_OVER, full opacity, per-pixel alpha (AC_SRC_ALPHA); ULW_ALPHA = 2
+    DllCall("UpdateLayeredWindow", "Ptr", BezelHwnd, "Ptr", 0, "Ptr", &pt, "Ptr", &sz, "Ptr", hdc, "Ptr", &src
+          , "UInt", 0, "UInt*", 0x01FF0000, "UInt", 2)
+
+    DllCall("gdiplus\GdipDeleteGraphics", "Ptr", G)
+    DllCall("gdiplus\GdipDisposeImage", "Ptr", pBmp)
+    DllCall("SelectObject", "Ptr", hdc, "Ptr", obm)
+    DllCall("DeleteObject", "Ptr", hbm)
+    DllCall("DeleteDC", "Ptr", hdc)
+    DllCall("gdiplus\GdiplusShutdown", "Ptr", token)
     BezelShown := true
 }
 
