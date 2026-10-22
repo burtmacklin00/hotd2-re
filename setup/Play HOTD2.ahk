@@ -1,9 +1,10 @@
-; The House of the Dead 2 (HOTD2RE) launcher - AutoHotkey 1.1
+; The House of the Dead 2 (HOTD2RE) launcher - AutoHotkey 1.1. This one file launches the game.
 ;
-; Put this script in the hotd2re folder (next to hotd2-outputs64.exe) and run it.
-;   Play HOTD2.ahk            launches in the current display mode
-;   Play HOTD2.ahk 4:3        switches to 4:3 with bezel first
-;   Play HOTD2.ahk stretch    switches to 16:9 stretch first
+; Put it in the hotd2re folder (next to hotd2-outputs64.exe) and run it.
+;   Play HOTD2.ahk           launches in the current display mode
+;   Play HOTD2.ahk 4x3       switches to the 4x3 folder's settings first (4:3 with bezel)
+;   Play HOTD2.ahk 16x9      switches to the 16x9 folder's settings first (16:9 stretch)
+; In 4:3 mode the bezel is 4x3\bezel.png (your own) or 4x3\bezel-placeholder.png.
 ; Tap Esc to pause (the game's own pause). HOLD Esc for 1.5 seconds to quit.
 
 #NoEnv
@@ -20,6 +21,8 @@ HOTR_CLOSE_AFTER := false   ; true = close Hook of the Reaper when the game exit
 HOLD_TO_QUIT_MS := 1500     ; how long to hold Esc to quit
 ; ------------------------------------------
 
+SETTINGS := A_ScriptDir . "\hotd2re_settings.ini"
+
 ; Game exe: 64-bit build on 64-bit Windows, else 32-bit, else the original.
 GameExe := "hotd2.exe"
 if FileExist("hotd2-outputs.exe")
@@ -31,10 +34,13 @@ if !FileExist(GameExe) {
     ExitApp
 }
 
-; Optional display mode from the command line (4:3 or stretch).
+; Optional display folder from the command line (4x3 or 16x9).
 Mode = %1%
 if (Mode != "") {
-    RunWait, powershell -NoProfile -ExecutionPolicy Bypass -File "%A_ScriptDir%\tools\set_aspect.ps1" -Mode "%Mode%", %A_ScriptDir%, Hide
+    if !ApplyFolder(A_ScriptDir . "\" . Mode, SETTINGS) {
+        MsgBox, 16, HOTD2, No %Mode%\settings.ini in %A_ScriptDir%.
+        ExitApp
+    }
 }
 
 ; Hook of the Reaper first, so it is listening when the game opens its outputs.
@@ -54,24 +60,31 @@ Run, "%A_ScriptDir%\%GameExe%", %A_ScriptDir%, , GamePid
 WinWait, ahk_pid %GamePid%, , 30
 WinActivate, ahk_pid %GamePid%
 
-; 4:3 mode: bezel over the side bars (your bezels\hotd2_4x3.png, else the placeholder).
-Aspect := ReadSetting("hotd2re_settings.ini", "aspect")
-Bezel := A_ScriptDir . "\bezels\placeholder_4x3.png"
-if FileExist(A_ScriptDir . "\bezels\hotd2_4x3.png")
-    Bezel := A_ScriptDir . "\bezels\hotd2_4x3.png"
-SplitPath, GameExe, , , , GameName
-if (Aspect = "4:3" && FileExist(Bezel)) {
-    Run, powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%A_ScriptDir%\tools\bezel_overlay.ps1" -Bezel "%Bezel%" -ProcessName "%GameName%", %A_ScriptDir%, Hide
+; 4:3 + fullscreen: bezel art over the black side bars.
+if (ReadSetting(SETTINGS, "aspect") = "4:3" && ReadSetting(SETTINGS, "fullscreen") != "0") {
+    Bezel := A_ScriptDir . "\4x3\bezel.png"
+    if !FileExist(Bezel)
+        Bezel := A_ScriptDir . "\4x3\bezel-placeholder.png"
+    if FileExist(Bezel) {
+        Sleep, 1500   ; let the game finish going fullscreen
+        ShowBezel(Bezel, GamePid)
+    }
 }
 
-; Wait for the game to close, then clean up.
 SetTimer, WatchGame, 1000
 return
 
+; Close with the game; keep the bezel above it.
 WatchGame:
     Process, Exist, %GamePid%
     if !ErrorLevel
         Goto, Finish
+    if BezelShown {
+        WinSet, AlwaysOnTop, On, ahk_id %BezelHwndL%
+        WinSet, AlwaysOnTop, On, ahk_id %BezelHwndR%
+        WinSet, Top, , ahk_id %BezelHwndL%
+        WinSet, Top, , ahk_id %BezelHwndR%
+    }
 return
 
 ; Tap Esc: passes through to the game (pause). Hold Esc: quit.
@@ -82,17 +95,101 @@ return
 return
 
 Finish:
+    Critical            ; held-Esc key repeats must not interrupt the shutdown
+    if Finishing
+        return
+    Finishing := true
     SetTimer, WatchGame, Off
     Process, Exist, %GamePid%
     if ErrorLevel {
+        DetectHiddenWindows, Off   ; ask the visible game window to close
         WinClose, ahk_pid %GamePid%
-        Process, WaitClose, %GamePid%, 5
-        Process, Close, %GamePid%
+        Process, WaitClose, %GamePid%, 3
+        if ErrorLevel
+            Process, Close, %GamePid%
     }
+    Gui, BezelL: Destroy
+    Gui, BezelR: Destroy
     if (StartedHotr && HOTR_CLOSE_AFTER)
         Process, Close, %HotrPid%
     ExitApp
 return
+
+; Two borderless, click-through, always-on-top windows over the side bars of the game's monitor. Each shows the
+; whole bezel image scaled to the screen, offset so only its own edge strip is visible.
+ShowBezel(image, pid) {
+    global BezelShown, BezelHwndL, BezelHwndR, PicBezelL, PicBezelR
+    ; The monitor the game window is on (the game runs fullscreen there).
+    WinGetPos, wx, wy, ww, wh, ahk_pid %pid%
+    cx := wx + ww // 2, cy := wy + wh // 2
+    sx := 0, sy := 0, sw := A_ScreenWidth, sh := A_ScreenHeight
+    SysGet, monCount, MonitorCount
+    Loop, %monCount% {
+        SysGet, m, Monitor, %A_Index%
+        if (cx >= mLeft && cx < mRight && cy >= mTop && cy < mBottom) {
+            sx := mLeft, sy := mTop, sw := mRight - mLeft, sh := mBottom - mTop
+            break
+        }
+    }
+    bar := Floor((sw - Round(sh * 4 / 3)) / 2)
+    if (bar <= 0)
+        return
+    rightX := sx + sw - bar
+    offset := bar - sw
+    for i, side in ["BezelL", "BezelR"] {
+        Gui, %side%: New, +AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x08000020 +LastFound +Hwnd%side%Hwnd
+        Gui, %side%: Margin, 0, 0
+        Gui, %side%: Color, 000000
+        Gui, %side%: Add, Picture, x0 y0 w%sw% h%sh% vPic%side%, %image%
+        WinSet, Transparent, 255   ; layered + E0x20 = mouse / gun clicks pass through
+    }
+    GuiControl, BezelR: Move, PicBezelR, x%offset% y0 w%sw% h%sh%
+    Gui, BezelL: Show, x%sx% y%sy% w%bar% h%sh% NA
+    Gui, BezelR: Show, x%rightX% y%sy% w%bar% h%sh% NA
+    BezelHwndL := BezelLHwnd, BezelHwndR := BezelRHwnd
+    BezelShown := true
+}
+
+; Copies the key=value lines of <folder>\settings.ini into the game's settings file (same keys replaced, others kept).
+ApplyFolder(folder, settingsFile) {
+    src := folder . "\settings.ini"
+    if !FileExist(src)
+        return false
+    want := {}, order := []
+    Loop, Read, %src%
+    {
+        line := Trim(A_LoopReadLine)
+        if (line = "" || InStr(";#[", SubStr(line, 1, 1)))
+            continue
+        eq := InStr(line, "=")
+        if (eq > 1) {
+            k := Trim(SubStr(line, 1, eq - 1))
+            want[k] := Trim(SubStr(line, eq + 1)), order.Push(k)
+        }
+    }
+    out := "", done := {}
+    Loop, Read, %settingsFile%
+    {
+        line := A_LoopReadLine
+        eq := InStr(line, "=")
+        k := eq > 1 ? Trim(SubStr(line, 1, eq - 1)) : ""
+        if (k != "" && want.HasKey(k)) {
+            out .= k . "=" . want[k] . "`r`n", done[k] := true
+        } else {
+            out .= line . "`r`n"
+        }
+    }
+    for i, k in order
+        if !done.HasKey(k)
+            out .= k . "=" . want[k] . "`r`n"
+    f := FileOpen(settingsFile, "w", "CP0")   ; overwrite in one go
+    if !IsObject(f) {
+        MsgBox, 16, HOTD2, Can't write %settingsFile%.`nIs it read-only?
+        ExitApp
+    }
+    f.Write(out), f.Close()
+    return true
+}
 
 ; Reads "key=value" from the game's settings file (it has no [sections]).
 ReadSetting(file, key) {

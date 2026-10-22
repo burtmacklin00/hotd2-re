@@ -3,7 +3,7 @@ HOTD2RE - GAME OUTPUTS BUILD (hotd2-outputs.exe)
 
 hotd2-outputs.exe is HOTD2RE built from the official source (2026 10 21 A) with game
 outputs added for recoil / force-feedback tools, and lightgunHID.ini support. Your original hotd2.exe is untouched.
-"Play HOTD2.bat" uses hotd2-outputs.exe automatically when it is in this folder.
+Launch with "Play HOTD2.ahk" (AutoHotkey 1.1).
 
 64-BIT VERSION (hotd2-outputs64.exe) - recommended on 64-bit Windows
   Same game + outputs + lightgunHID, plus the 64-bit graphics features: native Direct3D 12,
@@ -12,13 +12,24 @@ outputs added for recoil / force-feedback tools, and lightgunHID.ini support. Yo
   the GitHub-built package. The vendor DLLs are included in that package; turn the
   features on in Options > Graphics (off by default). "Install 64-bit Runtimes.bat" is only
   needed for a copy without them.
-  "Play HOTD2.bat" picks the 64-bit exe automatically. 32-bit and 64-bit builds have
+  "Play HOTD2.ahk" picks the 64-bit exe automatically. 32-bit and 64-bit builds have
   different version numbers, so online both players must use the same one.
 
-AUTOHOTKEY LAUNCHER (Play HOTD2.ahk, AutoHotkey 1.1)
-  Same as Play HOTD2.bat, plus: optional Hook of the Reaper start (set HOTR_EXE at the top),
-  hold Esc 1.5 s to quit (a tap still pauses), and it exits when the game closes.
-  Optional argument: 4:3 or stretch.
+LAUNCHING (Play HOTD2.ahk, AutoHotkey 1.1) - the only launcher
+  Starts the game (64-bit DLSS build on 64-bit Windows), draws the bezel in 4:3,
+  optionally starts Hook of the Reaper (set HOTR_EXE at the top of the script), and exits
+  when the game closes. Tap Esc = pause, HOLD Esc 1.5 s = quit.
+  Optional argument: 4x3 or 16x9 (switches folders first, see below).
+
+SWITCH FOLDERS
+  4x3\  16x9\  "Crosshairs On"\  "Crosshairs Off"\ each hold a settings.ini with only the
+  lines for that mode (aspect=4:3 / aspect=stretch / crosshairs=1 / crosshairs=0).
+  Switching copies those lines into hotd2re_settings.ini; your other settings stay.
+  Add more lines to a folder (e.g. render=4) to change them only in that mode.
+  "Swap 4x3 - 16x9.bat"   flips the display folder   (or: ... 4x3 / ... 16x9)
+  "Toggle Crosshairs.bat" flips the crosshair folder (or: ... on / ... off)
+  Bezel: 4x3\bezel.png (your own, 1920x1080 with art in the outer 240 px each side);
+  4x3\bezel-placeholder.png is used if there is none.
 
 HOW TOOLS CONNECT
   Protocol : MAME network outputs (same as MAME / DemulShooter)
