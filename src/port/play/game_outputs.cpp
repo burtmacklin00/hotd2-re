@@ -1,9 +1,3 @@
-#include "game_outputs.h"
-
-#include "game/world.h"
-
-#include <cstdio>
-
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -28,6 +22,12 @@ using socket_t = int;
 static void CloseSock(uintptr_t s) { close(static_cast<int>(s)); }
 static bool WouldBlock() { return errno == EWOULDBLOCK || errno == EAGAIN; }
 #endif
+
+#include "game_outputs.h"
+
+#include "game/world.h"
+
+#include <cstdio>
 
 namespace play {
 

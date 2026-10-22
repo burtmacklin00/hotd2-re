@@ -1,0 +1,105 @@
+# Builds the HOTD2RE outputs / lightgunHID package with Visual Studio 2022:
+#   hotd2-outputs64.exe  64-bit, Direct3D 12, DLSS + FSR + XeSS + DXC ray shadows (vendor SDKs at the pinned
+#                        versions in notes/agents/night-shift-integration.md)
+#   hotd2-outputs.exe    32-bit
+# plus the setup files (launchers, bezel, lightgunHID.ini, Hook of the Reaper file). The package has no original
+# game data: extract it into an existing hotd2re folder (next to game/ and scenes/).
+# Runs on every push to this branch, on demand (Actions > Build outputs package > Run workflow), and publishes a
+# GitHub release when a tag starting with "outputs-" is pushed.
+name: Build outputs package
+
+on:
+  push:
+    branches: [hotd2re-outputs-lightgunhid]
+    tags: ['outputs-*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FSR_COMMIT: 60f4ea81909200d8542eca14dccb2628b763a9a3
+  XESS_COMMIT: de0fb9c1c510661c571164e1418ceca8101dab69
+  DLSS_COMMIT: 9981c6350dc58c0ce21f024fd65e31e851c31689
+  DXC_TAG: v1.9.2609
+  DXC_SHA256: ad31b1fc8443175d204f77a611fdb3ef2ec42759bdc2f1167368de24a4a7e7f1
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch vendor SDKs (pinned)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sdk = "$env:RUNNER_TEMP\sdk"
+          New-Item -ItemType Directory -Force -Path $sdk | Out-Null
+          function Fetch($dir, $url, $commit) {
+            git init -q "$sdk\$dir"
+            git -C "$sdk\$dir" fetch -q --depth 1 $url $commit
+            git -C "$sdk\$dir" checkout -q FETCH_HEAD
+            if ((git -C "$sdk\$dir" rev-parse HEAD) -ne $commit) { throw "$dir is not at $commit" }
+          }
+          Fetch fidelityfx https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK.git $env:FSR_COMMIT
+          Fetch xess https://github.com/intel/xess.git $env:XESS_COMMIT
+          Fetch dlss https://github.com/NVIDIA/DLSS.git $env:DLSS_COMMIT
+          # DXC: the official Windows release zip, verified against the hash the project records.
+          gh release download $env:DXC_TAG -R microsoft/DirectXShaderCompiler -p 'dxc_*.zip' -D "$sdk\dxc-zip"
+          $zip = Get-ChildItem "$sdk\dxc-zip\dxc_*.zip" | Where-Object { $_.Name -notmatch 'pdb' } | Select-Object -First 1
+          $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $env:DXC_SHA256) { throw "DXC zip $($zip.Name) hash $hash does not match" }
+          Expand-Archive $zip.FullName -DestinationPath "$sdk\dxc"
+          "SDK=$sdk" >> $env:GITHUB_ENV
+
+      - name: Build 64-bit
+        shell: pwsh
+        run: |
+          cmake -S . -B build-x64 -A x64 -DHOTD2_ALLOW_64BIT=ON `
+            -DHOTD2_DLSS_SDK="$env:SDK\dlss" -DHOTD2_FSR_SDK="$env:SDK\fidelityfx" `
+            -DHOTD2_XESS_SDK="$env:SDK\xess" -DHOTD2_DXC_SDK="$env:SDK\dxc"
+          cmake --build build-x64 --config Release --target hotd2 --parallel
+
+      - name: Build 32-bit
+        shell: pwsh
+        run: |
+          cmake -S . -B build -A Win32
+          cmake --build build --config Release --target hotd2 --parallel
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $out = "package\hotd2re"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item setup\* $out -Recurse -Force
+          $x64 = 'build-x64\src\port\Release'
+          Copy-Item "$x64\hotd2.exe" "$out\hotd2-outputs64.exe"
+          foreach ($f in 'nvngx_dlss.dll','nvngx_dlssg.dll','amd_fidelityfx_upscaler_dx12.dll',
+                         'amd_fidelityfx_framegeneration_dx12.dll','libxess.dll','dxcompiler.dll','dxil.dll') {
+            Copy-Item "$x64\$f" $out
+          }
+          foreach ($d in 'vendor-licenses','dxc-licenses') { if (Test-Path "$x64\$d") { Copy-Item "$x64\$d" $out -Recurse -Force } }
+          Copy-Item 'build\src\port\Release\hotd2.exe' "$out\hotd2-outputs.exe"
+          Copy-Item LICENSE "$out\LICENSE-native-code.txt"
+          Copy-Item THIRD_PARTY_NOTICES.txt $out
+          "Built from $env:GITHUB_SHA by GitHub Actions run $env:GITHUB_RUN_ID" | Set-Content "$out\BUILD-OUTPUTS.txt"
+          Compress-Archive -Path $out -DestinationPath hotd2re-outputs-package.zip
+          Get-ChildItem $out | Format-Table Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hotd2re-outputs-package
+          path: package/
+
+      - name: Publish release (tags only)
+        if: startsWith(github.ref, 'refs/tags/outputs-')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create $env:GITHUB_REF_NAME hotd2re-outputs-package.zip --title "HOTD2RE outputs $env:GITHUB_REF_NAME" --notes "Unofficial HOTD2RE build with game outputs (hod2re), lightgunHID.ini, DLSS/FSR/XeSS. Extract into an existing hotd2re folder."

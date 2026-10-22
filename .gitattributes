@@ -1,1 +1,4 @@
 * text=auto eol=lf
+# Windows launcher package files keep CRLF line endings.
+setup/** text eol=crlf
+setup/**/*.png binary

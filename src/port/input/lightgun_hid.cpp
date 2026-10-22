@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <cstdlib>
+#include <cwchar>
 #include <fstream>
 #include <regex>
 
