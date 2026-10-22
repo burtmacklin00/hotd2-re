@@ -4,13 +4,12 @@
 #   hotd2-outputs.exe    32-bit
 # plus the setup files (launchers, bezel, lightgunHID.ini, Hook of the Reaper file). The package has no original
 # game data: extract it into an existing hotd2re folder (next to game/ and scenes/).
-# Runs on every push to this branch, on demand (Actions > Build outputs package > Run workflow), and publishes a
-# GitHub release when a tag starting with "outputs-" is pushed.
+# Runs on demand (Actions > Build outputs package > Run workflow) and publishes a GitHub release when a tag
+# starting with "outputs-" is pushed. Ordinary pushes do not build.
 name: Build outputs package
 
 on:
   push:
-    branches: [hotd2re-outputs-lightgunhid]
     tags: ['outputs-*']
   workflow_dispatch:
 
