@@ -5,7 +5,8 @@
 ;   Play HOTD2.ahk 4x3       switches to the 4x3 folder's settings first (4:3 with bezel)
 ;   Play HOTD2.ahk 16x9      switches to the 16x9 folder's settings first (16:9 stretch)
 ; In 4:3 mode the bezel is 4x3\bezel.png (your own) or 4x3\bezel-placeholder.png.
-; Tap Esc to pause (the game's own pause). HOLD Esc for 1.5 seconds to quit.
+; Esc quits the game. P pauses (it sends the game its own Esc: pause / back / cancel). Both keys can be
+; changed in Play HOTD2.ini. The gun's pause button and the middle mouse button also pause.
 
 #NoEnv
 #SingleInstance Force
@@ -18,15 +19,16 @@ DetectHiddenWindows, On
 ;   [Launcher]
 ;   HotrExe=C:\Lightgun\Hook Of The Reaper\HookOfTheReaper.exe   (empty = don't start it)
 ;   HotrCloseAfter=0      (1 = close Hook of the Reaper when the game exits)
-;   HoldToQuitMs=1500     (how long to hold Esc to quit)
+;   ExitKey=Esc           (quits the game; empty = no exit key)
+;   PauseKey=P            (does what Esc normally does in the game: pause / back / cancel)
 LAUNCHER_INI := A_ScriptDir . "\Play HOTD2.ini"
 IniRead, HOTR_EXE, %LAUNCHER_INI%, Launcher, HotrExe, %A_Space%
 IniRead, HOTR_CLOSE_AFTER, %LAUNCHER_INI%, Launcher, HotrCloseAfter, 0
-IniRead, HOLD_TO_QUIT_MS, %LAUNCHER_INI%, Launcher, HoldToQuitMs, 1500
+IniRead, EXIT_KEY, %LAUNCHER_INI%, Launcher, ExitKey, Esc
+IniRead, PAUSE_KEY, %LAUNCHER_INI%, Launcher, PauseKey, P
 HOTR_EXE := Trim(HOTR_EXE, " `t""")
 HOTR_CLOSE_AFTER := (HOTR_CLOSE_AFTER = "1" || HOTR_CLOSE_AFTER = "true")
-if HOLD_TO_QUIT_MS is not integer
-    HOLD_TO_QUIT_MS := 1500
+EXIT_KEY := Trim(EXIT_KEY), PAUSE_KEY := Trim(PAUSE_KEY)
 ; ------------------------------------------
 
 SETTINGS := A_ScriptDir . "\hotd2re_settings.ini"
@@ -41,6 +43,10 @@ if !FileExist(GameExe) {
     MsgBox, 16, HOTD2, Can't find %GameExe% in %A_ScriptDir%.`nPut this script in the hotd2re folder.
     ExitApp
 }
+
+; First run (no settings file yet): start from the light "Graphics Low" preset so any PC can run it.
+if (!FileExist(SETTINGS) && FileExist(A_ScriptDir . "\Graphics Low\settings.ini"))
+    ApplyFolder(A_ScriptDir . "\Graphics Low", SETTINGS)
 
 ; Optional display folder from the command line (4x3 or 16x9).
 Mode = %1%
@@ -79,7 +85,22 @@ if (ReadSetting(SETTINGS, "aspect") = "4:3" && ReadSetting(SETTINGS, "fullscreen
     }
 }
 
+; Exit / pause keys, only while the game window is active. The game never sees the exit key.
+Hotkey, If, WinActive("ahk_pid " . GamePid)
+if (EXIT_KEY != "")
+    Hotkey, $%EXIT_KEY%, Finish, UseErrorLevel
+if (PAUSE_KEY != "")
+    Hotkey, $%PAUSE_KEY%, SendGameEsc, UseErrorLevel
+Hotkey, If
+
 SetTimer, WatchGame, 1000
+return
+
+#If WinActive("ahk_pid " . GamePid)
+#If
+
+SendGameEsc:
+    Send, {Esc}
 return
 
 ; Close with the game; keep the bezel above it.
@@ -93,13 +114,6 @@ WatchGame:
         WinSet, Top, , ahk_id %BezelHwndL%
         WinSet, Top, , ahk_id %BezelHwndR%
     }
-return
-
-; Tap Esc: passes through to the game (pause). Hold Esc: quit.
-~Esc::
-    KeyWait, Esc, % "T" . (HOLD_TO_QUIT_MS / 1000)
-    if ErrorLevel
-        Goto, Finish
 return
 
 Finish:
