@@ -1,5 +1,7 @@
 #include "effects.h"
 
+#include <cmath>
+
 #include "camera.h"  // LookAngles (Cam_DirToAngles 0x004016B0)
 
 namespace game {

@@ -64,6 +64,7 @@
 #include "port/play/display_pointer.h"
 #include "port/play/display_viewport.h"
 #include "port/play/gameplay_hud.h"
+#include "port/play/game_outputs.h"
 #include "port/play/gun_input.h"
 #include "port/play/home_lobby_preview.h"
 #include "port/play/keyboard.h"
@@ -92,6 +93,9 @@
 #endif
 #include "assets/asset_override.h"
 #include "input/focused_guns.h"
+#ifdef _WIN32
+#include "input/lightgun_hid.h"
+#endif
 #include "game/stage.h"
 #include "net/netplay.h"
 #include "platform/platform.h"
@@ -185,8 +189,9 @@ uint32_t WorldHash(const game::World& w) {
 constexpr uint32_t kBuildId = 2026102101;
 const char* const kBuildName = "2026 10 21 A";
 #else
-constexpr uint32_t kBuildId = 2026101905;
-const char* const kBuildName = "2026 10 19 NS32";
+// Unofficial MinGW build with game outputs: its own build id so it never shares a room with an official build.
+constexpr uint32_t kBuildId = 2026102191;
+const char* const kBuildName = "2026 10 21 A OUTPUTS";
 #endif
 const char* const kRejoinTicket = "hotd2re_rejoin.bin";
 
@@ -774,6 +779,8 @@ int main(int argc, char** argv) {
     bool noHud = false;        // --no-hud: 3D only (clean screenshots)
     bool pace = false;         // --pace: a headless run steps at 60 Hz instead of as fast as it can (netplay tests)
     bool checkUpdates = true;  // --no-update-check: skip the launch-time release check
+    bool gameOutputs = true;   // --no-outputs: no recoil / lamp outputs on TCP 127.0.0.1:8000
+    int gameOutputsPort = 8000;  // --outputs-port N
     int dlssQuality = -1;
     int temporalVendor = 1, fsrMajor = 3;
     std::string dlssDirectory;
@@ -869,6 +876,10 @@ int main(int argc, char** argv) {
             noHud = true;  // screenshots: the 3D scene only (no HUD / world 2D / bitmap screens)
         else if (a == "--no-update-check")
             checkUpdates = false;
+        else if (a == "--no-outputs")
+            gameOutputs = false;
+        else if (a == "--outputs-port" && i + 1 < argc)
+            gameOutputsPort = atoi(argv[++i]);
         else if (a == "--host") {
             netHostMode = true;
             if (i + 1 < argc && argv[i + 1][0] != '-') netPort = atoi(argv[++i]);
@@ -1172,6 +1183,17 @@ int main(int argc, char** argv) {
 
     // Platform: window + gun source (none for headless screenshots), GPU device (swap chain or off-screen target).
     const bool headless = !screenshot.empty();
+    play::GameOutputs outputs;
+    if (gameOutputs && !headless) {
+        play::GameOutputsConfig oc;
+        oc.port = gameOutputsPort;
+        std::string err;
+        if (!outputs.Start(oc, &err)) fprintf(stderr, "outputs: %s\n", err.c_str());
+    }
+    const auto outputsNow = [] {
+        return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                         std::chrono::steady_clock::now().time_since_epoch()).count());
+    };
     platform::Platform plat;
     platform::Options po;
     po.title = std::string(netplay ? (netHostMode ? "hotd2-re play (host, P1)" : "hotd2-re play (joined, P2)") : "hotd2-re play") + " - " +
@@ -1354,6 +1376,29 @@ int main(int argc, char** argv) {
     auto& lightguns = plat.Lightguns();
     const std::string lightgunSettingsPath = "hotd2re_lightguns.ini";
     if (!headless) lightguns.settings.Load(lightgunSettingsPath);
+#ifdef _WIN32
+    // lightgunHID.ini: Player 1 / Player 2 guns by hardware ID. Guns connected -> two-player light guns (Raw Input);
+    // none connected -> one player with the mouse. Rechecked every two seconds for guns plugged in later.
+    input::LightgunHidConfig hidConfig;
+    const bool hidActive = !headless && hidConfig.Load("lightgunHID.ini") && hidConfig.Configured();
+    int hidGuns = -1;
+    double hidNextScan = 0;
+    auto applyHid = [&](bool startup) {
+        const auto mice = input::ListHidMice(startup);
+        if (startup) input::WriteHidDeviceList("lightgunHID_devices.txt", mice, hidConfig);
+        if (!hidActive) return;
+        bool slots[2];
+        const int found = input::ApplyLightgunHid(hidConfig, mice, lightguns.settings, slots);
+        if (found == hidGuns) return;
+        hidGuns = found;
+        const auto want = found > 0 || !hidConfig.mouseFallback ? platform::Input::RawInput : platform::Input::Mouse;
+        std::string err;
+        if (plat.CurrentInput() != want && !plat.SetInput(want, &err)) fprintf(stderr, "lightgunHID: %s\n", err.c_str());
+        printf("lightgunHID: P1 gun %s, P2 gun %s -> %s\n", slots[0] ? "connected" : "missing", slots[1] ? "connected" : "missing",
+               want == platform::Input::RawInput ? "light guns" : "mouse (1 player)");
+    };
+    if (!headless) applyHid(true);
+#endif
     input::WiiRemotes wii(plat.Guns());
     const std::string wiiSettingsPath = "hotd2re_wii.ini";
     if (!headless) {
@@ -1842,6 +1887,13 @@ int main(int argc, char** argv) {
         plat.SetCursorVisible(play::SystemCursorVisible(world.Hud(), context));
     };
     for (;;) {
+        outputs.Tick(outputsNow());
+#ifdef _WIN32
+        if (hidActive && !lightgunPage.IsOpen() && plat.Seconds() >= hidNextScan) {
+            hidNextScan = plat.Seconds() + 2.0;
+            applyHid(false);
+        }
+#endif
         int steps = 1;
         bool netStalled = false;
         net.PollLobbyCleanup();  // cancellation continues after leaving the lobby screen
@@ -2786,6 +2838,9 @@ int main(int argc, char** argv) {
             world.SetPortLeaderboardRecording(!headless && script.empty() && keyScript.empty() && !net.CatchingUp() &&
                                               !net.ReplayPending() && !replayStep);
             world.Step();
+            outputs.OnFrame(world.Hud(), netplay ? netLocal : 0,
+                            script.empty() && keyScript.empty() && !(netplay && (net.CatchingUp() || net.ReplayPending())) && !replayStep,
+                            outputsNow());
             if (netplay) {
                 const uint32_t hash = WorldHash(world);
                 port::net::FrameInput applied[2];

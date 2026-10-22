@@ -26,6 +26,8 @@ std::string DeviceKey(HANDLE handle) {
 }
 }  // namespace
 
+std::string RawDeviceKey(HANDLE handle) { return DeviceKey(handle); }
+
 bool RawInput::Init(HWND window, HWND coordWindow) {
     window_ = window;
     coordWindow_ = coordWindow ? coordWindow : window;

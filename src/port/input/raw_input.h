@@ -15,6 +15,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <string>
 #include <unordered_map>
 
 #include "aim_map.h"
@@ -22,6 +23,9 @@
 #include "lightguns.h"
 
 namespace input {
+
+// The opaque per-device key the light-gun settings use (hash of the Raw Input device name).
+std::string RawDeviceKey(HANDLE handle);
 
 // Screen geometry used to map absolute reports; all rects in screen pixels.
 struct Geometry {

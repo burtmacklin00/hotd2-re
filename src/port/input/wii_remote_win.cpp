@@ -2,7 +2,20 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <bluetoothapis.h>
+#if defined(__MINGW32__)
+// MinGW's bluetoothapis.h omits these (present in the Windows SDK).
+extern "C" DWORD WINAPI BluetoothAuthenticateDevice(HWND, HANDLE, BLUETOOTH_DEVICE_INFO*, PWSTR, ULONG);
+#ifndef BLUETOOTH_SERVICE_ENABLE
+#define BLUETOOTH_SERVICE_ENABLE 0x01
+#endif
+#endif
+#if defined(__MINGW32__)
+extern "C" {
 #include <hidsdi.h>
+}
+#else
+#include <hidsdi.h>
+#endif
 #include <setupapi.h>
 #include <algorithm>
 #include <atomic>
@@ -164,7 +177,7 @@ bool DiscoverBluetooth(const std::atomic<bool>& stop){
                 if(paired!=ERROR_SUCCESS && !stop){for(int i=0;i<6;++i)pin[i]=device.Address.rgBytes[i];BluetoothAuthenticateDevice(nullptr,radio.value,&device,pin,6);}
             }
             if(!stop){const GUID hidService{0x00001124,0,0x1000,{0x80,0,0,0x80,0x5f,0x9b,0x34,0xfb}};
-                BluetoothSetServiceState(radio.value,&device,&hidService,BLUETOOTH_SERVICE_ENABLE);}
+                BluetoothSetServiceState(radio.value,&device,const_cast<GUID*>(&hidService),BLUETOOTH_SERVICE_ENABLE);}
         }while(BluetoothFindNextDevice(found,&device));
         BluetoothFindDeviceClose(found);
     }while(!stop && BluetoothFindNextRadio(radios,&raw));
