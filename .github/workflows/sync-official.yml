@@ -1,0 +1,84 @@
+# Keeps the Light Gun Edition up to date with the official HOTD2RE releases (github.com/GitFist/hotd2-re).
+# Once a day: if the official project has published a new release, merge it into this branch, build, and publish
+# "outputs-<official tag>" as the newest release (which "Update HOTD2.bat" then installs).
+#   - Does nothing until the first Light Gun Edition release has been published by hand (outputs-* tag).
+#   - If the official changes clash with this edition's changes, nothing is merged or released: an issue
+#     "Official update needs a manual merge" is opened instead (and the run fails, so GitHub emails you).
+# Run it by hand: Actions > Sync official release > Run workflow.
+name: Sync official release
+
+on:
+  schedule:
+    - cron: '23 10 * * *'   # daily, 10:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: sync-official
+  cancel-in-progress: false
+
+env:
+  OFFICIAL: GitFist/hotd2-re
+  BRANCH: hotd2re-outputs-lightgunhid
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    outputs:
+      ref: ${{ steps.merge.outputs.ref }}
+      tag: ${{ steps.merge.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+
+      - name: Merge the newest official release
+        id: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! gh release list -R "$GITHUB_REPOSITORY" --limit 200 --json tagName -q '.[].tagName' | grep -q '^outputs-'; then
+            echo "No Light Gun Edition release has been published yet: nothing to do until the first one is."
+            exit 0
+          fi
+          official=$(gh api "repos/$OFFICIAL/releases/latest" -q .tag_name)
+          ours="outputs-$official"
+          echo "Newest official release: $official"
+          if gh release view "$ours" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$ours is already published."; exit 0
+          fi
+          git remote add official "https://github.com/$OFFICIAL.git"
+          git fetch --no-tags official "refs/tags/$official:refs/tags/$official"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git merge-base --is-ancestor "$official" HEAD; then
+            echo "This branch already contains $official: up to date."; exit 0
+          elif ! git merge --no-edit -m "Merge official release $official" "$official"; then
+            files=$(git diff --name-only --diff-filter=U | sed 's/^/- /')
+            git merge --abort
+            title="Official update $official needs a manual merge"
+            body=$(printf 'The official release **%s** changes the same lines as this edition, so it was not merged or released automatically.\n\nFiles in conflict:\n%s\n\nAsk Claude to "merge the official update", or merge %s into %s by hand.' "$official" "$files" "$official" "$BRANCH")
+            if ! gh issue list -R "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number -q '.[].number' | grep -q .; then
+              gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body "$body" || echo "::warning::Couldn't open an issue (are Issues turned on for this repository?)"
+            fi
+            echo "::error::$title"
+            exit 1
+          else
+            git push origin "HEAD:$BRANCH"
+          fi
+          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "tag=$ours" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: sync
+    if: needs.sync.outputs.ref != ''
+    uses: ./.github/workflows/build-outputs.yml
+    with:
+      ref: ${{ needs.sync.outputs.ref }}
+      release_tag: ${{ needs.sync.outputs.tag }}
+    secrets: inherit

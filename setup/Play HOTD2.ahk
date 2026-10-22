@@ -22,6 +22,11 @@ DetectHiddenWindows, On
 ;   ExitKey=Esc           (quits the game; empty = no exit key)
 ;   PauseKey=P            (does what Esc normally does in the game: pause / back / cancel)
 LAUNCHER_INI := A_ScriptDir . "\Play HOTD2.ini"
+; Your own settings files are never in the package (so updates can't overwrite them): the first run copies
+; the defaults\ versions into place.
+for i, name in ["Play HOTD2.ini", "LightgunHID.ini"]
+    if (!FileExist(A_ScriptDir . "\" . name) && FileExist(A_ScriptDir . "\defaults\" . name))
+        FileCopy, %A_ScriptDir%\defaults\%name%, %A_ScriptDir%\%name%
 IniRead, HOTR_EXE, %LAUNCHER_INI%, Launcher, HotrExe, %A_Space%
 IniRead, HOTR_CLOSE_AFTER, %LAUNCHER_INI%, Launcher, HotrCloseAfter, 0
 IniRead, EXIT_KEY, %LAUNCHER_INI%, Launcher, ExitKey, Esc

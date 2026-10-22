@@ -37,6 +37,11 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+// Light Gun Edition: the official build number below becomes kOfficialBuildId / kOfficialBuildName and this
+// edition derives its own from it (see after kDefaultLobby), so official updates merge without conflicts.
+#define kBuildId kOfficialBuildId
+#define kBuildName kOfficialBuildName
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -186,18 +191,28 @@ uint32_t WorldHash(const game::World& w) {
 // The build: shown on the Network screen and exchanged in the netplay handshake (two different builds could run
 // different worlds, so they do not connect). Bump both on every change that affects the game or the protocol.
 #if INTPTR_MAX == INT64_MAX
-// Unofficial MinGW build with game outputs: its own build id so it never shares a room with an official build.
-constexpr uint32_t kBuildId = 2026102192;
-const char* const kBuildName = "2026 10 21 A OUTPUTS64";
+constexpr uint32_t kBuildId = 2026102101;
+const char* const kBuildName = "2026 10 21 A";
 #else
-// Unofficial MinGW build with game outputs: its own build id so it never shares a room with an official build.
-constexpr uint32_t kBuildId = 2026102191;
-const char* const kBuildName = "2026 10 21 A OUTPUTS";
+constexpr uint32_t kBuildId = 2026101905;
+const char* const kBuildName = "2026 10 19 NS32";
 #endif
 const char* const kRejoinTicket = "hotd2re_rejoin.bin";
 
 // The lobby server (server/lobby): "host:port"; hotd2re_settings.ini lobby=, HOTD2_LOBBY or --lobby override it.
 const char* const kDefaultLobby = "64.23.186.88:27020";
+
+// Light Gun Edition build: the official number with the top bit set, so it never shares a room with an official
+// build (or an edition built from a different official release), and "LG" after the official name.
+#undef kBuildId
+#undef kBuildName
+constexpr uint32_t kBuildId = kOfficialBuildId | 0x80000000u;
+#if INTPTR_MAX == INT64_MAX
+const std::string kBuildNameText = std::string(kOfficialBuildName) + " LG64";
+#else
+const std::string kBuildNameText = std::string(kOfficialBuildName) + " LG";
+#endif
+const char* const kBuildName = kBuildNameText.c_str();
 
 #ifdef _WIN32
 struct DlssRuntime {

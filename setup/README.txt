@@ -10,12 +10,15 @@ QUICK START
      then Player 2, then Save. (Or edit LightgunHID.ini by hand.)
   3. Start Hook of the Reaper (copy "Hook of the Reaper\defaultLG\hod2re.txt" into its defaultLG folder first).
   4. Run "Play HOTD2.exe".  Esc = exit, P = pause (gun pause button / middle mouse also pause).
+  Later: run "Update HOTD2.bat" to get the newest version (your settings are kept).
 
 WHICH FILE DOES WHAT
   Play HOTD2.exe            Starts the game. No AutoHotkey needed.
   Play HOTD2.ahk            Same launcher as a script, for AutoHotkey 1.1 users / front-ends.
   Play HOTD2.ini            Launcher settings: Hook of the Reaper path, exit and pause keys.
+                            (Made from defaults\ on the first run; updates never replace it.)
   LightgunSetup.exe         Pick the Player 1 / Player 2 guns (writes LightgunHID.ini).
+  Update HOTD2.bat          Installs the newest Light Gun Edition release from GitHub.
   Swap 4x3 - 16x9.bat       4:3 with bezel  <->  16:9 stretch.
   Toggle Crosshairs.bat     Crosshairs on <-> off.
   Graphics - Max.bat        Best quality (DLSS on NVIDIA RTX, FSR 3 otherwise).
@@ -24,6 +27,22 @@ WHICH FILE DOES WHAT
   hotd2-outputs64.exe       The game, 64-bit (used automatically on 64-bit Windows).
   hotd2-outputs.exe         The game, 32-bit (for 32-bit Windows).
   You never need to run the hotd2-outputs exes directly - use Play HOTD2.
+
+UPDATING
+  Run "Update HOTD2.bat" (close the game first). It downloads the newest Light Gun Edition
+  release from github.com/burtmacklin00/hotd2-re/releases, checks it, and copies it over this
+  folder. It never replaces your own files:
+    LightgunHID.ini, Play HOTD2.ini, hotd2re_settings.ini, saves / records (hotd2re_*),
+    4x3\bezel.png and installed texture packs.
+  If you edited one of the shipped files (e.g. "Graphics Max\settings.ini" or a .bat), the old
+  copy is saved in backup\<date>\ before the new one goes in.
+  "Update HOTD2.bat" check   only tells you whether an update is available.
+  No internet on the game PC? Download hotd2re-outputs-package.zip elsewhere and drag it onto
+  "Update HOTD2.bat".
+  VERSION.txt shows which release this folder has. New official HOTD2RE releases are merged into
+  the Light Gun Edition automatically, usually within a day.
+  Manual install still works too: extracting the zip over the folder is safe, because the zip
+  doesn't contain any of your own files (their defaults are in defaults\).
 
 TEXTURE PACKS
   The only released pack is the official 2x pack (Toggle 2x Graphics.bat). Options > Graphics >
@@ -110,18 +129,19 @@ HOOK OF THE REAPER
 ONLINE PLAY
   Your own gun is always P1 outputs, even when you joined someone else's room as
   Player 2 (matches the game's advice to assign your local gun to Player 1).
-  This build has its own version number: online, both players must use this same
-  hotd2-outputs.exe. It will not see rooms made by the official hotd2.exe.
+  This edition has its own version number (the official one plus "LG", shown on the Network
+  screen): online, both players need the same Light Gun Edition release. It does not see rooms
+  made by the official hotd2.exe. Run "Update HOTD2.bat" on both PCs to match versions.
 
 COMMAND-LINE OPTIONS
   --no-outputs        turn outputs off
   --outputs-port N    use a different TCP port
 
 NOTES
-  - No update notices are shown by this build (they would point to official builds
-    without outputs).
-  - Source changes are in source\hotd2re-outputs.patch (applies to GitFist/hotd2-re
-    commit 60f608d). The native port code is MIT licensed; see LICENSE-native-code.txt.
+  - The game's own update notice is off in this edition (it points to official builds
+    without outputs); use "Update HOTD2.bat" instead.
+  - Source: github.com/burtmacklin00/hotd2-re (branch hotd2re-outputs-lightgunhid).
+    The native port code is MIT licensed; see LICENSE-native-code.txt.
 
 ==============================================================================
 ORIGINAL GAME NOTES (HOTD2RE)
