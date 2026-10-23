@@ -3878,7 +3878,13 @@ int main(int argc, char** argv) {
                     lastHits[p] = P.hits;
                 }
                 if (!on) pops.clear();
-                pops.erase(std::remove_if(pops.begin(), pops.end(), [&](const ComicPop& c) { return now - c.born > 32 || now < c.born; }),
+                // Lifetime from hotd2re_settings.ini comic_popup_ms (game frames at 60 Hz); when the game stops allowing shots
+                // (the camera moves on to the next scene), the remaining pop-ups fade out within a few frames.
+                const int life = std::max(6, volumes.display.graphics.comicPopupMs * 60 / 1000);
+                const int fadeFrames = std::max(3, std::min(8, life / 3));
+                if (!H.canShoot)
+                    for (auto& c : pops) c.born = std::min(c.born, now - (life - std::min(4, fadeFrames)));
+                pops.erase(std::remove_if(pops.begin(), pops.end(), [&](const ComicPop& c) { return now - c.born > life || now < c.born; }),
                            pops.end());
                 if (uiFont.Available() && !pops.empty()) {
                     const float xs = port::ViewportXScale(viewportAspect);
@@ -3889,7 +3895,7 @@ int main(int argc, char** argv) {
                         const bool subtle = volumes.display.graphics.comicPopups == 1;
                         const float size = (subtle ? 1.0f : 1.25f) * (1.f + 0.55f * std::max(0.f, 1.f - age / 5.f));  // slams in
                         // Subtle keeps the letters readable (mostly solid) and makes the starburst see-through.
-                        const uint32_t fade = age < 24 ? 255u : 255u * uint32_t(32 - age) / 8;
+                        const uint32_t fade = age < life - fadeFrames ? 255u : 255u * uint32_t(std::max(0, life - age)) / uint32_t(fadeFrames);
                         const uint32_t alpha = fade * (subtle ? 225u : 255u) / 255u;     // letters and outline
                         const uint32_t burstAlpha = fade * (subtle ? 110u : 255u) / 255u;  // starburst
                         const uint32_t fill = kStyles[c.style][0], ink = kStyles[c.style][1];

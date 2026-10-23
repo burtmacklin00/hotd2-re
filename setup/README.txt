@@ -85,6 +85,8 @@ CARTOON LOOK
                     play (menus, pause and the HUD stay clean). Left / right changes the level.
     Comic Pop-ups   Off / Subtle / Bold: comic words (POW! BAM! ZAP!) burst out where your shots hit.
                     Only while Cartoon is on.
+                    How long each one stays: comic_popup_ms in hotd2re_settings.ini
+                    (100-2000, default 400 = 0.4 s). They fade out as the camera moves on.
   "Toggle Cartoon.bat" switches both on / off. The level used for On is in
   "Cartoon On\settings.ini" (cartoon=1, 2 or 3; comic_popups=0 Off, 1 Subtle, 2 Bold).
   Looks best with the 2x texture pack. Gameplay and aiming are unchanged.
