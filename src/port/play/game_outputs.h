@@ -8,7 +8,7 @@
 // The output names match DemulShooter's HOTD2 PC target (same meanings), plus P1_Dead / P2_Dead.
 //
 //   P1_CtmRecoil / P2_CtmRecoil     1 for a short pulse on every shot (then 0)
-//   P1_Damaged   / P2_Damaged       1 for a short pulse when the player loses a life
+//   P1_Damaged   / P2_Damaged       1 for a short pulse when the player loses a life (not the last one: that is death)
 //   P1_Dead      / P2_Dead          1 while the player is dead (continue countdown / out), else 0
 //   P1_Ammo      / P2_Ammo          bullets in the gun (0 when not playing)
 //   P1_Clip      / P2_Clip          1 while the gun has ammo, 0 when empty / not playing

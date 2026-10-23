@@ -232,8 +232,11 @@ void GameOutputs::OnFrame(const game::WorldHud& hud, int slotForP1, bool live, u
             // A shot left the gun this frame; the ammo drop also counts, for any path that does not raise `fired`.
             if (p.fired || (t.lastAmmo >= 0 && p.ammo < t.lastAmmo)) Fire(recoilPulse_[out], nowMs);
         }
-        // A life lost while playing (also the hit that ends in the continue countdown).
-        if (live && inGame && t.wasPlaying && t.lastLives >= 0 && p.lives < t.lastLives) Fire(damagedPulse_[out], nowMs);
+        // A life lost while playing. Not on the hit that takes the last life: that one is the player's death, which
+        // Hook of the Reaper's Death_* light commands show from P_Life reaching 0; a Damaged effect on the same lights
+        // at the same moment would block it.
+        if (live && inGame && t.wasPlaying && t.lastLives >= 0 && p.lives < t.lastLives && p.lives > 0)
+            Fire(damagedPulse_[out], nowMs);
 
         Set(ammo_[out], playing ? p.ammo : 0);
         Set(clip_[out], playing && p.ammo > 0 ? 1 : 0);

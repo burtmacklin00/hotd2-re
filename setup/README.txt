@@ -110,7 +110,8 @@ HOW TOOLS CONNECT
 
 OUTPUTS (P1_ and P2_ versions of each)
   P1_CtmRecoil    1 = short pulse on every shot (40 ms on / 40 ms off), then 0
-  P1_Damaged      1 = 200 ms pulse when the player loses a life
+  P1_Damaged      1 = 200 ms pulse when the player loses a life (not the last one: losing the
+                  last life is the death, shown by Life reaching 0 / Dead = 1)
   P1_Dead         1 while the player is dead (continue countdown / out), else 0
   P1_Ammo         bullets in the gun (0 when not playing)
   P1_Clip         1 while the gun has ammo, 0 when empty
