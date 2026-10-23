@@ -201,7 +201,7 @@ const char* Help(int r) {
         case DisplayMenu::kCartoon:
             return "Comic-book look during play: dark outlines and flat shading bands. Menus and HUD stay clean. Off keeps the original look.";
         case DisplayMenu::kComicPopups:
-            return "Comic words (BLAM! SPLAT! POW!) burst out where your shots hit. Display only; gameplay unchanged.";
+            return "Needs Cartoon on. Comic words (POW! BAM! ZAP!) burst out where your shots hit. Display only; gameplay unchanged.";
         case DisplayMenu::kVsync:
             return "Synchronize presentation to reduce tearing. Game stays at 60 Hz.";
         case DisplayMenu::kTearing:
@@ -890,6 +890,8 @@ bool DisplayMenu::Disabled(int row, const DisplaySettings& d) const {
             return !d.dynamicResolution || !caps_.gpuTiming || temporalInputActive_;
         case kCrtCurvature:
             return !curvatureAvailable_ || frameGenerationActive_;
+        case kComicPopups:  // Light Gun Edition: pop-ups belong to the Cartoon look
+            return d.graphics.cartoon == 0;
         default:
             return false;
     }

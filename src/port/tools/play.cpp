@@ -3861,7 +3861,7 @@ int main(int argc, char** argv) {
                 }();
                 const auto& H = world.Hud();
                 const int now = world.Frame();
-                const bool on = volumes.display.graphics.comicPopups && world.GameMode() == 6 && !H.paused && !noHud &&
+                const bool on = volumes.display.graphics.comicPopups && volumes.display.graphics.cartoon > 0 && world.GameMode() == 6 && !H.paused && !noHud &&
                                 !previewHidden && lobby.page == Lobby::kOff;
                 for (int p = 0; p < 2; ++p) {
                     const auto& P = H.player[p];
