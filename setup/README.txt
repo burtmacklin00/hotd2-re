@@ -83,10 +83,10 @@ CARTOON LOOK
   Options > Graphics, top of the list ("COMIC LOOK"):
     Cartoon         Off / Low / Medium / High: dark comic outlines and flat shading bands during
                     play (menus, pause and the HUD stay clean). Left / right changes the level.
-    Comic Pop-ups   On / Off: comic words (POW! BAM! ZAP!) burst out where your shots hit.
+    Comic Pop-ups   Off / Subtle / Bold: comic words (POW! BAM! ZAP!) burst out where your shots hit.
                     Only while Cartoon is on.
   "Toggle Cartoon.bat" switches both on / off. The level used for On is in
-  "Cartoon On\settings.ini" (cartoon=1, 2 or 3; comic_popups=1 or 0).
+  "Cartoon On\settings.ini" (cartoon=1, 2 or 3; comic_popups=0 Off, 1 Subtle, 2 Bold).
   Looks best with the 2x texture pack. Gameplay and aiming are unchanged.
 
 GRAPHICS PRESETS

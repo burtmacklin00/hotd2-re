@@ -201,7 +201,7 @@ const char* Help(int r) {
         case DisplayMenu::kCartoon:
             return "Comic-book look during play: dark outlines and flat shading bands. Menus and HUD stay clean. Off keeps the original look.";
         case DisplayMenu::kComicPopups:
-            return "Needs Cartoon on. Comic words (POW! BAM! ZAP!) burst out where your shots hit. Display only; gameplay unchanged.";
+            return "Needs Cartoon on. Comic words (POW! BAM! ZAP!) where your shots hit. Subtle: see-through and smaller. Bold: solid.";
         case DisplayMenu::kVsync:
             return "Synchronize presentation to reduce tearing. Game stays at 60 Hz.";
         case DisplayMenu::kTearing:
@@ -599,8 +599,10 @@ std::string DisplayMenu::ValueText(const DisplaySettings& d, int r) {
             return g.colorGrade == 0 ? "Original" : g.colorGrade == 1 ? "Warm" : g.colorGrade == 2 ? "Cool" : "Mono";
         case kCartoon:
             return Strength(g.cartoon);
-        case kComicPopups:
-            return OnOff(g.comicPopups != 0);
+        case kComicPopups: {
+            const char* values[] = {"Off", "Subtle", "Bold"};
+            return values[std::clamp(g.comicPopups, 0, 2)];
+        }
         case kVsync:
             return OnOff(g.syncInterval != 0);
         case kTearing:
@@ -796,7 +798,7 @@ void DisplayMenu::Step(DisplaySettings& d, int r, int delta) {
             g.cartoon = Wrap(g.cartoon + delta, 4);
             break;
         case kComicPopups:
-            g.comicPopups = Wrap(g.comicPopups + delta, 2);
+            g.comicPopups = Wrap(g.comicPopups + delta, 3);
             break;
         case kVsync:
             g.syncInterval = Wrap(g.syncInterval + delta, 2);

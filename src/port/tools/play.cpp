@@ -3885,8 +3885,13 @@ int main(int argc, char** argv) {
                     for (size_t n = 0; n < pops.size(); ++n) {
                         const auto& c = pops[n];
                         const int age = now - c.born;
-                        const float size = 1.25f * (1.f + 0.55f * std::max(0.f, 1.f - age / 5.f));  // slams in, then holds
-                        const uint32_t alpha = age < 24 ? 255u : uint32_t(255 * (32 - age) / 8);
+                        // Bold: full size, solid. Subtle: smaller and about 60% see-through.
+                        const bool subtle = volumes.display.graphics.comicPopups == 1;
+                        const float size = (subtle ? 1.0f : 1.25f) * (1.f + 0.55f * std::max(0.f, 1.f - age / 5.f));  // slams in
+                        // Subtle keeps the letters readable (mostly solid) and makes the starburst see-through.
+                        const uint32_t fade = age < 24 ? 255u : 255u * uint32_t(32 - age) / 8;
+                        const uint32_t alpha = fade * (subtle ? 225u : 255u) / 255u;     // letters and outline
+                        const uint32_t burstAlpha = fade * (subtle ? 110u : 255u) / 255u;  // starburst
                         const uint32_t fill = kStyles[c.style][0], ink = kStyles[c.style][1];
                         const std::string word = kWords[c.word];
                         const float textW = word.size() * 16.5f * size, textH = 34.f * size;
@@ -3923,7 +3928,7 @@ int main(int argc, char** argv) {
                         b.tsp = 0x94918000;
                         b.depth = .0075f;
                         const float bw = std::max(inkW * 1.75f + 50.f, inkH * 3.2f) / 2, bh = std::max(inkH * 2.6f, 60.f * size / 1.25f) / 2;
-                        const uint32_t bc = (alpha << 24) | fill;
+                        const uint32_t bc = (burstAlpha << 24) | fill;
                         const float bx0 = 320 + (c.x - bw - 320) * xs, bx1 = 320 + (c.x + bw - 320) * xs;
                         b.v[0] = {bx0, c.y - bh, 0, 1, bc, 0, 0, 0};
                         b.v[1] = {bx0, c.y + bh, 0, 1, bc, 0, 0, 1};

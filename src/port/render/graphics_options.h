@@ -30,7 +30,7 @@ struct GraphicsOptions {
     int bloom = 0;            // 0 Off, 1..3 SDR bright-area glow
     int colorGrade = 0;       // 0 original, 1 warm, 2 cool, 3 monochrome
     int cartoon = 0;          // Light Gun Edition: 0 Off, 1..3 comic outlines + banded shading (final image)
-    int comicPopups = 0;      // Light Gun Edition: 0 Off, 1 "BLAM!"-style words on hits (drawn by play.exe)
+    int comicPopups = 0;      // Light Gun Edition: 0 Off, 1 Subtle (see-through, smaller), 2 Bold: comic words on hits
     int crtMask = 0;          // 0 Off, 1 aperture grille, 2 slot mask, 3 shadow mask
     int crtCurvature = 0;     // 0 Off, 1..3 barrel geometry; input uses matching CrtWarpUV
     int crtGlow = 0;          // 0 Off, 1..3 bounded phosphor glow
@@ -70,7 +70,7 @@ inline bool ValidateGraphicsOptions(const GraphicsOptions& g, std::string* error
         g.sharpening >= 0 && g.sharpening <= 3 && g.syncInterval >= 0 && g.syncInterval <= 1 &&
         g.brightness >= 0 && g.brightness <= 100 && g.gamma >= 0 && g.gamma <= 100 &&
         g.contrast >= 0 && g.contrast <= 100 && g.saturation >= 0 && g.saturation <= 100 &&
-        g.bloom >= 0 && g.bloom <= 3 && g.colorGrade >= 0 && g.colorGrade <= 3 && g.cartoon >= 0 && g.cartoon <= 3 && g.comicPopups >= 0 && g.comicPopups <= 1 &&
+        g.bloom >= 0 && g.bloom <= 3 && g.colorGrade >= 0 && g.colorGrade <= 3 && g.cartoon >= 0 && g.cartoon <= 3 && g.comicPopups >= 0 && g.comicPopups <= 2 &&
         g.crtMask >= 0 && g.crtMask <= 3 && g.crtCurvature >= 0 && g.crtCurvature <= 3 && g.crtGlow >= 0 && g.crtGlow <= 3 &&
         g.softParticles >= 0 && g.softParticles <= 3 && g.ambientOcclusion >= 0 && g.ambientOcclusion <= 3 &&
         g.shadowMaps >= 0 && g.shadowMaps <= 3 &&

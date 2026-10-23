@@ -118,7 +118,7 @@ bool Settings::Load(const std::string& path) {
         else if (key == "cartoon")  // Light Gun Edition
             number(graphics.cartoon, 0, 3);
         else if (key == "comic_popups")  // Light Gun Edition
-            number(graphics.comicPopups, 0, 1);
+            number(graphics.comicPopups, 0, 2);
         else if (key == "per_pixel_lighting")
             boolean(graphics.perPixelLighting);
         else if (key == "soft_particles")
