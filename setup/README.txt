@@ -9,7 +9,7 @@ QUICK START
   2. Plug in your guns and run LightgunSetup.exe once: pull the Player 1 trigger,
      then Player 2, then Save. (Or edit LightgunHID.ini by hand.)
   3. Start Hook of the Reaper (copy "Hook of the Reaper\defaultLG\hod2re.txt" into its defaultLG folder first).
-  4. Run "Play HOTD2.exe".  Esc = exit, P = pause. The gun's middle / Start button is off (no accidental pauses).
+  4. Run "Play HOTD2.exe".  Esc = exit, 1 = pause during gameplay (the usual Start key on light guns).
   Later: run "Update HOTD2.bat" to get the newest version (your settings are kept).
 
 WHICH FILE DOES WHAT
@@ -62,9 +62,10 @@ LAUNCHING (Play HOTD2.exe, or Play HOTD2.ahk with AutoHotkey 1.1)
   Starts the game, draws the bezel in 4:3, optionally starts Hook of the Reaper
   (set HotrExe in Play HOTD2.ini), and exits when the game closes. HotrCloseAfter=1 closes
   Hook of the Reaper when the game exits, even if you started it yourself.
-  Esc = exit the game. P = pause (it sends the game its own Esc, so P also goes back in menus
-  and cancels setup screens). Change either key in Play HOTD2.ini. Backspace / right click
-  also go back in menus. Optional argument: 4x3 or 16x9.
+  Esc = exit the game (change it with ExitKey in Play HOTD2.ini). 1 = pause, during gameplay only
+  (the usual Start key on light guns; on the title / Home menus 1 opens the hidden prototype).
+  PauseKey in Play HOTD2.ini can add an extra key that does what Esc does in the game (pause /
+  back / cancel). Backspace / right click also go back in menus. Optional argument: 4x3 or 16x9.
   First launch on a new install (no Play HOTD2.ini yet) starts from the Graphics Low preset in
   borderless fullscreen (the official package starts windowed; the bezel needs fullscreen).
   Windows may warn about the unsigned exes the first time: More info > Run anyway.
@@ -140,7 +141,7 @@ GUN CONTROLS (defaults; change them per player in Options > Light Guns)
                              and continues, P on the keyboard pauses. To turn it back on, add
                              StartButton = 1 to LightgunHID.ini (then it starts, continues and pauses).
   Confirm (4th button)       Enter in menus
-  Keyboard (Play HOTD2):     Esc = quit the game, P = pause
+  Keyboard:                  Esc = quit the game (Play HOTD2), 1 = pause during gameplay
   Hidden prototype (HOTD4-style bonus chapter): press 1 (or F8) on the title screen or the Home /
   Play / Practice menu. In it: hold the trigger for the SMG, middle button = grenade, reload
   button or a shot off screen = reload. It is local play only and has no leaderboard.

@@ -4,7 +4,7 @@ An unofficial add-on for [HOTD2RE](https://github.com/GitFist/hotd2-re), the nat
 
 - **Two-player light guns** (Raw Input) with fixed Player 1 / Player 2 guns, and a one-click gun picker
 - **Recoil and outputs** for Hook of the Reaper / MAMEHooker (ammo, life, damage, death, recoil, start lamps)
-- **Launcher** with a 4:3 bezel, Esc to quit and P to pause, and no pop-ups (works in LaunchBox and other front ends)
+- **Launcher** with a 4:3 bezel, Esc to quit and 1 (a light gun's Start key) to pause, and no pop-ups (works in LaunchBox and other front ends)
 - **One-click switches** for 4:3 or 16:9, crosshairs on or off, and max or low graphics (DLSS / FSR / XeSS on the 64-bit build)
 - **Updater** that keeps your settings, gun setup, saves and bezel
 
@@ -59,7 +59,7 @@ Point the game entry at **`Play HOTD2.exe`** in the `hotd2re` folder. It shows t
 | Reload button (right) | Reload |
 | Middle / Start button | Off, so nobody pauses by accident (`StartButton = 1` in `LightgunHID.ini` turns it back on) |
 | **Esc** | Quit the game |
-| **P** | Pause (shoot *Resume* to carry on) |
+| **1** | Pause, during gameplay only (the usual Start key on light guns). Shoot *Resume* to carry on |
 
 **Hidden prototype** (a short HOTD4-style bonus chapter): press **1** (or F8) on the title screen or the Home / Play / Practice menu. Hold the trigger for its SMG, **middle button = grenade**, reload button or a shot off screen = reload.
 

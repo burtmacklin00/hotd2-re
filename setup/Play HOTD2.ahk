@@ -6,7 +6,7 @@
 ;   Play HOTD2.ahk 16x9      switches to the 16x9 folder's settings first (16:9 stretch)
 ; In 4:3 mode the bezel is 4x3\bezel.png (your own) or 4x3\bezel-placeholder.png. It is drawn over the whole
 ; screen with its transparency, so art may reach into the game picture.
-; Esc quits the game. P pauses (it sends the game its own Esc: pause / back / cancel). Both keys can be
+; Esc quits the game. The game's own 1 key pauses during gameplay. PauseKey can add a key that sends the game Esc. Both can be
 ; changed in Play HOTD2.ini. The gun's Start / middle button is off in the game (StartButton in LightgunHID.ini).
 
 #NoEnv
@@ -21,7 +21,7 @@ DetectHiddenWindows, On
 ;   HotrExe=C:\Lightgun\Hook Of The Reaper\HookOfTheReaper.exe   (empty = don't start it)
 ;   HotrCloseAfter=0      (1 = close Hook of the Reaper when the game exits, also when you started it yourself)
 ;   ExitKey=Esc           (quits the game; empty = no exit key)
-;   PauseKey=P            (does what Esc normally does in the game: pause / back / cancel)
+;   PauseKey=             (optional extra key that does what Esc does in the game; the game's own 1 key pauses)
 LAUNCHER_INI := A_ScriptDir . "\Play HOTD2.ini"
 ; Your own settings files are never in the package (so updates can't overwrite them): the first run copies
 ; the defaults\ versions into place. No "Play HOTD2.ini" yet = the first launch on this install.
@@ -32,7 +32,7 @@ for i, name in ["Play HOTD2.ini", "LightgunHID.ini"]
 IniRead, HOTR_EXE, %LAUNCHER_INI%, Launcher, HotrExe, %A_Space%
 IniRead, HOTR_CLOSE_AFTER, %LAUNCHER_INI%, Launcher, HotrCloseAfter, 0
 IniRead, EXIT_KEY, %LAUNCHER_INI%, Launcher, ExitKey, Esc
-IniRead, PAUSE_KEY, %LAUNCHER_INI%, Launcher, PauseKey, P
+IniRead, PAUSE_KEY, %LAUNCHER_INI%, Launcher, PauseKey, %A_Space%
 HOTR_EXE := Trim(HOTR_EXE, " `t""")
 HOTR_CLOSE_AFTER := (HOTR_CLOSE_AFTER = "1" || HOTR_CLOSE_AFTER = "true")
 EXIT_KEY := Trim(EXIT_KEY), PAUSE_KEY := Trim(PAUSE_KEY)

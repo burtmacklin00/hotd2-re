@@ -2243,12 +2243,20 @@ int main(int argc, char** argv) {
                 if (ev.type == T::KeyUp) g_keys &= ~KeyBit(ev.key);
                 // Light Gun Edition: "1" (a cabinet's Player 1 Start key) also opens the F8 prototype, but only on the title
                 // screen and the Home / Play / Practice menus, never where digits are typed (room codes, names).
+                // During gameplay "1" pauses instead (the light guns' usual Start key): it presses Esc, which opens the pause menu,
+                // only while a player is playing, nothing is paused and no menu / results / name entry is on screen.
                 if (ev.ch == '1' && ev.key == platform::Key::Unknown) {
                     const int page = world.Hud().nightShiftPage;
                     const bool menuScreen = world.GameMode() == 3 || (world.GameMode() == 4 && page >= -1 && page <= 2);
-                    if (active && ev.type == T::KeyDown && menuScreen && lobby.page == Lobby::kOff && !runNamePrompt.IsOpen())
-                        g_keys |= 0x400u;
-                    if (ev.type == T::KeyUp) g_keys &= ~0x400u;
+                    const bool playing = world.GameMode() == 6 && !world.Hud().paused && !world.Hud().stageResults.active &&
+                                         (world.Hud().player[0].state == 5 || world.Hud().player[1].state == 5) && page < 0 &&
+                                         !menu.IsOpen() && !optionsPage.IsOpen() && !wiiPage.IsOpen() && !lightgunPage.IsOpen() &&
+                                         !modelGallery.IsOpen();
+                    if (active && ev.type == T::KeyDown && !ev.repeat && lobby.page == Lobby::kOff && !runNamePrompt.IsOpen()) {
+                        if (menuScreen) g_keys |= 0x400u;
+                        else if (playing) g_keys |= play::kEscapeKey;
+                    }
+                    if (ev.type == T::KeyUp) g_keys &= ~(0x400u | play::kEscapeKey);
                 }
                 if (active && ev.type == T::KeyDown && !ev.repeat && ev.ch && isalnum(static_cast<unsigned char>(ev.ch)))
                     typed += static_cast<char>(toupper(ev.ch));
