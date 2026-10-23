@@ -37,6 +37,7 @@ All the game code and data come from the official HOTD2RE project. This edition 
 |---|---|
 | `Swap 4x3 - 16x9.bat` | 4:3 with bezel ↔ 16:9 stretched |
 | `Toggle Crosshairs.bat` | Crosshairs on ↔ off |
+| `Toggle Cartoon.bat` | Cartoon look (comic outlines + flat shading) on ↔ off. Also in *Options → Graphics → Cartoon* |
 | `Graphics - Max.bat` | Best quality (DLSS on NVIDIA RTX, FSR 3 on other cards) |
 | `Graphics - Low.bat` | For older graphics cards (the default on first run) |
 | `Toggle 2x Graphics.bat` | Downloads (first time, about 720 MB) and turns on the official 2× texture pack |

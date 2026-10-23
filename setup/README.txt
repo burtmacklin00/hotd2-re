@@ -21,6 +21,7 @@ WHICH FILE DOES WHAT
   Update HOTD2.bat          Installs the newest Light Gun Edition release from GitHub.
   Swap 4x3 - 16x9.bat       4:3 with bezel  <->  16:9 stretch.
   Toggle Crosshairs.bat     Crosshairs on <-> off.
+  Toggle Cartoon.bat        Cartoon look (comic outlines + flat shading) on <-> off.
   Graphics - Max.bat        Best quality (DLSS on NVIDIA RTX, FSR 3 otherwise).
   Graphics - Low.bat        For older graphics cards.
   Toggle 2x Graphics.bat    Downloads (first time) and switches the official 2x texture pack.
@@ -81,7 +82,8 @@ SWITCH FOLDERS
 CARTOON LOOK
   Options > Graphics > Cartoon (Off / Low / Medium / High): comic-book dark outlines and flat
   shading bands on the final picture. Or set cartoon=0..3 in hotd2re_settings.ini. Looks best
-  with the 2x texture pack. Gameplay and aiming are unchanged.
+  with the 2x texture pack. Gameplay and aiming are unchanged. "Toggle Cartoon.bat" switches it
+  on / off (strength for On: "Cartoon On\settings.ini").
 
 GRAPHICS PRESETS
   "Graphics - Max.bat"  Direct3D 12, DLSS (NVIDIA RTX) or FSR 3 at Native AA, ray shadows,
