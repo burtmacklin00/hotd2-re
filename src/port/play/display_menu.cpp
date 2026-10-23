@@ -197,6 +197,8 @@ const char* Help(int r) {
             return "50 preserves original color; lower values reduce intensity.";
         case DisplayMenu::kColorGrade:
             return "Optional final color treatment. Original keeps authored colors.";
+        case DisplayMenu::kCartoon:
+            return "Comic-book look: dark outlines and flat shading bands on the final image. Off keeps the original look.";
         case DisplayMenu::kVsync:
             return "Synchronize presentation to reduce tearing. Game stays at 60 Hz.";
         case DisplayMenu::kTearing:
@@ -259,7 +261,7 @@ const std::vector<int>& DisplayMenu::Rows(Page p) {
         {kRenderer, kResolutionMode, kRender, kDynamicResolution, kGpuBudget, kTemporalUpscaler, kTemporalQuality,
          kUpscaler, kFrameGeneration, kRenderInterpolation, kPreset, kMsaa, kPostAA, kTemporalAA, kAniso, kFiltering,
          kDownsample, kSharpen, kCoverage, kIndependentUi, kPerPixel, kSoftParticles, kAmbientOcclusion, kShadowMaps,
-         kRayShadows, kBloom, kFog, kReflections, kCinematicFocus, kContrast, kSaturation, kColorGrade, kStatistics, kBack},
+         kRayShadows, kBloom, kFog, kReflections, kCinematicFocus, kContrast, kSaturation, kColorGrade, kCartoon, kStatistics, kBack},
         {kDifficulty, kLives, kContinues, kCrosshairP1, kCrosshairP2, kCrosshairs, kBlood, kResetGameplay, kBack},
         {kMasterVolume, kMusicVolume, kGunVolume, kEffectsVolume, kAttractionVolume, kBack},
         {kLightguns, kWiiRemotes, kBack},
@@ -437,7 +439,8 @@ const char* DisplayMenu::Label(int r) {
                                                  "Effects + Dialogue",
                                                  "Attraction Volume",
                                                  "Light Guns",
-                                                 "Wii Remotes"};
+                                                 "Wii Remotes",
+                                                 "Cartoon"};
     return r >= 0 && r < kRowCount ? names[r] : "";
 }
 void DisplayMenu::ApplyPreset(DisplaySettings& d, int p, const port::GraphicsCapabilities* caps) {
@@ -590,6 +593,8 @@ std::string DisplayMenu::ValueText(const DisplaySettings& d, int r) {
             return std::to_string(g.saturation);
         case kColorGrade:
             return g.colorGrade == 0 ? "Original" : g.colorGrade == 1 ? "Warm" : g.colorGrade == 2 ? "Cool" : "Mono";
+        case kCartoon:
+            return Strength(g.cartoon);
         case kVsync:
             return OnOff(g.syncInterval != 0);
         case kTearing:
@@ -780,6 +785,9 @@ void DisplayMenu::Step(DisplaySettings& d, int r, int delta) {
             break;
         case kColorGrade:
             g.colorGrade = Wrap(g.colorGrade + delta, 4);
+            break;
+        case kCartoon:
+            g.cartoon = Wrap(g.cartoon + delta, 4);
             break;
         case kVsync:
             g.syncInterval = Wrap(g.syncInterval + delta, 2);

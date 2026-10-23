@@ -78,6 +78,11 @@ SWITCH FOLDERS
   Bezel: 4x3\bezel.png (your own, 1920x1080 with art in the outer 240 px each side);
   4x3\bezel-placeholder.png is used if there is none.
 
+CARTOON LOOK
+  Options > Graphics > Cartoon (Off / Low / Medium / High): comic-book dark outlines and flat
+  shading bands on the final picture. Or set cartoon=0..3 in hotd2re_settings.ini. Looks best
+  with the 2x texture pack. Gameplay and aiming are unchanged.
+
 GRAPHICS PRESETS
   "Graphics - Max.bat"  Direct3D 12, DLSS (NVIDIA RTX) or FSR 3 at Native AA, ray shadows,
                         4096 shadows, contact shading, reflections, light fog, pose smoothing.

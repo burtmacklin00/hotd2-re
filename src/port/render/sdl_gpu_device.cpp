@@ -1322,7 +1322,7 @@ void SdlGpuDevice::Submit(const GpuDrawList& list) {
 bool SdlGpuDevice::ReadPixels(std::vector<uint8_t>* rgba) {
     if (!cmd_ || !readback_) return false;
     if (needClear_) Submit(GpuDrawList{ width_, height_ });  // nothing drawn: still clear
-    const bool effects = hudReady_ || graphics_.postAA || graphics_.sharpening || graphics_.bloom || graphics_.colorGrade || graphics_.crtMask || graphics_.crtCurvature || graphics_.crtGlow ||
+    const bool effects = hudReady_ || graphics_.postAA || graphics_.sharpening || graphics_.bloom || graphics_.colorGrade || graphics_.cartoon || graphics_.crtMask || graphics_.crtCurvature || graphics_.crtGlow ||
         graphics_.brightness != 50 || graphics_.gamma != 50 || graphics_.contrast != 50 || graphics_.saturation != 50;
     if (effects) DrawPresent(postColor_, 0, 0, width_, height_, 0);
     SDL_GPUCopyPass* pass = SDL_BeginGPUCopyPass(cmd_);

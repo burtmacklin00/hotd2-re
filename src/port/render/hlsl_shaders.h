@@ -377,7 +377,7 @@ cbuffer Present : CB_REG {
     float4 dst;      // x, y: destination rectangle size (pixels); z: crt strength (0 off); w: game rows (480)
     float4 effects;  // FXAA, sharpening, quality downsample, SDR bloom
     float4 color;    // brightness offset, gamma exponent, contrast, saturation
-    float4 grade;    // 0 original, 1 warm, 2 cool, 3 monochrome
+    float4 grade;    // x: 0 original, 1 warm, 2 cool, 3 monochrome; y: cartoon 0..3 (Light Gun Edition)
     float4 hdr;      // linear scRGB output, paper-white/80
     float4 crt;      // phosphor-mask preset, curvature coefficient, glow strength
 };
@@ -451,6 +451,26 @@ float4 psmain(VSOut i) : SV_Target {
         float3 minimum = min(c, min(min(n, s), min(e, w)));
         float3 maximum = max(c, max(max(n, s), max(e, w)));
         c = clamp(c + effects.y * (c - (n + s + e + w) * 0.25), minimum, maximum);
+    }
+    if (grade.y > 0.5) {
+        // Light Gun Edition "Cartoon": dark comic outlines where the picture's brightness changes sharply (a Sobel
+        // edge test in final-image pixels) and lighting cut into a few flat bands with livelier colour.
+        float lvl = grade.y;
+        float2 o = max(1.0, dst.y / 1080.0) * (0.8 + 0.4 * lvl) / dst.xy;
+        float tl = Luma(ImageSample(uv + o * float2(-1, -1))), tc = Luma(ImageSample(uv + o * float2(0, -1)));
+        float tr = Luma(ImageSample(uv + o * float2(1, -1))), ml = Luma(ImageSample(uv + o * float2(-1, 0)));
+        float mr = Luma(ImageSample(uv + o * float2(1, 0))), bl = Luma(ImageSample(uv + o * float2(-1, 1)));
+        float bc = Luma(ImageSample(uv + o * float2(0, 1))), br = Luma(ImageSample(uv + o * float2(1, 1)));
+        float gx = (tr + 2.0 * mr + br) - (tl + 2.0 * ml + bl);
+        float gy = (bl + 2.0 * bc + br) - (tl + 2.0 * tc + tr);
+        float edge = saturate((sqrt(gx * gx + gy * gy) - (0.30 - 0.04 * lvl)) * 5.0);
+        float bands = 7.0 - lvl;                       // 6 / 5 / 4 shading bands
+        float l = Luma(c);
+        float f = frac(l * bands);
+        float q = (floor(l * bands) + smoothstep(0.35, 0.65, f)) / bands;
+        c *= q / max(l, 0.03);
+        c = lerp(Luma(c).xxx, c, 1.15 + 0.08 * lvl);  // a little more colour, like inked comics
+        c = lerp(c, float3(0.03, 0.025, 0.03), edge * (0.70 + 0.08 * lvl));
     }
     if (effects.w > 0) {
         // A conservative SDR glow. Original lighting and colour are unchanged when Off.

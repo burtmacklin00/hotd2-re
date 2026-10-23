@@ -671,7 +671,7 @@ bool D3D12Device::ReadTarget(Target& target, std::vector<uint8_t>* rgba) {
 }
 bool D3D12Device::ReadPixels(std::vector<uint8_t>* rgba) {
     if (!offscreen_ || !active_) return false;
-    const bool effects = graphics_.postAA || graphics_.sharpening || graphics_.bloom || graphics_.colorGrade || graphics_.crtMask || graphics_.crtCurvature || graphics_.crtGlow || graphics_.brightness != 50 || graphics_.gamma != 50 || graphics_.contrast != 50 || graphics_.saturation != 50;
+    const bool effects = graphics_.postAA || graphics_.sharpening || graphics_.bloom || graphics_.colorGrade || graphics_.cartoon || graphics_.crtMask || graphics_.crtCurvature || graphics_.crtGlow || graphics_.brightness != 50 || graphics_.gamma != 50 || graphics_.contrast != 50 || graphics_.saturation != 50;
     if (effects || output_.resource || menuReady_) return ReadPresentation(width_, height_, rgba);
     return ReadTarget(color_, rgba);
 }

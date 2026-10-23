@@ -1238,7 +1238,7 @@ void D3D11Device::FinishGpuTiming() {
 bool D3D11Device::ReadPixels(std::vector<uint8_t>* rgba) {
     if (!staging_) return false;
     ResolveColor();
-    const bool effects = hudReady_ || graphics_.postAA || graphics_.sharpening || graphics_.bloom || graphics_.colorGrade || graphics_.crtMask || graphics_.crtCurvature || graphics_.crtGlow ||
+    const bool effects = hudReady_ || graphics_.postAA || graphics_.sharpening || graphics_.bloom || graphics_.colorGrade || graphics_.cartoon || graphics_.crtMask || graphics_.crtCurvature || graphics_.crtGlow ||
         graphics_.brightness != 50 || graphics_.gamma != 50 || graphics_.contrast != 50 || graphics_.saturation != 50;
     if (effects) DrawPresent(postRtv_.Get(), 0, 0, width_, height_, 0);
     ctx_->CopyResource(staging_.Get(), effects ? postColor_.Get() : color_.Get());

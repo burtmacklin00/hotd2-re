@@ -115,6 +115,8 @@ bool Settings::Load(const std::string& path) {
             number(graphics.bloom, 0, 3);
         else if (key == "color_grade")
             number(graphics.colorGrade, 0, 3);
+        else if (key == "cartoon")  // Light Gun Edition
+            number(graphics.cartoon, 0, 3);
         else if (key == "per_pixel_lighting")
             boolean(graphics.perPixelLighting);
         else if (key == "soft_particles")
@@ -199,7 +201,7 @@ bool Settings::Save(const std::string& path) const {
       << "\nspatial_upscaler=" << g.spatialUpscaler << "\nsharpening=" << g.sharpening << "\nalpha_coverage=" << g.alphaToCoverage
       << "\nvsync=" << g.syncInterval << "\nallow_tearing=" << g.allowTearing << "\nlow_latency=" << g.lowLatency
       << "\ndownsample=" << g.downsample << "\nbrightness=" << g.brightness << "\ngamma=" << g.gamma << "\ncontrast=" << g.contrast
-      << "\nsaturation=" << g.saturation << "\nbloom=" << g.bloom << "\ncolor_grade=" << g.colorGrade
+      << "\nsaturation=" << g.saturation << "\nbloom=" << g.bloom << "\ncolor_grade=" << g.colorGrade << "\ncartoon=" << g.cartoon
       << "\nper_pixel_lighting=" << g.perPixelLighting << "\nsoft_particles=" << g.softParticles << "\nmaterial_maps=" << g.materialMaps
       << "\nambient_occlusion=" << g.ambientOcclusion << "\nshadow_maps=" << g.shadowMaps << "\nvolumetric_fog=" << g.volumetricFog
       << "\nreflections=" << g.reflections << "\ncinematic_focus=" << g.cinematicFocus << "\nmesh_refinement=" << g.meshRefinement
