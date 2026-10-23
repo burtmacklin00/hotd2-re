@@ -3900,6 +3900,20 @@ int main(int argc, char** argv) {
                         words.push_back({tx, ty, word, size, (alpha << 24) | ink});
                         std::vector<port::ModelRenderer::SpriteDraw> pop;
                         uiFont.Append(words, pop, xs);
+                        if (pop.empty()) continue;
+                        // Centre the word on the pop from its real drawn size (glyph widths vary by font). The quads span
+                        // the font's line box; Impact's capitals sit in its middle (cap top ~0.2, baseline ~0.8 of the box).
+                        float minX = 1e9f, maxX = -1e9f, minY = 1e9f, maxY = -1e9f;
+                        for (const auto& d : pop)
+                            for (const auto& v : d.v) {
+                                const float ux = 320 + (v.x - 320) / xs;
+                                minX = std::min(minX, ux), maxX = std::max(maxX, ux), minY = std::min(minY, v.y), maxY = std::max(maxY, v.y);
+                            }
+                        const float boxW = maxX - minX, boxH = maxY - minY;
+                        const float dx = c.x - (minX + maxX) / 2, dy = c.y - (minY + boxH * 0.50f);
+                        for (auto& d : pop)
+                            for (auto& v : d.v) v.x += dx * xs, v.y += dy;
+                        const float inkW = std::max(10.f, boxW - 2 * o), inkH = boxH * 0.6f;
                         // the starburst behind them
                         port::ModelRenderer::SpriteDraw b{};
                         b.texture = &burst;
@@ -3908,7 +3922,7 @@ int main(int argc, char** argv) {
                         b.isp = 0xE4000000;
                         b.tsp = 0x94918000;
                         b.depth = .0075f;
-                        const float bw = std::max(textW * 1.75f + 50.f, textH * 3.0f) / 2, bh = textH * 2.5f / 2;
+                        const float bw = std::max(inkW * 1.75f + 50.f, inkH * 3.2f) / 2, bh = std::max(inkH * 2.6f, 60.f * size / 1.25f) / 2;
                         const uint32_t bc = (alpha << 24) | fill;
                         const float bx0 = 320 + (c.x - bw - 320) * xs, bx1 = 320 + (c.x + bw - 320) * xs;
                         b.v[0] = {bx0, c.y - bh, 0, 1, bc, 0, 0, 0};
