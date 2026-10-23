@@ -61,7 +61,8 @@ IniRead, GunP1, %A_ScriptDir%\LightgunHID.ini, Lightguns, P1_Lightgun_HID, %A_Sp
 IniRead, GunP2, %A_ScriptDir%\LightgunHID.ini, Lightguns, P2_Lightgun_HID, %A_Space%
 IniRead, GunOld, %A_ScriptDir%\LightgunHID.ini, Player1, Device, %A_Space%
 IniRead, GunSetupShown, %LAUNCHER_INI%, Launcher, GunSetupShown, 0
-if (Trim(GunP1) = "" && Trim(GunP2) = "" && Trim(GunOld) = "" && GunSetupShown != "1" && FileExist(SetupExe)) {
+IniRead, NoGuns, %A_ScriptDir%\LightgunHID.ini, Lightguns, NoGuns, 0   ; "No light guns (mouse)" in the setup
+if (Trim(GunP1) = "" && Trim(GunP2) = "" && Trim(GunOld) = "" && GunSetupShown != "1" && Trim(NoGuns) != "1" && FileExist(SetupExe)) {
     IniWrite, 1, %LAUNCHER_INI%, Launcher, GunSetupShown
     RunWait, "%SetupExe%", %A_ScriptDir%
 }

@@ -132,6 +132,8 @@ LIGHT GUNS (LightgunHID.ini)
   - Each launch writes lightgunHID_devices.txt listing connected devices and their IDs.
   - Two identical guns: give both the same ID; Player 2 gets the second one.
   - Remove the file to use the in-game Options > Light Guns assignment instead.
+  - No guns? Click "No light guns (mouse)" in the setup: it saves mouse play and the setup
+    never opens by itself again.
   Buttons and calibration are still set per player in Options > Light Guns.
 
 GUN CONTROLS (defaults; change them per player in Options > Light Guns)

@@ -52,7 +52,7 @@ struct Pick {
 
 enum { kStepP1, kStepP2, kStepDone };
 
-HWND gWnd, gTitle, gText, gList, gP1, gP2, gRedo1, gRedo2, gSkip, gUse, gSave, gCancel;
+HWND gWnd, gTitle, gText, gList, gP1, gP2, gRedo1, gRedo2, gSkip, gUse, gSave, gCancel, gNoGuns;
 HFONT gBig, gNormal;
 std::vector<Device> gDevices;
 Pick gPick[2];
@@ -176,7 +176,9 @@ void Choose(const Device& d) {
 }
 
 // The ini, keeping other lines; [Lightguns] gets the P1 / P2 keys (index lines only for identical guns).
-bool SaveIni() {
+// noGuns: "No light guns" (mouse play): clears both players and writes NoGuns = 1, so Play HOTD2 stops offering
+// this setup. Saving picked guns removes NoGuns again.
+bool SaveIni(bool noGuns = false) {
     std::vector<std::wstring> lines;
     {
         HANDLE f = CreateFileW(gIniPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -210,7 +212,8 @@ bool SaveIni() {
     std::vector<std::wstring> out;
     bool inSection = false, haveSection = false;
     std::vector<std::wstring> ours;
-    for (int p = 0; p < 2; ++p) {
+    if (noGuns) ours.push_back(L"NoGuns = 1");
+    for (int p = 0; p < 2 && !noGuns; ++p) {
         if (!gPick[p].set) continue;
         const std::wstring pre = p == 0 ? L"P1_" : L"P2_";
         ours.push_back(pre + L"Lightgun_HID = " + gPick[p].vidPid);
@@ -231,7 +234,8 @@ bool SaveIni() {
         }
         const std::wstring k = keyOf(l);
         // Old per-player sections and our own keys are replaced.
-        if (inSection && (k == L"P1_LIGHTGUN_HID" || k == L"P2_LIGHTGUN_HID" || k == L"P1_LIGHTGUN_INDEX" || k == L"P2_LIGHTGUN_INDEX"))
+        if (inSection && (k == L"P1_LIGHTGUN_HID" || k == L"P2_LIGHTGUN_HID" || k == L"P1_LIGHTGUN_INDEX" || k == L"P2_LIGHTGUN_INDEX" ||
+                          k == L"NOGUNS"))
             continue;
         out.push_back(l);
     }
@@ -262,11 +266,12 @@ HWND Make(const wchar_t* cls, const wchar_t* text, DWORD style, int id, HFONT fo
     return h;
 }
 
-enum { kIdList = 100, kIdRedo1, kIdRedo2, kIdSkip, kIdUse, kIdSave, kIdCancel };
+enum { kIdList = 100, kIdRedo1, kIdRedo2, kIdSkip, kIdUse, kIdSave, kIdCancel, kIdNoGuns };
 
 void Layout(int w, int h) {
     const int m = 16, bh = 32;
-    MoveWindow(gTitle, m, m, w - 2 * m, 24, TRUE);
+    MoveWindow(gTitle, m, m, w - 2 * m - 190, 24, TRUE);
+    MoveWindow(gNoGuns, w - m - 180, m - 2, 180, 28, TRUE);
     MoveWindow(gText, m, m + 30, w - 2 * m, 40, TRUE);
     MoveWindow(gP1, m, m + 80, w - 2 * m - 130, 24, TRUE);
     MoveWindow(gRedo1, w - m - 120, m + 76, 120, 28, TRUE);
@@ -348,6 +353,15 @@ LRESULT CALLBACK WndProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
                 MessageBoxW(h, (L"Could not write " + gIniPath + L"\nIs the folder writable?").c_str(), L"Light Gun Setup", MB_ICONERROR);
             }
             break;
+        case kIdNoGuns:
+            if (SaveIni(true)) {
+                MessageBoxW(h, L"Saved: no light guns. The game will use the mouse (1 player).\n"
+                               L"Run this setup again any time to pick guns.", L"Light Gun Setup", MB_ICONINFORMATION);
+                DestroyWindow(h);
+            } else {
+                MessageBoxW(h, (L"Could not write " + gIniPath + L"\nIs the folder writable?").c_str(), L"Light Gun Setup", MB_ICONERROR);
+            }
+            break;
         case kIdCancel:
             DestroyWindow(h);
             break;
@@ -417,6 +431,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int show) {
     gSkip = Make(L"BUTTON", L"No Player 2 gun", BS_PUSHBUTTON, kIdSkip, gNormal);
     gSave = Make(L"BUTTON", L"Save", BS_DEFPUSHBUTTON, kIdSave, gNormal);
     gCancel = Make(L"BUTTON", L"Cancel", BS_PUSHBUTTON, kIdCancel, gNormal);
+    gNoGuns = Make(L"BUTTON", L"No light guns (mouse)", BS_PUSHBUTTON, kIdNoGuns, gNormal);
 
     RAWINPUTDEVICE rid{0x01, 0x02, RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, gWnd};
     RegisterRawInputDevices(&rid, 1, sizeof(rid));
