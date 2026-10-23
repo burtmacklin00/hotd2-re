@@ -80,10 +80,13 @@ SWITCH FOLDERS
   4x3\bezel-placeholder.png is used if there is none.
 
 CARTOON LOOK
-  Options > Graphics > Cartoon (Off / Low / Medium / High): comic-book dark outlines and flat
-  shading bands on the final picture. Or set cartoon=0..3 in hotd2re_settings.ini. Looks best
-  with the 2x texture pack. Gameplay and aiming are unchanged. "Toggle Cartoon.bat" switches it
-  on / off (strength for On: "Cartoon On\settings.ini").
+  Options > Graphics, top of the list ("COMIC LOOK"):
+    Cartoon         Off / Low / Medium / High: dark comic outlines and flat shading bands during
+                    play (menus, pause and the HUD stay clean). Left / right changes the level.
+    Comic Pop-ups   On / Off: comic words (BLAM! SPLAT! POW!) burst out where your shots hit.
+  "Toggle Cartoon.bat" switches both on / off. The level used for On is in
+  "Cartoon On\settings.ini" (cartoon=1, 2 or 3; comic_popups=1 or 0).
+  Looks best with the 2x texture pack. Gameplay and aiming are unchanged.
 
 GRAPHICS PRESETS
   "Graphics - Max.bat"  Direct3D 12, DLSS (NVIDIA RTX) or FSR 3 at Native AA, ray shadows,

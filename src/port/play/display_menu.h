@@ -155,6 +155,7 @@ class DisplayMenu {
         kLightguns,
         kWiiRemotes,
         kCartoon,  // Light Gun Edition
+        kComicPopups,  // Light Gun Edition
         kRowCount
     };
 

@@ -11,11 +11,13 @@ inline GraphicsOptions HudSceneGraphics(const GraphicsOptions& graphics,bool fsr
     scene.sharpening=fsr?0:graphics.sharpening;
     scene.downsample=graphics.downsample;
     scene.bloom=graphics.bloom;
+    scene.cartoon=graphics.cartoon;  // Light Gun Edition: style the scene, keep the HUD clean
     return scene;
 }
 inline GraphicsOptions HudDisplayGraphics(GraphicsOptions graphics) {
     graphics.postAA=0;graphics.spatialUpscaler=0;graphics.sharpening=0;
     graphics.downsample=false;graphics.bloom=0;
+    graphics.cartoon=0;  // Light Gun Edition: already applied to the scene
     return graphics;
 }
 inline bool ValidHudOutputSize(int width,int height) {

@@ -40,6 +40,7 @@ const char* GroupStart(DisplayMenu::Page page, int row) {
         if (row == D::kHdrOutput) return "CALIBRATION";
         if (row == D::kMenuStyle) return "INTERFACE";
     } else if (page == D::kGraphics) {
+        if (row == D::kCartoon) return "COMIC LOOK";
         if (row == D::kRenderer) return "RENDERING & RESOLUTION";
         if (row == D::kPreset) return "IMAGE CLARITY";
         if (row == D::kPerPixel) return "LIGHTING & EFFECTS";
@@ -198,7 +199,9 @@ const char* Help(int r) {
         case DisplayMenu::kColorGrade:
             return "Optional final color treatment. Original keeps authored colors.";
         case DisplayMenu::kCartoon:
-            return "Comic-book look: dark outlines and flat shading bands on the final image. Off keeps the original look.";
+            return "Comic-book look during play: dark outlines and flat shading bands. Menus and HUD stay clean. Off keeps the original look.";
+        case DisplayMenu::kComicPopups:
+            return "Comic words (BLAM! SPLAT! POW!) burst out where your shots hit. Display only; gameplay unchanged.";
         case DisplayMenu::kVsync:
             return "Synchronize presentation to reduce tearing. Game stays at 60 Hz.";
         case DisplayMenu::kTearing:
@@ -258,10 +261,10 @@ const std::vector<int>& DisplayMenu::Rows(Page p) {
     static const std::vector<int> rows[] = {
         {kMonitor, kFullscreen, kScale, kViewport, kAspect, kInteger, kVsync, kFrameCap, kTearing, kLowLatency,
          kHdrOutput, kPaperWhite, kBrightness, kGamma, kCalibration, kMenuStyle, kMenuOpacity, kResetGraphics, kBack},
-        {kRenderer, kResolutionMode, kRender, kDynamicResolution, kGpuBudget, kTemporalUpscaler, kTemporalQuality,
+        {kCartoon, kComicPopups, kRenderer, kResolutionMode, kRender, kDynamicResolution, kGpuBudget, kTemporalUpscaler, kTemporalQuality,
          kUpscaler, kFrameGeneration, kRenderInterpolation, kPreset, kMsaa, kPostAA, kTemporalAA, kAniso, kFiltering,
          kDownsample, kSharpen, kCoverage, kIndependentUi, kPerPixel, kSoftParticles, kAmbientOcclusion, kShadowMaps,
-         kRayShadows, kBloom, kFog, kReflections, kCinematicFocus, kContrast, kSaturation, kColorGrade, kCartoon, kStatistics, kBack},
+         kRayShadows, kBloom, kFog, kReflections, kCinematicFocus, kContrast, kSaturation, kColorGrade, kStatistics, kBack},
         {kDifficulty, kLives, kContinues, kCrosshairP1, kCrosshairP2, kCrosshairs, kBlood, kResetGameplay, kBack},
         {kMasterVolume, kMusicVolume, kGunVolume, kEffectsVolume, kAttractionVolume, kBack},
         {kLightguns, kWiiRemotes, kBack},
@@ -440,7 +443,8 @@ const char* DisplayMenu::Label(int r) {
                                                  "Attraction Volume",
                                                  "Light Guns",
                                                  "Wii Remotes",
-                                                 "Cartoon"};
+                                                 "Cartoon",
+                                                 "Comic Pop-ups"};
     return r >= 0 && r < kRowCount ? names[r] : "";
 }
 void DisplayMenu::ApplyPreset(DisplaySettings& d, int p, const port::GraphicsCapabilities* caps) {
@@ -595,6 +599,8 @@ std::string DisplayMenu::ValueText(const DisplaySettings& d, int r) {
             return g.colorGrade == 0 ? "Original" : g.colorGrade == 1 ? "Warm" : g.colorGrade == 2 ? "Cool" : "Mono";
         case kCartoon:
             return Strength(g.cartoon);
+        case kComicPopups:
+            return OnOff(g.comicPopups != 0);
         case kVsync:
             return OnOff(g.syncInterval != 0);
         case kTearing:
@@ -788,6 +794,9 @@ void DisplayMenu::Step(DisplaySettings& d, int r, int delta) {
             break;
         case kCartoon:
             g.cartoon = Wrap(g.cartoon + delta, 4);
+            break;
+        case kComicPopups:
+            g.comicPopups = Wrap(g.comicPopups + delta, 2);
             break;
         case kVsync:
             g.syncInterval = Wrap(g.syncInterval + delta, 2);

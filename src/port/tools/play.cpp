@@ -3570,6 +3570,11 @@ int main(int argc, char** argv) {
             for (auto& crosshair : crosshairs) crosshair.depth = .00002f;
             sprites.insert(sprites.end(), crosshairs.begin(), crosshairs.end());
         };
+        // Light Gun Edition: the Cartoon look only styles actual gameplay, never menus, pause, results or the front end.
+        port::g_cartoonScene.store(world.GameMode() == 6 && !world.Hud().paused && !world.Hud().stageResults.active &&
+                                   world.Hud().nightShiftPage < 0 && lobby.page == Lobby::kOff && !menu.IsOpen() &&
+                                   !optionsPage.IsOpen() && !wiiPage.IsOpen() && !lightgunPage.IsOpen() &&
+                                   !runNamePrompt.IsOpen() && !modelGallery.IsOpen());
         const int pattern = optionsPage.IsOpen() ? optionsPage.CalibrationPattern()
                             : menu.DisplayOpen() ? menu.Display().CalibrationPattern()
                                                  : -1;
@@ -3801,6 +3806,48 @@ int main(int argc, char** argv) {
             static const bool noTexRes = getenv("HOTD2_NO_TEXRES") != nullptr;  // comparisons: every sprite file loaded
             const auto spr = scene.MakeSpriteDraws(defs, world.Hud().paused ? 0.001f : 0.8f, noTexRes ? nullptr : &world.Hud().texFiles);
             sprites.insert(sprites.end(), spr.begin(), spr.end());
+            {
+                // Light Gun Edition: comic pop-ups ("BLAM!", "SPLAT!"...) where a player's shot hits. Display only: driven by
+                // the HUD's hit counters, local counters for the words, never the game's random numbers.
+                struct ComicPop { float x, y; int born; int word; uint32_t color; };
+                static std::vector<ComicPop> pops;
+                static int lastHits[2] = {-1, -1}, lastPop[2] = {-1000, -1000};
+                static unsigned popCount = 0;
+                static const char* const kWords[] = {"BLAM!", "SPLAT!", "POW!", "CRUNCH!", "BANG!", "WHAM!", "SPLAT!", "KA-POW!"};
+                static const uint32_t kColors[] = {0x00FFE135u, 0x00FF5A1Fu, 0x00FFFFFFu, 0x00FF2A2Au};
+                const auto& H = world.Hud();
+                const int now = world.Frame();
+                const bool on = volumes.display.graphics.comicPopups && world.GameMode() == 6 && !H.paused && !noHud &&
+                                !previewHidden && lobby.page == Lobby::kOff;
+                for (int p = 0; p < 2; ++p) {
+                    const auto& P = H.player[p];
+                    if (on && lastHits[p] >= 0 && P.hits > lastHits[p] && now - lastPop[p] >= 8) {
+                        float x = 320 + P.aim[0], y = 240 - P.aim[1];
+                        if (P.crosshairPos[0] != 0 || P.crosshairPos[1] != 0) x = P.crosshairPos[0], y = P.crosshairPos[1];
+                        pops.push_back({std::clamp(x, 60.f, 580.f), std::clamp(y, 50.f, 430.f), now,
+                                        int(popCount % (sizeof(kWords) / sizeof(kWords[0]))), kColors[popCount % 4]});
+                        ++popCount;
+                        lastPop[p] = now;
+                        if (pops.size() > 8) pops.erase(pops.begin());
+                    }
+                    lastHits[p] = P.hits;
+                }
+                if (!on) pops.clear();
+                pops.erase(std::remove_if(pops.begin(), pops.end(), [&](const ComicPop& c) { return now - c.born > 30 || now < c.born; }),
+                           pops.end());
+                if (uiFont.Available() && !pops.empty()) {
+                    std::vector<game::WorldHud::MenuText> words;
+                    for (const auto& c : pops) {
+                        const int age = now - c.born;
+                        const float size = 1.2f + 0.7f * std::max(0.f, 1.f - age / 5.f);  // bursts out, then settles
+                        const uint32_t alpha = age < 20 ? 255u : uint32_t(255 * (30 - age) / 10);
+                        const std::string word = kWords[c.word];
+                        const float width = word.size() * 15.5f * size;
+                        words.push_back({c.x - width / 2, c.y - 40 - age * 0.7f, word, size, (alpha << 24) | c.color});
+                    }
+                    uiFont.Append(words, sprites, port::ViewportXScale(viewportAspect));
+                }
+            }
             if (!noHud && lobby.page == Lobby::kOff) {
                 for (const auto& hint : world.Hud().menuScrollHints)
                     play::AppendMenuScrollHint(hint, sprites, viewportAspect);
