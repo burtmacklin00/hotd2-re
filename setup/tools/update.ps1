@@ -53,8 +53,8 @@ if ($current -eq $latest -and -not $Force) { Write-Host 'Already up to date.' -F
 if ($Check) { Write-Host 'An update is available. Run "Update HOTD2.bat" to install it.' -ForegroundColor Yellow; exit 0 }
 }
 
-if (Get-Process -Name 'hotd2', 'hotd2-outputs', 'hotd2-outputs64', 'Play HOTD2', 'LightgunSetup' -ErrorAction SilentlyContinue) {
-    Write-Host 'Close the game (and LightgunSetup) first, then run the update again.' -ForegroundColor Yellow; exit 2
+if (Get-Process -Name 'hotd2', 'hotd2-outputs', 'hotd2-outputs64', 'Play HOTD2', 'LightgunSetup', '1 - Light Gun Setup' -ErrorAction SilentlyContinue) {
+    Write-Host 'Close the game (and Light Gun Setup) first, then run the update again.' -ForegroundColor Yellow; exit 2
 }
 
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ("hotd2re-update-" + [Guid]::NewGuid().ToString('N'))

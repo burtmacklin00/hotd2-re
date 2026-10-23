@@ -130,7 +130,7 @@ jobs:
           }
           foreach ($d in 'vendor-licenses','dxc-licenses') { if (Test-Path "$x64\$d") { Copy-Item "$x64\$d" $out -Recurse -Force } }
           Copy-Item 'build\src\port\Release\hotd2.exe' "$out\hotd2-outputs.exe"
-          Copy-Item 'build-setup\Release\LightgunSetup.exe' $out
+          Copy-Item 'build-setup\Release\LightgunSetup.exe' "$out\1 - Light Gun Setup.exe"   # named as the first step
           Copy-Item PlayHOTD2.exe "$out\Play HOTD2.exe"
           Copy-Item LICENSE "$out\LICENSE-native-code.txt"
           Copy-Item THIRD_PARTY_NOTICES.txt $out

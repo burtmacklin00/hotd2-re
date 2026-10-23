@@ -6,7 +6,7 @@ this edition comes first; the original game notes follow below.
 
 QUICK START
   1. Extract this package into your hotd2re game folder (next to game\ and scenes\).
-  2. Plug in your guns and run LightgunSetup.exe once: pull the Player 1 trigger,
+  2. Plug in your guns and run "1 - Light Gun Setup.exe" once: pull the Player 1 trigger,
      then Player 2, then Save. (Or edit LightgunHID.ini by hand.)
   3. Start Hook of the Reaper (copy "Hook of the Reaper\defaultLG\hod2re.txt" into its defaultLG folder first).
   4. Run "Play HOTD2.exe".  Esc = exit, 1 = pause during gameplay (the usual Start key on light guns).
@@ -17,7 +17,8 @@ WHICH FILE DOES WHAT
   Play HOTD2.ahk            Same launcher as a script, for AutoHotkey 1.1 users / front-ends.
   Play HOTD2.ini            Launcher settings: Hook of the Reaper path, exit and pause keys.
                             (Made from defaults\ on the first run; updates never replace it.)
-  LightgunSetup.exe         Pick the Player 1 / Player 2 guns (writes LightgunHID.ini).
+  1 - Light Gun Setup.exe   Pick the Player 1 / Player 2 guns (writes LightgunHID.ini). Opens by itself
+                            the first time Play HOTD2 runs with no guns picked.
   Update HOTD2.bat          Installs the newest Light Gun Edition release from GitHub.
   Swap 4x3 - 16x9.bat       4:3 with bezel  <->  16:9 stretch.
   Toggle Crosshairs.bat     Crosshairs on <-> off.
@@ -118,7 +119,7 @@ OUTPUTS (P1_ and P2_ versions of each)
   Credits         shared credits
 
 LIGHT GUNS (LightgunHID.ini)
-  Easiest: run LightgunSetup.exe, pull the trigger on the Player 1 gun, then the Player 2
+  Easiest: run "1 - Light Gun Setup.exe", pull the trigger on the Player 1 gun, then the Player 2
   gun (or "No Player 2 gun"), and click Save. It writes LightgunHID.ini for you.
   (A desk mouse clicking inside the setup window just operates the app.)
   Or edit LightgunHID.ini by hand - Player 1 and Player 2 guns by hardware ID (VID/PID):

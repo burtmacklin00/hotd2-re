@@ -22,7 +22,7 @@ All the game code and data come from the official HOTD2RE project. This edition 
    👉 https://github.com/burtmacklin00/hotd2-re/releases/latest
    Extract it **into the same `hotd2re` folder**, next to the `game` and `scenes` folders, and choose *Replace* if asked.
 
-3. **Pick your guns.** Plug in your guns, run **`LightgunSetup.exe`**, pull the Player 1 trigger, then the Player 2 trigger (or click *No Player 2 gun*), and click **Save**.
+3. **Pick your guns.** Plug in your guns, run **`1 - Light Gun Setup.exe`** (it also opens by itself the first time you start the game with no guns set), pull the Player 1 trigger, then the Player 2 trigger (or click *No Player 2 gun*), and click **Save**.
    With no guns connected, the game runs as one player with the mouse.
 
 4. **Hook of the Reaper (recoil)** *(optional)*. Copy `Hook of the Reaper\defaultLG\hod2re.txt` into the `defaultLG` folder of your Hook of the Reaper install.

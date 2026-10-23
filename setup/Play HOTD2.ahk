@@ -51,6 +51,21 @@ if !FileExist(GameExe) {
     ExitApp
 }
 
+; Light gun setup: "1 - Light Gun Setup.exe" (older packages: LightgunSetup.exe, removed once the new one is here).
+SetupExe := A_ScriptDir . "\1 - Light Gun Setup.exe"
+if (FileExist(SetupExe) && FileExist(A_ScriptDir . "\LightgunSetup.exe"))
+    FileDelete, %A_ScriptDir%\LightgunSetup.exe
+; No guns picked at all (both players empty in LightgunHID.ini): open the setup once before the game. A Player 1 gun
+; alone never asks; after one showing it never opens by itself again (GunSetupShown in Play HOTD2.ini).
+IniRead, GunP1, %A_ScriptDir%\LightgunHID.ini, Lightguns, P1_Lightgun_HID, %A_Space%
+IniRead, GunP2, %A_ScriptDir%\LightgunHID.ini, Lightguns, P2_Lightgun_HID, %A_Space%
+IniRead, GunOld, %A_ScriptDir%\LightgunHID.ini, Player1, Device, %A_Space%
+IniRead, GunSetupShown, %LAUNCHER_INI%, Launcher, GunSetupShown, 0
+if (Trim(GunP1) = "" && Trim(GunP2) = "" && Trim(GunOld) = "" && GunSetupShown != "1" && FileExist(SetupExe)) {
+    IniWrite, 1, %LAUNCHER_INI%, Launcher, GunSetupShown
+    RunWait, "%SetupExe%", %A_ScriptDir%
+}
+
 ; First launch on this install (the official package ships its own hotd2re_settings.ini, windowed): start from the
 ; light "Graphics Low" preset so any PC can run it, in borderless fullscreen (defaults\first-run) for the bezel.
 if (FirstRun || !FileExist(SETTINGS)) {
