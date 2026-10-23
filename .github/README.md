@@ -60,6 +60,8 @@ Point the game entry at **`Play HOTD2.exe`** in the `hotd2re` folder. It shows t
 | **Esc** | Quit the game |
 | **P** | Pause (shoot *Resume* to carry on) |
 
+**Hidden prototype** (a short HOTD4-style bonus chapter): press **1** (or F8) on the title screen or the Home / Play / Practice menu. Hold the trigger for its SMG, **middle button = grenade**, reload button or a shot off screen = reload.
+
 Buttons and calibration can be changed per player in *Options → Light Guns*. Guns calibrated in their own software work without in-game calibration.
 
 ---

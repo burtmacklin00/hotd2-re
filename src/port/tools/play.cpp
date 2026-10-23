@@ -2241,6 +2241,15 @@ int main(int argc, char** argv) {
                 }
                 if (active && ev.type == T::KeyDown) g_keys |= KeyBit(ev.key);
                 if (ev.type == T::KeyUp) g_keys &= ~KeyBit(ev.key);
+                // Light Gun Edition: "1" (a cabinet's Player 1 Start key) also opens the F8 prototype, but only on the title
+                // screen and the Home / Play / Practice menus, never where digits are typed (room codes, names).
+                if (ev.ch == '1' && ev.key == platform::Key::Unknown) {
+                    const int page = world.Hud().nightShiftPage;
+                    const bool menuScreen = world.GameMode() == 3 || (world.GameMode() == 4 && page >= -1 && page <= 2);
+                    if (active && ev.type == T::KeyDown && menuScreen && lobby.page == Lobby::kOff && !runNamePrompt.IsOpen())
+                        g_keys |= 0x400u;
+                    if (ev.type == T::KeyUp) g_keys &= ~0x400u;
+                }
                 if (active && ev.type == T::KeyDown && !ev.repeat && ev.ch && isalnum(static_cast<unsigned char>(ev.ch)))
                     typed += static_cast<char>(toupper(ev.ch));
                 if (active && ev.type == T::KeyDown && !ev.repeat && ev.key == platform::Key::Backspace) typedBackspace = true;
@@ -2617,6 +2626,16 @@ int main(int argc, char** argv) {
                         if (inGame && !menuWasOpen && !pageWasOpen) in[p] = play::AspectedWorldInput(in[p], ps.x, ps.y, viewportAspect);
                         in[p].held |= keys | play::WorldKeyboardBits(ps.menuHeld, inGame, activePlayer);
                         in[p].pressed |= keysPressed | play::WorldKeyboardBits(ps.menuPressed, inGame, activePlayer);
+#ifdef _WIN32
+                        // Light Gun Edition, F8 prototype only: the gun's middle / Start button throws a grenade (its G key;
+                        // Start stays off everywhere else), and a trigger pull off the screen reloads (like the main game).
+                        if (inGame && world.Hud().prototype && !menuWasOpen && !pageWasOpen) {
+                            const input::PlayerState raw = focusedGuns.Player(dev);
+                            if (raw.held & input::kStart) in[p].held |= 0x800u;
+                            if (raw.pressed & input::kStart) in[p].pressed |= 0x800u;
+                            if ((ps.pressed & input::kTrigger) && !ps.onScreen) in[p].pressed |= 0x2u;
+                        }
+#endif
                     }
                     if (menuWasOpen) {  // the pause menu took this frame's input (the world ignores all but start while paused)
                         in[p].held = in[p].pressed = 0;

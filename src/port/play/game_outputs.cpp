@@ -224,7 +224,9 @@ void GameOutputs::OnFrame(const game::WorldHud& hud, int slotForP1, bool live, u
         const auto& p = hud.player[slot];
         PlayerTrack& t = track_[out];
         const bool playing = inGame && p.state == kStatePlaying;
-        const bool dead = inGame && t.wasPlaying && (p.state == kStateContinue || p.state == kStateOut);
+        // (The F8 prototype has no continue: a player who runs out of lives goes straight to state 9.)
+        const bool dead = inGame && t.wasPlaying &&
+                          (p.state == kStateContinue || p.state == kStateOut || (hud.prototype && p.state == 9));
 
         if (live && playing) {
             // A shot left the gun this frame; the ammo drop also counts, for any path that does not raise `fired`.
@@ -240,7 +242,7 @@ void GameOutputs::OnFrame(const game::WorldHud& hud, int slotForP1, bool live, u
         lampBlink_[out] = !playing;
 
         if (playing) t.wasPlaying = true;
-        else if (!inGame || p.state == 9) t.wasPlaying = false;  // back to attract / title / not joined
+        else if (!inGame || (p.state == 9 && !hud.prototype)) t.wasPlaying = false;  // back to attract / title / not joined
         t.lastLives = inGame ? p.lives : -1;
         t.lastAmmo = playing ? p.ammo : -1;
         t.lastState = p.state;

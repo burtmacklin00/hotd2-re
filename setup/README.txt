@@ -128,6 +128,9 @@ GUN CONTROLS (defaults; change them per player in Options > Light Guns)
                              StartButton = 1 to LightgunHID.ini (then it starts, continues and pauses).
   Confirm (4th button)       Enter in menus
   Keyboard (Play HOTD2):     Esc = quit the game, P = pause
+  Hidden prototype (HOTD4-style bonus chapter): press 1 (or F8) on the title screen or the Home /
+  Play / Practice menu. In it: hold the trigger for the SMG, middle button = grenade, reload
+  button or a shot off screen = reload. It is local play only and has no leaderboard.
   Which physical button on your gun sends left / right / middle / 4th depends on the gun's own
   software; Options > Light Guns > button capture lets you assign them in game.
 
