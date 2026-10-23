@@ -5,6 +5,8 @@
 #   - If the official changes clash with this edition's changes, nothing is merged or released: an issue
 #     "Official update needs a manual merge" is opened instead (and the run fails, so GitHub emails you).
 # Run it by hand: Actions > Sync official release > Run workflow.
+# The schedule only runs from the default branch (hotd2re-outputs-lightgunhid); GitHub reads it when this file is
+# pushed there.
 name: Sync official release
 
 on:
