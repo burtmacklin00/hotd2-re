@@ -3809,12 +3809,56 @@ int main(int argc, char** argv) {
             {
                 // Light Gun Edition: comic pop-ups ("BLAM!", "SPLAT!"...) where a player's shot hits. Display only: driven by
                 // the HUD's hit counters, local counters for the words, never the game's random numbers.
-                struct ComicPop { float x, y; int born; int word; uint32_t color; };
+                // 1960s "Batman" style: a bold word with a thick black outline on a bright, jagged starburst, tilted.
+                struct ComicPop { float x, y; int born; int word; int style; float tilt; };
                 static std::vector<ComicPop> pops;
                 static int lastHits[2] = {-1, -1}, lastPop[2] = {-1000, -1000};
                 static unsigned popCount = 0;
-                static const char* const kWords[] = {"BLAM!", "SPLAT!", "POW!", "CRUNCH!", "BANG!", "WHAM!", "SPLAT!", "KA-POW!"};
-                static const uint32_t kColors[] = {0x00FFE135u, 0x00FF5A1Fu, 0x00FFFFFFu, 0x00FF2A2Au};
+                static const char* const kWords[] = {"POW!", "BAM!", "ZAP!", "WHAM!", "BLAM!", "SPLAT!", "KRUNCH!", "BIFF!",
+                                                     "ZOWIE!", "THWACK!"};
+                // burst fill, letters (0xRRGGBB): yellow / red, red / yellow, white / blue, cyan / red, orange / purple
+                static const uint32_t kStyles[][2] = {{0xFFE135u, 0xE01E1Eu}, {0xE8201Eu, 0xFFE135u}, {0xF7F7F7u, 0x1E3CFFu},
+                                                      {0x35D0FFu, 0xE01E1Eu}, {0xFF8A1Au, 0x6A1FC9u}};
+                static const float kTilts[] = {-12.f, 9.f, -7.f, 13.f, -10.f, 6.f};
+                static const port::RgbaImage burst = [] {
+                    // A white 14-point starburst with a black rim, transparent outside (tinted per pop by the vertex colour).
+                    port::RgbaImage img;
+                    img.width = img.height = 256;
+                    img.pixels.assign(256 * 256 * 4, 0);
+                    const int points = 14;
+                    float rx[2 * points], ry[2 * points];
+                    for (int i = 0; i < 2 * points; ++i) {
+                        const float a = 6.2831853f * i / (2 * points) - 1.5707963f;
+                        const float jag = (i % 2 == 0) ? (0.92f + 0.08f * ((i * 37 % 11) / 10.f)) : (0.70f + 0.05f * ((i * 53 % 7) / 6.f));
+                        rx[i] = std::cos(a) * jag;
+                        ry[i] = std::sin(a) * jag;
+                    }
+                    auto inside = [&](float x, float y, float k) {
+                        bool in = false;
+                        for (int i = 0, j = 2 * points - 1; i < 2 * points; j = i++) {
+                            const float xi = rx[i] * k, yi = ry[i] * k, xj = rx[j] * k, yj = ry[j] * k;
+                            if ((yi > y) != (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) in = !in;
+                        }
+                        return in;
+                    };
+                    for (int py = 0; py < 256; ++py)
+                        for (int px = 0; px < 256; ++px) {
+                            float cover = 0, fill = 0;
+                            for (int sy = 0; sy < 2; ++sy)
+                                for (int sx = 0; sx < 2; ++sx) {
+                                    const float x = (px + 0.25f + 0.5f * sx) / 128.f - 1.f, y = (py + 0.25f + 0.5f * sy) / 128.f - 1.f;
+                                    if (inside(x, y, 0.98f)) {
+                                        cover += .25f;
+                                        if (inside(x, y, 0.86f)) fill += .25f;
+                                    }
+                                }
+                            uint8_t* o = &img.pixels[(py * 256 + px) * 4];
+                            const uint8_t v = static_cast<uint8_t>(cover > 0 ? 255.f * fill / cover : 0);
+                            o[0] = o[1] = o[2] = v;
+                            o[3] = static_cast<uint8_t>(255.f * cover);
+                        }
+                    return img;
+                }();
                 const auto& H = world.Hud();
                 const int now = world.Frame();
                 const bool on = volumes.display.graphics.comicPopups && world.GameMode() == 6 && !H.paused && !noHud &&
@@ -3824,28 +3868,66 @@ int main(int argc, char** argv) {
                     if (on && lastHits[p] >= 0 && P.hits > lastHits[p] && now - lastPop[p] >= 8) {
                         float x = 320 + P.aim[0], y = 240 - P.aim[1];
                         if (P.crosshairPos[0] != 0 || P.crosshairPos[1] != 0) x = P.crosshairPos[0], y = P.crosshairPos[1];
-                        pops.push_back({std::clamp(x, 60.f, 580.f), std::clamp(y, 50.f, 430.f), now,
-                                        int(popCount % (sizeof(kWords) / sizeof(kWords[0]))), kColors[popCount % 4]});
+                        pops.push_back({std::clamp(x, 90.f, 550.f), std::clamp(y, 70.f, 410.f), now,
+                                        int(popCount % (sizeof(kWords) / sizeof(kWords[0]))), int(popCount % 5),
+                                        kTilts[popCount % (sizeof(kTilts) / sizeof(kTilts[0]))]});
                         ++popCount;
                         lastPop[p] = now;
-                        if (pops.size() > 8) pops.erase(pops.begin());
+                        if (pops.size() > 6) pops.erase(pops.begin());
                     }
                     lastHits[p] = P.hits;
                 }
                 if (!on) pops.clear();
-                pops.erase(std::remove_if(pops.begin(), pops.end(), [&](const ComicPop& c) { return now - c.born > 30 || now < c.born; }),
+                pops.erase(std::remove_if(pops.begin(), pops.end(), [&](const ComicPop& c) { return now - c.born > 32 || now < c.born; }),
                            pops.end());
                 if (uiFont.Available() && !pops.empty()) {
-                    std::vector<game::WorldHud::MenuText> words;
-                    for (const auto& c : pops) {
+                    const float xs = port::ViewportXScale(viewportAspect);
+                    for (size_t n = 0; n < pops.size(); ++n) {
+                        const auto& c = pops[n];
                         const int age = now - c.born;
-                        const float size = 1.2f + 0.7f * std::max(0.f, 1.f - age / 5.f);  // bursts out, then settles
-                        const uint32_t alpha = age < 20 ? 255u : uint32_t(255 * (30 - age) / 10);
+                        const float size = 1.25f * (1.f + 0.55f * std::max(0.f, 1.f - age / 5.f));  // slams in, then holds
+                        const uint32_t alpha = age < 24 ? 255u : uint32_t(255 * (32 - age) / 8);
+                        const uint32_t fill = kStyles[c.style][0], ink = kStyles[c.style][1];
                         const std::string word = kWords[c.word];
-                        const float width = word.size() * 15.5f * size;
-                        words.push_back({c.x - width / 2, c.y - 40 - age * 0.7f, word, size, (alpha << 24) | c.color});
+                        const float textW = word.size() * 16.5f * size, textH = 34.f * size;
+                        // the letters: 8 black copies around the coloured word make a thick outline
+                        std::vector<game::WorldHud::MenuText> words;
+                        const float tx = c.x - textW / 2, ty = c.y - textH / 2, o = 2.6f * size;
+                        for (int k = 0; k < 8; ++k) {
+                            const float a = 6.2831853f * k / 8;
+                            words.push_back({tx + std::cos(a) * o, ty + std::sin(a) * o, word, size, alpha << 24});
+                        }
+                        words.push_back({tx, ty, word, size, (alpha << 24) | ink});
+                        std::vector<port::ModelRenderer::SpriteDraw> pop;
+                        uiFont.Append(words, pop, xs);
+                        // the starburst behind them
+                        port::ModelRenderer::SpriteDraw b{};
+                        b.texture = &burst;
+                        b.linear = true;
+                        b.key = 0x8000000F;
+                        b.isp = 0xE4000000;
+                        b.tsp = 0x94918000;
+                        b.depth = .0075f;
+                        const float bw = std::max(textW * 1.75f + 50.f, textH * 3.0f) / 2, bh = textH * 2.5f / 2;
+                        const uint32_t bc = (alpha << 24) | fill;
+                        const float bx0 = 320 + (c.x - bw - 320) * xs, bx1 = 320 + (c.x + bw - 320) * xs;
+                        b.v[0] = {bx0, c.y - bh, 0, 1, bc, 0, 0, 0};
+                        b.v[1] = {bx0, c.y + bh, 0, 1, bc, 0, 0, 1};
+                        b.v[2] = {bx1, c.y - bh, 0, 1, bc, 0, 1, 0};
+                        b.v[3] = {bx1, c.y + bh, 0, 1, bc, 0, 1, 1};
+                        pop.insert(pop.begin(), b);
+                        // tilt everything around the pop's centre (in unscaled menu space), newest pop in front
+                        const float r = c.tilt * 0.0174533f, cs = std::cos(r), sn = std::sin(r);
+                        for (auto& d : pop) {
+                            for (auto& v : d.v) {
+                                const float ux = 320 + (v.x - 320) / xs - c.x, uy = v.y - c.y;
+                                v.x = 320 + (c.x + ux * cs - uy * sn - 320) * xs;
+                                v.y = c.y + ux * sn + uy * cs;
+                            }
+                            d.depth -= .0004f * static_cast<float>(n);
+                        }
+                        sprites.insert(sprites.end(), pop.begin(), pop.end());
                     }
-                    uiFont.Append(words, sprites, port::ViewportXScale(viewportAspect));
                 }
             }
             if (!noHud && lobby.page == Lobby::kOff) {
