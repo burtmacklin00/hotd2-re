@@ -38,10 +38,11 @@
 #include <string>
 #include <vector>
 
-// Light Gun Edition: the official build number below becomes kOfficialBuildId / kOfficialBuildName and this
-// edition derives its own from it (see after kDefaultLobby), so official updates merge without conflicts.
+// Light Gun Edition: the official build number / version below become kOfficialBuildId / kOfficialBuildName /
+// kOfficialReleaseVersion and this edition derives its own from them (see after kDefaultLobby), so official updates merge without conflicts.
 #define kBuildId kOfficialBuildId
 #define kBuildName kOfficialBuildName
+#define kReleaseVersion kOfficialReleaseVersion
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -226,6 +227,11 @@ const std::string kBuildNameText = std::string(kOfficialBuildName) + " LG64";
 const std::string kBuildNameText = std::string(kOfficialBuildName) + " LG";
 #endif
 const char* const kBuildName = kBuildNameText.c_str();
+// The version players see (Network screen, window title): the official one plus "LG", e.g. "1.1 LG", so the two
+// editions (which can't share online rooms) are told apart.
+#undef kReleaseVersion
+const std::string kReleaseVersionText = std::string(kOfficialReleaseVersion) + " LG";
+const char* const kReleaseVersion = kReleaseVersionText.c_str();
 
 #ifdef _WIN32
 struct DlssRuntime {
