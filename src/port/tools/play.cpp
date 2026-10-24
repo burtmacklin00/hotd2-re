@@ -44,6 +44,9 @@
 #define kBuildName kOfficialBuildName
 #define kReleaseVersion kOfficialReleaseVersion
 #ifdef _WIN32
+#include <io.h>  // Light Gun Edition: _dup2 for hotd2re_log.txt
+#endif
+#ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -119,6 +122,15 @@
 #include "update/update_install.h"
 
 namespace {
+
+// Light Gun Edition: startup progress in hotd2re_log.txt (GUI launches without a console), one timestamped line per
+// step, written straight to disk so a hang shows the step it stopped in.
+void StartupMark(const char* step) {
+    static const auto t0 = std::chrono::steady_clock::now();
+    const double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    std::fprintf(stderr, "[startup %7.2fs] %s\n", s, step);
+    std::fflush(stderr);
+}
 
 // Keyboard for P1's pad bits (0x009C9028): Up 0x10 / Down 0x20 / Left 0x40 / Right 0x80 (mode select, the boss /
 // lesson / item selects, name entry), Enter = start 0x8, Space = confirm 0x4, Backspace = reload / back 0x2 (the
@@ -802,8 +814,16 @@ int main(int argc, char** argv) {
         FILE* f = nullptr;
         freopen_s(&f, "CONOUT$", "w", stdout);
         freopen_s(&f, "CONOUT$", "w", stderr);
+    } else if (GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_UNKNOWN) {
+        // Light Gun Edition: no console (Play HOTD2 / front-end launch): keep this launch's messages in hotd2re_log.txt.
+        FILE* f = nullptr;
+        if (freopen_s(&f, "hotd2re_log.txt", "w", stderr) == 0) {
+            setvbuf(stderr, nullptr, _IONBF, 0);
+            _dup2(_fileno(stderr), _fileno(stdout));
+        }
     }
 #endif
+    StartupMark("start");
     std::string dir;
     int firstOpt = 2;
 #ifdef PLAY_GUI
@@ -1054,6 +1074,7 @@ int main(int argc, char** argv) {
     port::SceneDef def;
     port::Scene scene;
     std::string err;
+    StartupMark("loading game data");
     if (!assets.Open(dir, &err) || !def.Load(scenePath, &err) || !scene.Init(assets, def, &err)) {
         fprintf(stderr, "%s\n", err.c_str());
         return 1;
@@ -1316,6 +1337,7 @@ int main(int argc, char** argv) {
     }
     // Showing applies SDL's pending fullscreen state without exposing the windowed frame. Do this before sizing
     // the renderer: hidden windows still report their windowed dimensions and SDL_GPU cannot acquire their swap chain.
+    StartupMark("showing the window");
     if (!plat.ShowWindow(&err)) {
         fprintf(stderr, "platform: %s\n", err.c_str());
         return 1;
@@ -1333,6 +1355,7 @@ int main(int argc, char** argv) {
     const int renderH = initialSize.height, renderW = initialSize.width;
     std::string displayNotice;
     bool startupRendererFallback = false;
+    StartupMark("creating the renderer");
     auto gpu = play::CreateRequestedRenderer(
         common.renderer, platform::DefaultRenderer(), !explicitRuntimeRenderer,
         [&](platform::Renderer choice, std::string* failure) { return plat.CreateGpu(choice, renderW, renderH, false, 0, failure); },
@@ -1359,6 +1382,7 @@ int main(int argc, char** argv) {
         volumes.display.graphics.allowTearing = false;
         volumes.display.graphics.lowLatency = false;
     }
+    StartupMark("applying graphics settings");
     if (!gpu->ConfigureGraphics(volumes.display.graphics, &err)) {
         displayNotice = err;
         fprintf(stderr, "Graphics settings: %s; previous settings retained\n", err.c_str());
@@ -1376,7 +1400,9 @@ int main(int argc, char** argv) {
             std::printf("Graphics warmup: %u pipelines, %u states, %u samplers created in %.2f CPU ms\n", stats.pipelinesCreated,
                         stats.stateObjectsCreated, stats.samplersCreated, stats.cpuMilliseconds);
     };
+    StartupMark("preparing shaders (slow the first time after an update)");
     warmGraphics();
+    StartupMark("shaders ready");
     scene.SetViewportAspect(viewportAspect);
     bool rayAvailable = false, rayActive = false;
 #ifdef _WIN32
@@ -1493,7 +1519,9 @@ int main(int argc, char** argv) {
         printf("lightgunHID: P1 gun %s, P2 gun %s -> %s\n", slots[0] ? "connected" : "missing", slots[1] ? "connected" : "missing",
                want == platform::Input::RawInput ? "light guns" : "mouse (1 player)");
     };
+    StartupMark("scanning devices (light guns)");
     if (!headless) applyHid(true);
+    StartupMark("devices scanned");
 #endif
     input::WiiRemotes wii(plat.Guns());
     const std::string wiiSettingsPath = "hotd2re_wii.ini";
@@ -2056,6 +2084,7 @@ int main(int argc, char** argv) {
     double lastDeliveredSeconds = 0, perfCpuMs = 0;
     uint64_t perfGenerated = 0, perfRetained = 0;
     std::vector<game::World::SoundEvent> sounds;
+    StartupMark("starting the game loop");
     bool quit = false;   // window closed or the mode select's EXIT (World::QuitRequested)
     // Typed letters / digits and Backspace presses for the lobby's code field, kept until a game step consumes them
     // (the render loop runs faster than the game clock: most iterations have no step, and a key event that arrived
@@ -4118,6 +4147,8 @@ int main(int argc, char** argv) {
 #endif
         auto finishFrame = [&] {
             gpu->EndFrame();
+            static bool firstFrameShown = false;
+            if (!firstFrameShown) { firstFrameShown = true; StartupMark("first frame on screen"); }
 #ifdef _WIN32
             if (headless && generatedFrames.active && !frameGenerationCaptures.empty()) {
                 std::vector<uint8_t> generated, retained;
