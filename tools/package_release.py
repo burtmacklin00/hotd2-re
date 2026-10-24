@@ -5,6 +5,8 @@ Existing outputs are always refused. Complete packages are explicitly local and
 require a game directory plus its verified extraction metadata.
 """
 import argparse
+import base64
+import gzip
 import hashlib
 import json
 from pathlib import Path, PureWindowsPath
@@ -29,6 +31,16 @@ EXCLUDED_GAME = {name.casefold() for name in (
     "Config.exe", "pol/bg_adv19.bin", "tex/scr_tod_itm_itamidome2.bin", "pol/komono_0.bin", "pol/tv2.bin")}
 REQUIRED_GAME_FILES = {name.casefold() for name in (
     "Hod2.exe", "evt/comevtbl.bin", "evt/st1evtbl.bin", "pol/common.bin", "tex/common.bin", "tex/scr_common.bin")}
+MAX_PUBLIC_FILES = 512
+MAX_PUBLIC_FILE_BYTES = 512 * 1024 * 1024
+MAX_PUBLIC_TOTAL_BYTES = 1024 * 1024 * 1024
+MAX_FILE_INDEX_BYTES = 2 * 1024 * 1024
+MAX_FILE_ASSETS_BYTES = 512 * 1024 * 1024
+PUBLIC_MANAGED_PATH = re.compile(
+    r"hotd2\.exe|scenes/st1_play\.scene|README\.txt|BUILD\.txt|CREDITS\.txt|LICENSE-SDL\.txt|"
+    r"LICENSE-native-code\.txt|THIRD_PARTY_NOTICES\.txt|nvngx_dlss\.dll|nvngx_dlssg\.dll|"
+    r"amd_fidelityfx_upscaler_dx12\.dll|amd_fidelityfx_framegeneration_dx12\.dll|libxess\.dll|"
+    r"dxcompiler\.dll|dxil\.dll|(?:vendor-licenses/(?:nvidia|amd|intel)|dxc-licenses)/[A-Za-z0-9_./ -]+\.(?:txt|md)", re.I)
 
 
 def sha256(path):
@@ -103,6 +115,14 @@ def executable_info(exe, source_dir, architecture):
     ids = dict((label, int(build_id)) for build_id, label in re.findall(
         r'\bkBuildId\s*=\s*(\d+)\s*;\s*const\s+char\s*\*\s*const\s+kBuildName\s*=\s*"([^"\r\n]+)"', source))
     info.update(buildLabel=label, sourceBuildId=ids.get(label), sha256=sha256(exe))
+    if re.search(r"\bkReleaseVersion\b", source):
+        versions = re.findall(r'\bkReleaseVersion\s*=\s*"([^"\r\n]*)"', source)
+        if len(versions) != 1 or not re.fullmatch(r"[1-9][0-9]*\.[0-9]", versions[0]):
+            raise ValueError("Source release version must be canonical major.minor, with one fractional digit (for example 1.0)")
+        version = versions[0]
+        if version.encode("ascii") + b"\0" not in binary:
+            raise ValueError("Executable release version does not match source; rebuild or select matching -SourceRoot")
+        info["releaseVersion"] = version
     return info
 
 
@@ -228,6 +248,88 @@ def write_manifest(package_dir, metadata):
     (package_dir / "SHA256SUMS.txt").write_text("\n".join(sums) + "\n", encoding="ascii")
 
 
+def write_file_assets(package_dir, out, info):
+    """Publish a bounded, content-addressed alternative to the unchanged ZIP."""
+    metadata = {}
+    for name in ("PACKAGE-MANIFEST.json", "SHA256SUMS.txt"):
+        path = require_file(package_dir / name)
+        if path.stat().st_size > MAX_FILE_INDEX_BYTES:
+            raise ValueError("File update metadata exceeds its bounded size")
+        metadata[name] = path.read_bytes()
+    manifest = json.loads(metadata["PACKAGE-MANIFEST.json"])
+    if (manifest.get("format") != 1 or manifest.get("packageKind") != "public" or
+            manifest.get("originalGameDataIncluded") is not False or manifest.get("executable") != info):
+        raise ValueError("File update manifest does not match the public package")
+    records = manifest.get("files")
+    if not isinstance(records, list) or not 2 <= len(records) <= MAX_PUBLIC_FILES:
+        raise ValueError("Invalid file update payload count")
+    selected, seen = [], set()
+    unpacked = sum(len(data) for data in metadata.values())
+    for record in records:
+        if not isinstance(record, dict):
+            raise ValueError("Invalid file update payload record")
+        name, size, digest = record.get("path"), record.get("bytes"), record.get("sha256")
+        if (not isinstance(name, str) or not name or len(name) > 180 or
+                "\\" in name or re.search(r'[\x00-\x1f\x7f<>:"|?*]', name) or
+                any(part in {"", ".", ".."} or part.endswith((".", " ")) or
+                    re.fullmatch(r"(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?", part, re.I)
+                    for part in name.split("/")) or name.casefold() in seen or
+                (name != "game/PUT_YOUR_GAME_FILES_HERE.txt" and not PUBLIC_MANAGED_PATH.fullmatch(name))):
+            raise ValueError("Unexpected file update payload path")
+        if (type(size) is not int or not 0 <= size <= MAX_PUBLIC_FILE_BYTES or
+                not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+            raise ValueError("Invalid file update payload size or hash")
+        unpacked += size
+        if unpacked > MAX_PUBLIC_TOTAL_BYTES:
+            raise ValueError("File update payload exceeds its unpacked size limit")
+        source = require_file(package_dir / name)
+        if (not source.resolve(strict=True).is_relative_to(package_dir.resolve(strict=True)) or
+                any(linked(parent) for parent in source.parents if parent != package_dir and parent.is_relative_to(package_dir)) or
+                source.stat().st_size != size or sha256(source) != digest):
+            raise ValueError(f"File update payload verification failed: {name}")
+        selected.append((source, dict(path=name, bytes=size, sha256=digest)))
+        seen.add(name.casefold())
+
+    # Verify every staged source before emitting any blob. Identical payloads
+    # share one deterministic gzip asset, irrespective of their original names.
+    assets = out / "file-assets"
+    assets.mkdir(exist_ok=False)
+    packed, entries, packed_total = {}, [], 0
+    for source, record in selected:
+        digest = record["sha256"]
+        if digest not in packed:
+            blob = assets / f"hotd2re-file-{digest}.gz"
+            observed, size = hashlib.sha256(), 0
+            with source.open("rb") as incoming, blob.open("xb") as destination:
+                with gzip.GzipFile(filename="", mode="wb", fileobj=destination, compresslevel=6, mtime=0) as stream:
+                    for block in iter(lambda: incoming.read(1024 * 1024), b""):
+                        size += len(block)
+                        if size > record["bytes"]:
+                            raise ValueError(f"File update payload changed during compression: {record['path']}")
+                        observed.update(block)
+                        stream.write(block)
+            if size != record["bytes"] or observed.hexdigest() != digest:
+                raise ValueError(f"File update payload changed during compression: {record['path']}")
+            packed[digest] = dict(packedBytes=blob.stat().st_size, packedSha256=sha256(blob))
+        entry = dict(record, **packed[digest])
+        # Count every row, even shared blobs, to match consumer size validation.
+        packed_total += entry["packedBytes"]
+        if packed_total > MAX_FILE_ASSETS_BYTES:
+            raise ValueError("File update payload exceeds its compressed size limit")
+        entries.append(entry)
+    index = dict(format=1, architecture=info["architecture"], buildLabel=info["buildLabel"],
+                 manifestBase64=base64.b64encode(metadata["PACKAGE-MANIFEST.json"]).decode("ascii"),
+                 checksumsBase64=base64.b64encode(metadata["SHA256SUMS.txt"]).decode("ascii"), files=entries)
+    encoded = (json.dumps(index, separators=(",", ":")) + "\n").encode("utf-8")
+    if len(encoded) > MAX_FILE_INDEX_BYTES:
+        raise ValueError("File update index exceeds its bounded size")
+    name = f"hotd2re-win-{info['architecture']}.files.json"
+    with (out / name).open("xb") as stream:
+        stream.write(encoded)
+    with (out / f"{name}.sha256").open("x", encoding="ascii") as stream:
+        stream.write(f"{hashlib.sha256(encoded).hexdigest()}  {name}\n")
+
+
 def stage_package(*, kind, architecture, exe, source_dir, out, game_dir=None, game_manifest=None):
     source_dir, exe, out = source_dir.resolve(strict=True), exe.resolve(strict=True), out.resolve()
     if out.exists():
@@ -279,15 +381,21 @@ def stage_package(*, kind, architecture, exe, source_dir, out, game_dir=None, ga
         (package_dir / "game/PUT_YOUR_GAME_FILES_HERE.txt").write_text("Copy your own House of the Dead 2 installation here: Hod2.exe and its data folders.\n", encoding="ascii")
     else:
         (package_dir / "hotd2re_settings.ini").write_text("master=5\nmusic=5\nguns=5\nsfx=5\nattraction=5\ninput=mouse\nfullscreen=0\nscale=1\naspect=4:3\ncrt=0\nrender=1\nlobby=64.23.186.88:27020\n", encoding="ascii")
-    (package_dir / "README.txt").write_text(readme.replace("{{BUILD_LABEL}}", info["buildLabel"]).replace("{{ARCHITECTURE}}", architecture), encoding="utf-8")
-    (package_dir / "BUILD.txt").write_text(f"Native Windows {architecture} / {info['peFormat']} ({info['machine']})\nBuild label: {info['buildLabel']}\nSource base revision: {revision['baseRevision']} ({revision['status']})\nhotd2.exe SHA256: {info['sha256']}\nPackage kind: {kind}; original game data included: {kind == 'complete'}\n", encoding="ascii")
+    release_version = info.get("releaseVersion", info["buildLabel"])
+    (package_dir / "README.txt").write_text(readme.replace("{{BUILD_LABEL}}", info["buildLabel"]).replace("{{RELEASE_VERSION}}", release_version).replace("{{ARCHITECTURE}}", architecture), encoding="utf-8")
+    (package_dir / "BUILD.txt").write_text(f"Native Windows {architecture} / {info['peFormat']} ({info['machine']})\nRelease version: {release_version}\nBuild label: {info['buildLabel']}\nSource base revision: {revision['baseRevision']} ({revision['status']})\nhotd2.exe SHA256: {info['sha256']}\nPackage kind: {kind}; original game data included: {kind == 'complete'}\n", encoding="ascii")
     (package_dir / "CREDITS.txt").write_text("Native code, SDL and shader notices are retained in LICENSE-native-code.txt (when supplied), LICENSE-SDL.txt and THIRD_PARTY_NOTICES.txt.\nOptional runtime license/notice trees accompany their DLLs.\nOriginal game data retains its respective rights and is not covered by the native code license.\n", encoding="ascii")
     metadata = dict(format=1, packageKind=kind, originalGameDataIncluded=kind == "complete", executable=info,
                     sourceAtPackaging=revision, optionalRuntimeDlls=[name for _, name in runtime if name.endswith(".dll")],
                     thirdPartyBuildPathExceptions=runtime_exceptions, game=game_metadata)
     write_manifest(package_dir, metadata)
     privacy_check(package_dir)
-    name = "hotd2re-complete.zip" if kind == "complete" else f"hotd2re-win-{architecture}.zip"
+    if kind == "public":
+        write_file_assets(package_dir, out, info)
+    if kind == "complete":
+        name = f"HOTD2RE-{info['releaseVersion']}-Windows-{architecture}.zip" if "releaseVersion" in info else "hotd2re-complete.zip"
+    else:
+        name = f"hotd2re-win-{architecture}.zip"
     archive_path = out / name
     with zipfile.ZipFile(archive_path, "x", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
         for path in sorted(package_dir.rglob("*")):
@@ -301,7 +409,7 @@ def stage_package(*, kind, architecture, exe, source_dir, out, game_dir=None, ga
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kind", choices=("public", "complete"), required=True)
-    parser.add_argument("--architecture", choices=("x86", "x64"), default="x86")
+    parser.add_argument("--architecture", choices=("x86", "x64"), default="x64")
     parser.add_argument("--exe", type=Path)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--source-root", type=Path, default=REPO)
