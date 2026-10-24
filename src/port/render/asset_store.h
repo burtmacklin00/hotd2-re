@@ -51,6 +51,8 @@ struct TexturePackInfo {
 // high-resolution pack at menu startup. decodeAll additionally checks every PNG with the
 // actual game decoder; it can be slow and is intended for an explicit validation operation.
 TexturePackInfo InspectTexturePack(const std::filesystem::path& path, bool decodeAll = false);
+// Light Gun Edition: when false, InspectTexturePack counts images without opening each PNG header.
+extern bool g_packHeaderCheck;
 // Each root may be a pack or a directory of installed packs. Only immediate children are
 // examined, paths are deduplicated, and results are sorted by display name.
 std::vector<TexturePackInfo> DiscoverTexturePacks(const std::vector<std::filesystem::path>& roots);

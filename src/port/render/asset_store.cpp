@@ -96,6 +96,10 @@ bool PackPngHeader(const std::filesystem::path& path, bool decodeAll, std::strin
 }
 } // namespace
 
+// Light Gun Edition: off at startup, so the pack list doesn't open every PNG (very slow on a cold USB drive).
+// Textures are still checked one by one when they load.
+bool g_packHeaderCheck = true;
+
 TexturePackInfo InspectTexturePack(const std::filesystem::path& path, bool decodeAll) {
     TexturePackInfo info;
     std::error_code ec;
@@ -138,7 +142,7 @@ TexturePackInfo InspectTexturePack(const std::filesystem::path& path, bool decod
     }
     auto inspect = [&](const std::filesystem::path& png, size_t& count) {
         ++count;
-        if (info.error.empty()) {
+        if (g_packHeaderCheck && info.error.empty()) {
             std::string reason;
             if (!PackPngHeader(png, decodeAll, &reason))
                 info.error = png.lexically_relative(info.path).generic_string() + ": " + reason;
@@ -173,7 +177,7 @@ TexturePackInfo InspectTexturePack(const std::filesystem::path& path, bool decod
                 const std::string index = stem.substr(0,stem.size()-3);
                 if (!std::all_of(index.begin(), index.end(), [](unsigned char c) { return std::isdigit(c) != 0; })) continue;
                 ++info.materialMaps;
-                if (info.error.empty()) {
+                if (g_packHeaderCheck && info.error.empty()) {
                     std::string reason;
                     if (!PackPngHeader(images->path(), decodeAll, &reason, true))
                         info.error = images->path().lexically_relative(info.path).generic_string() + ": " + reason;

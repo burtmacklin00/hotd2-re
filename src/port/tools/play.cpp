@@ -1812,6 +1812,7 @@ int main(int argc, char** argv) {
                                                  std::filesystem::current_path() / "packs"};
     if (!volumes.assets.empty()) packRoots.emplace_back(volumes.assets);
     StartupMark("checking texture packs");
+    port::g_packHeaderCheck = false;  // list packs without opening every PNG (froze startup on a cold drive)
     const auto discoveredPacks = port::DiscoverTexturePacks(packRoots);
     StartupMark("texture packs checked");
     for (const auto& pack : discoveredPacks)
