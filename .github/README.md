@@ -14,7 +14,7 @@ All the game code and data come from the official HOTD2RE project. This edition 
 
 ## Install (new users)
 
-1. **Get the official game.** Download **`hotd2re-multiplayer-complete.zip`** from the official releases:
+1. **Get the official game.** Download the official Windows x64 zip (named like **`HOTD2RE-1.1-Windows-x64.zip`**) from the official releases:
    👉 https://github.com/GitFist/hotd2-re/releases/latest
    Extract it into a normal, writable folder (for example `C:\Games\HOTD2`, not inside *Program Files*). You get a `hotd2re` folder.
 
