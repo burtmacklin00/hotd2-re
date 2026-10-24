@@ -1527,7 +1527,9 @@ int main(int argc, char** argv) {
     const std::string wiiSettingsPath = "hotd2re_wii.ini";
     if (!headless) {
         wii.settings.Load(wiiSettingsPath);
+        StartupMark("Wii Remote support");
         wii.Configure();
+        StartupMark("Wii Remote support ready");
     }
     input::FocusedGuns focusedGuns(wii);
 #ifdef _WIN32
@@ -1724,6 +1726,7 @@ int main(int argc, char** argv) {
 
     game::ExeImage sndExe;
     game::SoundTable sndTable;
+    StartupMark("starting audio");
     std::unique_ptr<port::AudioOutput> sndBackend;
     std::unique_ptr<game::SoundDriver> sndDriver;
     if (audio && !headless && sndExe.Load(dir + "/Hod2.exe") && sndTable.Load(sndExe) &&
@@ -1739,6 +1742,7 @@ int main(int argc, char** argv) {
         if (attractionBackend) attractionDriver = std::make_unique<game::SoundDriver>(*attractionBackend);
         else fprintf(stderr, "attraction audio: %s\n", err.c_str());
     }
+    StartupMark("audio ready");
 
     // The port's pause menu (src/port/play/pause_menu.h; not in the original): volumes per category, return to the
     // title. The settings live next to the port's save file (the working directory). Interactive runs only: scripted /
@@ -1807,7 +1811,10 @@ int main(int argc, char** argv) {
                                                  std::filesystem::path(dir).parent_path() / "packs",
                                                  std::filesystem::current_path() / "packs"};
     if (!volumes.assets.empty()) packRoots.emplace_back(volumes.assets);
-    for (const auto& pack : port::DiscoverTexturePacks(packRoots))
+    StartupMark("checking texture packs");
+    const auto discoveredPacks = port::DiscoverTexturePacks(packRoots);
+    StartupMark("texture packs checked");
+    for (const auto& pack : discoveredPacks)
         packChoices.push_back({pack.name, pack.path.string(),
                                pack.valid ? std::to_string(pack.textures) + " textures / " + std::to_string(pack.frontScreens) +
                                                 " screens / " + std::to_string(pack.materialMaps) + " materials / " +
