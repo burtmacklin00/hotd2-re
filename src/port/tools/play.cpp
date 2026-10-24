@@ -115,6 +115,7 @@
 #include "render/model_renderer.h"
 #include "scene/scene.h"
 #include "update/update_check.h"
+#include "update/update_install.h"
 
 namespace {
 
@@ -198,12 +199,14 @@ uint32_t WorldHash(const game::World& w) {
 // different worlds, so they do not connect). Bump both on every change that affects the game or the protocol.
 // Presentation-only updates can change the displayed label while retaining multiplayer compatibility.
 #if INTPTR_MAX == INT64_MAX
-constexpr uint32_t kBuildId = 2026102200;
-const char* const kBuildName = "2026 10 22 E";
+constexpr uint32_t kBuildId = 2026102302;
+const char* const kBuildName = "2026 10 24 B";
 #else
-constexpr uint32_t kBuildId = 2026102201;
-const char* const kBuildName = "2026 10 22 NS32 E";
+constexpr uint32_t kBuildId = 2026102303;
+const char* const kBuildName = "2026 10 24 NS32 B";
 #endif
+// Release ordering is architecture-independent; keep this in step with build labels.
+const char* const kUpdateBuildName = "2026 10 24 B";
 const char* const kRejoinTicket = "hotd2re_rejoin.bin";
 
 // The lobby server (server/lobby): "host:port"; hotd2re_settings.ini lobby=, HOTD2_LOBBY or --lobby override it.
@@ -768,6 +771,18 @@ std::string FindGameDir(const char* argv0) {
 }
 
 int main(int argc, char** argv) {
+#ifdef PLAY_GUI
+    // Recover before loading optional runtime DLLs or touching save/settings files.
+    std::string recoveryError;
+    const auto recovery = port::update::RecoverInterruptedUpdate(&recoveryError);
+    if (recovery == port::update::Recovery::Started) return 0;
+    if (recovery == port::update::Recovery::Failed) {
+        MessageBoxA(nullptr, ("The interrupted update needs to be restored before the game can start.\n\n" + recoveryError +
+            "\n\nYour saves and settings have been kept. Please try launching the game again.").c_str(),
+            "HOTD2RE - Update recovery", MB_OK | MB_ICONERROR);
+        return 1;
+    }
+#endif
 #if defined(_WIN32) && defined(PLAY_GUI)
     // hotd2.exe (GUI subsystem): no console of its own. Started from a terminal, print there unless the output is
     // already redirected (a file or pipe handed over by the caller).
@@ -1116,7 +1131,7 @@ int main(int argc, char** argv) {
         }
         if (!net.SetLobbyServer(lobbyAddr, lobbyPort, &err)) fprintf(stderr, "netplay: %s (the in-game lobby is off)\n", err.c_str());
         homeDirectory.SetLobbyServer(lobbyAddr, lobbyPort, nullptr);
-        if (!rankings.Configure(lobbyAddr, lobbyPort, kBuildId, &err)) fprintf(stderr, "rankings: %s\n", err.c_str());
+        if (!rankings.Configure(lobbyAddr, lobbyPort, port::net::kLeaderboardCompatibilityId, &err)) fprintf(stderr, "rankings: %s\n", err.c_str());
     }
     int netLocal = netHostMode ? 0 : 1, netRemote = netHostMode ? 1 : 0;
     // Player identity belongs to the game, not to the connection. A surviving joiner must keep P2.
@@ -1236,7 +1251,7 @@ int main(int argc, char** argv) {
     port::FrontScreens screens(dir);
     // the modern main menu's background (the baked labels in-painted out of the tiles): with the port's features only
     if (screenshot.empty() || (getenv("HOTD2_PLAY_MENU") && !getenv("HOTD2_PLAY_MENU_NATIVE_BOOT")))
-        screens.SetModernMenu(activeNightShift);
+        screens.SetModernMenu(activeNightShift, true);
     if (screenshot.empty() && !port::AssetDir().empty())  // the mode select's six tiles (the pack's are 1024 x 1024 PNGs)
         for (const char* t : {"tex\\hod2title00.bin", "tex\\hod2title01.bin", "tex\\hod2title02.bin", "tex\\hod2title03.bin",
                               "tex\\hod2title10.bin", "tex\\hod2title11.bin"})
@@ -1440,7 +1455,7 @@ int main(int argc, char** argv) {
     port::update::UpdateCheck updates;
     if (checkUpdates && !headless && !direct && !netplay && runFrames == 0 && scriptPath.empty() && !getenv("HOTD2_PLAY_KEYS") &&
         !getenv("HOTD2_PLAY_MENU") && !getenv("HOTD2_WII_MENU") && !getenv("HOTD2_LIGHTGUN_MENU"))
-        updates.Start(kBuildName);
+        updates.Start(kUpdateBuildName);
     std::string availableUpdate;
     auto& lightguns = plat.Lightguns();
     const std::string lightgunSettingsPath = "hotd2re_lightguns.ini";
@@ -1844,7 +1859,7 @@ int main(int argc, char** argv) {
         }
         if (page.TakeGameplayReset()) {
             if (world.ResetPortGameOptions()) {
-                volumes.display.redBlood = false;
+                volumes.display.redBlood = play::DisplaySettings{}.redBlood;
                 volumes.display.showCrosshairs = true;
                 page.SetStatus("Gameplay defaults restored. Records, unlocks and device calibration are preserved.");
             } else {
@@ -2313,7 +2328,11 @@ int main(int argc, char** argv) {
                 // Wait for a local front-end screen so a late response cannot interrupt a match or online lobby.
                 if (sndDriver) sndDriver->OnActivate(false);
                 if (attractionDriver) attractionAudio.Update(*attractionDriver, sndTable, attract, false);
-                plat.NotifyUpdate(kBuildName, availableUpdate);
+                if (plat.NotifyUpdate(kBuildName, availableUpdate)) {
+                    std::string updateError;
+                    if (port::update::StartUpdate(availableUpdate, &updateError)) quit = true;
+                    else plat.NotifyUpdateError(updateError);
+                }
                 // The modal can leave input and focus events queued. Preserve window
                 // close/activation, then discard its key/mouse edges before resuming.
                 for (platform::Event ev; plat.PollEvent(&ev);) {
@@ -3676,9 +3695,10 @@ int main(int argc, char** argv) {
             const auto lobbyHud = ModernLobbyHud(lobby, net);
             play::AppendNightShiftPanels(lobbyHud, sprites, viewportAspect, volumes.display.menuOpacity);
             uiFont.Append(lobbyHud.menuText, sprites, port::ViewportXScale(viewportAspect));
-        } else if (world.NetworkLobby()) {
+        } else if (world.NetworkLobby() && world.Hud().nightShiftPage < 0) {
             // A connected lobby is a complete 2D screen, independent of the last stage's
-            // camera, near plane, models and texture residency (as with the pause menu).
+            // camera, near plane, models and texture residency. Night Shift rooms
+            // use the panels and native text in the modern-menu branch below.
             renderer.SetScene(assets, {});
             vp = game::Mat4::Identity();
             sprites = scene.MakeSpriteDraws(world.Hud().sprites, 0.001f, nullptr);
@@ -3790,7 +3810,7 @@ int main(int argc, char** argv) {
                 if (uiFont.Available()) uiFont.Append(world.Hud().menuText, sprites, port::ViewportXScale(viewportAspect));
                 for (const auto& hint : world.Hud().menuScrollHints)
                     play::AppendMenuScrollHint(hint, sprites, viewportAspect);
-                if (!world.Hud().menuScrollHints.empty()) appendMenuCrosshairs();
+                if (world.NetworkLobby() || !world.Hud().menuScrollHints.empty()) appendMenuCrosshairs();
             }
         } else {
             vp = scene.BuildFromWorld(renderer, world);

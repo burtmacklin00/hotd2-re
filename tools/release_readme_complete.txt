@@ -14,7 +14,8 @@ launches with a custom game-folder path or command-line options.
 
 NIGHT SHIFT MENUS
 Home uses the game's moving standby preview. Play contains Arcade, Original, Boss Mode
-(time attack), Horde and Randomizer. Practice contains Training and Scene Select.
+(time attack), Challenges, Horde and Randomizer. Practice contains Scene Select.
+Challenges is the former Training mode, with objective captions for each challenge.
 Home also offers Leaderboard, Online, Extras, Options and Exit. Host Online, Browse Lobby and
 Peer to Peer are directly accessible beside the waiting-room preview.
 Options > Game Options contains game rules, sound controls and Wii Remote / Light Gun setup.
@@ -79,11 +80,18 @@ records persistently; older clients display abbreviated names. Local records wor
 
 UPDATES AND EXISTING SAVES
 Normal launches check the official GitHub release page once in the background. A newer
-build is offered at the local title/main menu: Open download page or Later. Downloading
-and installation are manual. Offline/failed checks stay silent. Pass --no-update-check
+build is offered at the local title/main menu: Update now, Download, or Later.
+Update now opens a visible progress window, closes the game, downloads and verifies
+the matching Windows version, replaces its program files, and reopens it. Saves, settings, controller
+calibration, original game data and installed packs are kept. Failed installations
+restore the previous program files; an interrupted update is recovered on next launch.
+Keep the .hotd2-update folder if recovery needs another attempt. A writable local game
+folder and Windows PowerShell are required. Offline/failed checks stay silent. Pass --no-update-check
 to disable this check. Scripted/headless/direct gameplay launches skip it.
+October 23 Builds A and B need one manual update to receive this updater fix if their
+update window stays hidden or installation fails. Follow the manual steps below.
 
-When updating, close the game and extract the ENTIRE new ZIP into a separate writable
+If updating manually, close the game and extract the ENTIRE new ZIP into a separate writable
 folder. Keep its new executable, all accompanying DLLs, licenses and scenes together.
 Replacing only hotd2.exe can leave older, incompatible graphics runtimes installed.
 To retain your progress and preferences, copy these files from your old hotd2re folder
@@ -134,9 +142,9 @@ released before use again.
 Original item select: shoot a stock item to equip it, an equipped item to put it back,
 and your END button when ready. Both players choose their own items and confirm separately.
 Shoot the inventory arrows to scroll. BACK returns to the main menu or shared lobby.
-Boss, Training and Scene Select: shoot a side arrow/card to browse, then the centre card
+Boss, Challenges and Scene Select: shoot a side arrow/card to browse, then the centre card
 or START to play. LEVEL arrows change unlocked difficulty; BACK returns to the menu/lobby.
-Training instructions and Retry/Back, ranking-page arrows and BACK are clickable too.
+Challenge instructions and Retry/Back, ranking-page arrows and BACK are clickable too.
 Online menus have clickable rows, a room-code number pad, DELETE, BACK and cancel buttons.
 At the end of a chapter, the results show each player's stage totals and the team summary.
 After three seconds, click, shoot, or press Enter to continue. Either online player can advance both games.
