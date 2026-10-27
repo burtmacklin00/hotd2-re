@@ -4099,7 +4099,9 @@ int main(int argc, char** argv) {
              world.NetworkLobby() || lobby.page != Lobby::kOff);
         // Menu readability is independent of scene resolution and the saved
         // gameplay Sharp HUD preference. Hide UI still previews the game alone.
-        gpu->SetMenuOverlay(outputResolutionMenu);
+        // Light Gun Edition: during Cartoon gameplay the HUD is also drawn after the scene pass, so the comic outlines
+        // stay on the scene and the HUD stays clean even when DLSS is off or fails to start.
+        gpu->SetMenuOverlay(outputResolutionMenu || (!previewHidden && port::g_cartoonScene.load()));
         const bool beganFrame = gpu->BeginFrame(clear);
         // BeginFrame may switch HDR off even when it cannot start a drawable
         // frame (for example while minimized or waiting for presentation).
