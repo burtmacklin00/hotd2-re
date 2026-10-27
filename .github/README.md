@@ -72,6 +72,8 @@ Buttons and calibration can be changed per player in *Options → Light Guns*. G
 Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, texture packs and `bezel.png` are never replaced.
 No internet on the game PC? Download `hotd2re-outputs-package.zip` on another PC and drag it onto `Update HOTD2.bat`.
 
+**Online leaderboards:** there's no username screen at startup. To send your scores to the online leaderboards, set a name in *Settings → Gameplay → Username*.
+
 **Online play:** both players need the same Light Gun Edition release, so update together. This edition can't join rooms made by the official build.
 
 ---

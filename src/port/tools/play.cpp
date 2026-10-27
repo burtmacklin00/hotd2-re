@@ -1946,7 +1946,8 @@ int main(int argc, char** argv) {
         scoreQueue.Load(queuePath.string());
     }
     play::UsernamePrompt usernamePrompt;
-    if (interactiveScores && !play::ValidUsername(volumes.username)) usernamePrompt.Open({}, true);
+    // Light Gun Edition: no username screen at launch (front ends / light guns). Set it in Settings > Gameplay >
+    // Username; until then runs just aren't sent to the online leaderboards.
     uint32_t promptPrevKeys = 0;
     bool promptInputConsumed = false;
     std::string scoreSubmissionNotice;
@@ -1996,7 +1997,7 @@ int main(int argc, char** argv) {
     };
     auto openUsernameEditor = [&](play::DisplayMenu& page) {
         if (!page.TakeUsernameEdit()) return false;
-        usernamePrompt.Open(volumes.username, !play::ValidUsername(volumes.username));
+        usernamePrompt.Open(volumes.username, false);  // Light Gun Edition: always cancellable from Settings
         promptPrevKeys = g_keys;
         promptInputConsumed = true;
         return true;
