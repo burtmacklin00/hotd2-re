@@ -27,6 +27,12 @@ public:
     // 0x004A34B0 Snd_PlayChannel(ch, loop): (re)starts from the current position; a playing static buffer is
     // rewound first. Returns false if the channel has no buffer.
     virtual bool Play(int ch, bool loop) = 0;
+    // Optional PCM loop region, in frames at sourceRate: play the intro once, then repeat [startFrame,endFrame).
+    // Set after Open and before Play. Unsupported backends reject it rather than loop the entire recording.
+    virtual bool SetLoopRegion(int ch, uint32_t startFrame, uint32_t endFrame, uint32_t sourceRate) {
+        (void)ch; (void)startFrame; (void)endFrame; (void)sourceRate;
+        return false;
+    }
     virtual void Pause(int ch) = 0;      // 0x004A3780 Snd_PauseChannel: stop, keep position
     virtual void Stop(int ch) = 0;       // 0x004A39E0 Snd_StopChannel: stop + rewind (buffer kept)
     virtual void Release(int ch) = 0;    // 0x004A32D0 Snd_ReleaseChannels(ch, ch, 0)
@@ -38,6 +44,7 @@ public:
 
 class SoundDriver {
 public:
+    struct LoopRegion { uint32_t startFrame, endFrame, sampleRate; };
     explicit SoundDriver(SoundBackend& backend) : b_(backend) {
         for (uint8_t& c : cat_) c = kSfx;
     }
@@ -46,10 +53,11 @@ public:
     void PlayGameSound(const SoundTable& table, uint32_t id, const SoundContext& ctx = {});
 
     // 0x004AC020 Snd_PlayFile(path, loop, channel (-1 = auto 0..14), id (-1 = none)). Returns the play result.
-    bool PlayFile(const std::string& path, bool loop, int channel, uint32_t id);
+    bool PlayFile(const std::string& path, bool loop, int channel, uint32_t id, LoopRegion region = {});
     // 0x004AC220 Snd_StopLoopedSe: Snd_StopChannel on every remembered looped SE channel, then forget them.
     void StopLoopedSe();
-    // 0x004ABF80 Snd_Command(_, cmd, _): 0x2A0 pause BGM, 0x3A0 resume BGM (looped), 0x300A0 / 0x1100A0 stop and
+    // 0x004ABF80 Snd_Command(_, cmd, _): 0x2A0 pause BGM, 0x3A0 resume BGM with its original loop mode,
+    // 0x300A0 / 0x1100A0 stop and
     // release SE channels 0..14; everything else (0x100A0, 0x800A0, 0x900A0) does nothing.
     void Command(uint32_t cmd);
     // 0x00401000 (via 0x0041D4F0): 0 -> stop + release BGM, 1 -> stop + release voice, other -> stop all playing.
@@ -96,6 +104,7 @@ private:
     Slot loops_[6] = {};     // 0x00810150
     int nLoops_ = 0;         // 0x008101F8
     uint32_t curBgm_ = 0;    // 0x009C8FB8
+    bool bgmLoop_ = false;  // keep one-shot jingles/previews one-shot across pause or focus loss
     int slotBgm_ = 0;        // 0x009C90A8 (set to 0 by 0x0040AD70)
     int slotVoice_ = 1;      // 0x009C90AC (set to 1 by 0x0040AD70)
     uint32_t previewMusicId_ = 0;

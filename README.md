@@ -1,10 +1,10 @@
-![HOTD2RE main menu](docs/images/hotd2re-header.png)
+![HOTD2RE Night Shift main menu with example online rooms](docs/images/hotd2re-night-shift-main-menu.png)
 
 # HOTD2RE
 
 A native C++20 rebuild of **The House of the Dead 2** for Windows, featuring online co-op, additional game modes, and modern controls and display options.
 
-**[Download 1.2 for Windows x64](https://github.com/GitFist/hotd2-re/releases/download/v2026.10.26-a/HOTD2RE-1.2-Windows-x64.zip)** · [Release notes](https://github.com/GitFist/hotd2-re/releases/latest) · **[Optional 2× graphics pack](https://github.com/GitFist/hotd2-re/releases/download/v2026.10.16-r/hotd2re-graphics-2x.zip)**
+**[Download 1.5 for Windows x64](https://github.com/GitFist/hotd2-re/releases/download/v2026.10.27-b/HOTD2RE-1.5-Windows-x64.zip)** · [Release notes](https://github.com/GitFist/hotd2-re/releases/latest) · **[Optional 2× graphics pack](https://github.com/GitFist/hotd2-re/releases/download/v2026.10.16-r/hotd2re-graphics-2x.zip)**
 
 ## Features
 
@@ -20,49 +20,33 @@ A native C++20 rebuild of **The House of the Dead 2** for Windows, featuring onl
 - Chapter results and an experimental Prototype chapter, available with **F8**.
 - Background update notifications with **Update and restart**, preserving saves, settings and installed packs, with recovery if installation is interrupted.
 
+## Screenshots
+
+| Play menu | Settings |
+| --- | --- |
+| ![Night Shift Play menu](docs/images/hotd2re-play.png) | ![Night Shift settings](docs/images/hotd2re-settings.png) |
+
+**Online Arcade leaderboard**
+
+![Online Arcade leaderboard](docs/images/hotd2re-arcade-leaderboard.png)
+
+The main-menu preview uses example online rooms.
+
 ## Getting started
 
 **Requirements:** Windows 10 or 11 (64-bit) and a Direct3D 11-compatible graphics device. Optional Direct3D 12/vendor features require compatible hardware.
 
-1. Download **[HOTD2RE-1.2-Windows-x64.zip](https://github.com/GitFist/hotd2-re/releases/download/v2026.10.26-a/HOTD2RE-1.2-Windows-x64.zip)**.
+1. Download **[HOTD2RE-1.5-Windows-x64.zip](https://github.com/GitFist/hotd2-re/releases/download/v2026.10.27-b/HOTD2RE-1.5-Windows-x64.zip)**.
 2. Extract the ZIP to a writable folder.
 3. Open the `hotd2re` folder and run **hotd2.exe**.
 
 The download includes the required game data. Keep the `game` and `scenes` folders beside `hotd2.exe`. GitHub's **Source code** archives are for building the project.
 
-**Version 1.2** adds the score display code: **Left, Left, Right, Right, Right, Left, Right, Enter** at the title or main menu toggles each active player's score during gameplay. It provides one complete x64 download; existing 1.1 clients can use the in-game updater. Selective updates and full-download fallback are handled automatically through a separate update feed. Previous Night Shift improvements remain included; see the [graphics fixes and validation](docs/GRAPHICS-FIXES.md).
-
-## Updates
-
-The current release is **1.2**. Later releases advance by **0.1**: 1.3, 1.4,
-and so on, with 2.0 after 1.9.
-
-The game checks the official GitHub release page once in the background on normal launches. If a newer build is available, a prompt appears at the local title/main menu. **Update now** opens a visible progress window, closes the game, downloads and verifies the matching Windows client, installs it, and restarts with your launch options. Saves, settings, controller calibration, original game data and installed packs are preserved. Failed installations restore the previous program files; interrupted installations recover on the next launch. Keep `.hotd2-update` if recovery needs another attempt. Automatic installation requires a writable local folder and Windows PowerShell.
-
-Unchanged program files are verified and reused, while changed or missing files download individually. A changed file is downloaded in full, compressed. The updater falls back to a verified full client download if selective assets are unavailable or invalid. Both download paths use the companion update feed. Staging and recovery still need space for a full program copy and backups.
-
-**One-time migration:** older date-labeled builds and 32-bit installations need a manual installation of the latest complete x64 package. Version 1.0 x64 can update through its selective-download path; if that fails, use the manual installation below. Compatibility ZIPs/checksums have been retired from the main release page, and new releases are x64 only. After installing 1.1, future updates work from inside the game; supporting files are downloaded automatically.
-
-**Later** keeps you playing, and **Download** opens the manual download page. Failed checks stay silent. Launch with `--no-update-check` to disable the check.
-
-For a manual update, close the game and extract the **entire new ZIP into a fresh writable folder**. Keep the new executable, accompanying DLLs, licenses and `scenes` together. Replacing only the executable can leave incompatible older runtimes installed.
-
-Before launching, copy your existing `hotd2re_settings.ini`, `hotd2re_save.bin`, and any `hotd2re_horde_records.txt`, `hotd2re_lightguns.ini` and `hotd2re_wii.ini` into the new `hotd2re` folder, replacing its supplied default settings. Copy installed visual-pack folders if your settings select them. Keep the old folder as a backup until you have checked the new version. Both online players should update together and create a new room.
+**Version 1.5** restores Strength's chainsaw loop using the Dreamcast loop points and fixes enemies running away while rearming. The score display code remains: **Left, Left, Right, Right, Right, Left, Right, Enter** at the title or main menu toggles each active player's score during gameplay. It provides one complete x64 download; existing 1.1 clients can use the in-game updater. Selective updates and full-download fallback are handled automatically through a separate update feed. Previous Night Shift improvements remain included; see the [graphics fixes and validation](docs/GRAPHICS-FIXES.md).
 
 ## Online play
 
-Both players need the same game version.
-
-1. Use **Host Online** on Home to host, or **Online** to open network choices. Classic menus use **Network**.
-2. Choose room rules to host, or **Browse Lobby** to join a room.
-3. For a private room, enter its code when prompted. **Peer to Peer** also supports joining an unlisted room by code.
-4. Once both players are connected, the host selects a mode and starts the game.
-
-Use **Pause → Return to Lobby** to choose another mode together. After a disconnect, select **Network → Rejoin Game** to return to an active match while the other player continues playing.
-
-Connections use a direct route when available, with an automatic server relay fallback.
-
-Home's **Leaderboard** page offers local Arcade, Original, Horde and individual Boss Mode records. After an eligible run's results and local initials screens finish, an online-name prompt appears automatically in both menu styles. Enter up to 12 characters using typing or the on-screen keyboard, then **Publish** or **Skip**. The prompt shows submission success or an error with a retry; opening it never uploads a score. Local initials remain three characters. Online names allow letters, numbers, spaces, periods, underscores and hyphens. Shared records are unverified and stored persistently; **Publish New Run** remains available as a manual fallback. Local records work offline.
+Use **Host Online** or **Browse Lobby** to play two-player co-op with someone on the same game version. Choose a username on first launch; eligible scores submit automatically to the online leaderboards, with offline scores queued until you reconnect.
 
 ## Controls
 
@@ -78,41 +62,11 @@ Home's **Leaderboard** page offers local Arcade, Original, Horde and individual 
 | Back | Esc or Backspace |
 | Quit | Main menu **Exit** or close the window |
 
-**Score display code:** at the title screen or main menu (Night Shift Home or Classic), press **Left, Left, Right, Right, Right, Left, Right, Enter**. A message confirms the toggle; repeat the code to turn it off. Scores appear in each active player's upper corner during gameplay. This preference lasts until you close the game and does not change scoring or leaderboard eligibility.
-
-Open **Options > Game Options > Light Guns** or **Pause > Light Guns** to switch between mouse/touchpad input and light guns, assign Player 1 and Player 2, remap buttons, calibrate aim, and test both guns. Classic menus retain **Options > Light Guns**. See the [light-gun setup guide](docs/LIGHT-GUNS.md).
-
-Open **Extras** below **Online** on Home to preview the audio library (Classic also has an Extras entry). All **38 music tracks** retain their original preview numbers and have descriptive names. **Standard** and **Alternate** distinguish the two recordings of a theme; for example, 01 and 17 are the two Chapter 1 versions. Click or shoot a recording, or select it with the arrows and press Enter, to play it once. Wheel scrolling and the Prev/Next buttons browse each list without stopping playback. Each song has **Play** to start/resume, **Pause**, and **Reset** to rewind and stop; selecting its name restarts it. Left/right moves between music controls and the effects list. Effect names come from the game's audio files. Escape, reload or **Back** stops previews and returns to the main menu. Audio volumes remain in Game Options.
-
-**Master Volume** controls all game, menu, Extras and attraction audio. Its logarithmic scale starts at -45 dB for 1 and rises in even 5 dB steps to full volume at 10; 0 is an exact mute. **Attraction Volume** controls the Modern menu's background demo music, voices and effects independently of the gameplay category sliders. All five volume controls default to **5 / 10**. Existing saved choices are retained. Both controls are in **Game Options** and **Pause**, update immediately, and persist in the settings file. The attraction loop falls silent in Extras and when you start playing.
-
-**Extras > Model Viewer** contains Agents, Civilians, 35 enemy and creature appearances, and Bosses, including Goldman. Creatures include both Murrer appearances, the Kageo J half-body crawler, bats, owls, fish and the ambient moth. Drag the model list's scrollbar to browse; clicking the scrollbar track moves a page. Select a character to view it against black. Click the animation name to open a clip list with its own draggable scrollbar; the wheel scrolls that list while the current clip keeps playing. Left-drag rotates/tilts; middle-drag raises/lowers the camera. A/D or Left/Right rotate, W/S or Up/Down adjust height, and the wheel outside the clip list or Q/E zoom. R restores the camera. Page Up/Down selects an animation; Enter/Space toggles playback, with Play/Pause/Reset buttons also available. Animations loop with their authored motion sound cues. Escape, reload or Back closes the clip list, returns to the model list, then Extras.
-
-Every Model Viewer clip starts centered above the controls and remains centered as its pose changes. Selecting a clip or pressing Reset clears vertical panning while retaining your rotation and zoom. The **Mute / Unmute** button or **M** silences viewer sounds immediately without pausing animation or changing game volume settings; the choice stays active while browsing models. Native attack, reaction, civilian, weapon and boss cues use their original timing. Held one-frame poses play their cue once, and sustained effects stop on pause, mute, clip changes and exit.
-
-Zombie previews randomly select their original attack and impact variants for each occurrence, using the correct voice group. Choices are independent, as in gameplay, so an occasional repeat is possible. The approach groan is the original shared recording.
-
-Scrollable lists in Options, the audio previews, the model browser and the Original-mode inventory show a soft edge fade and arrow wherever more items remain. Each cue disappears at that end of the list; short lists show neither cue. Existing scroll buttons, wheel and keyboard navigation remain available.
-
-Choose **Blood Color: Green / Red** on the graphics menu's **Color** page. The change applies immediately and is saved locally; online players can choose independently.
-
-**Image > Gameplay Crosshairs > Off** hides both players' gameplay sights on this computer. Menu/shop/calibration pointers stay visible and aiming/shooting are unchanged. The system '+' pointer hides automatically during gameplay and returns for UI and desktop use.
-
-Switching to another window keeps the game and audio running. Use **Esc** to pause manually when needed; online manual pause stops the shared game. Background desktop input does not shoot or operate the game's menus.
-
 ## Graphics and display
 
-Open a graphics shortcut under **Options**, or **Pause > Graphics Options**. Both menu themes provide the same nine categories: **Display, Image, Lighting, Performance, Packs, Color, Resolution, CRT and Advanced**. Availability depends on the active renderer, GPU and installed pack.
-
-**Display** contains windowed/borderless/exclusive fullscreen, aspect ratio, Fit/Stretch, monitor, menu style, opacity and **Reset All Graphics**. Reset asks for confirmation and preserves your pack, menu theme, game rules, audio and controls. Menu Style applies after restart. Menu Opacity controls Night Shift panels; Classic labels it “Night Shift only.”
-
-**Image** contains presets, MSAA/post AA/TAA, texture filtering, Sharp HUD, sharpening and crosshairs. Original/Clean/Enhanced presets change image choices and downsampling; they do not reset every graphics setting. **Resolution** contains internal render scale, output matching/SSAA, dynamic resolution, downsampling and FSR 1 spatial upscaling. **Color** provides color controls, blood color, HDR and black/white/gamma/geometry test patterns. **CRT** contains scanlines, phosphor masks, curvature and glow.
-
-**Lighting** adds optional pixel lighting, smoke blending, contact shading, raster/ray shadows, bloom, fog, reflections and cutscene blur. Direct3D 11 and SDL GPU provide the broad raster-effects paths. Native Direct3D 12 on Windows x64 supports compatible vendor reconstruction/frame generation and experimental directional DXR shadows; it does not support every D3D11/SDL effect. HDR requires Windows HDR and retains the original art's SDR range. Material detail and model smoothing under **Packs** need a compatible authored pack.
-
-**Performance** contains frame limits, VSync, supported tearing/latency controls and statistics. **Advanced** contains renderer, vendor upscaling, quality, frame generation and pose interpolation. Renderer/vendor choices require restart. Pose interpolation above 60 FPS adds up to one tick of visual delay; game logic stays at 60 Hz. Advanced effects, HDR, ray shadows and frame generation are optional and Off by default.
-
-While changing graphics during a paused game, **Hide UI / H** reveals the actual scene without resuming. H, Show UI, Back/Reload, Enter or Start restores the menu.
+- Increase **Render Scale** for a sharper picture, or lower it to improve performance; select **Fixed Scale** under **Resolution Mode** if the setting is unavailable.
+- While adjusting graphics in a paused game, press **H** to hide the menu and preview the scene, then **H** again to restore it.
+- Use **Reset All Graphics** to restore graphics defaults while keeping your controls and gameplay settings.
 
 ## Wii Remotes
 

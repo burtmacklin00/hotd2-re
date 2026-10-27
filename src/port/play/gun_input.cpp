@@ -8,12 +8,17 @@ namespace play {
 game::WorldInput DeviceWorldInput(const DevicePlayer& d, int worldPlayerState, uint8_t& prevButtons) {
     const uint8_t bits = static_cast<uint8_t>(d.held | d.pressed);
     uint8_t b = static_cast<uint8_t>((bits & 1 ? 1 : 0) | (bits & 2 ? 2 : 0) | (bits & 4 ? 4 : 0));
+    uint8_t pressed = d.pressed & 7;
     // Not in the game (state 9: join) or on the CONTINUE countdown (state 4): the trigger also presses start, so a
-    // light-gun player can join / continue without reaching for the start button.
-    if ((worldPlayerState == 9 || worldPlayerState == 4) && (b & 1)) b |= 4;
+    // light-gun player can join / continue without reaching for the start button (Light Gun Edition adds state 4).
+    const bool triggerStarts = worldPlayerState == 9 || worldPlayerState == 4;
+    if (triggerStarts && (b & 1)) b |= 4;
+    if (triggerStarts && (pressed & 1)) pressed |= 4;
     float nx = d.x, ny = d.y;
     if (!d.onScreen) nx = ny = -1.0f;
-    const game::WorldInput in = game::MakeWorldInput(nx, ny, b, prevButtons);
+    // A release and a fresh press can both arrive between game frames. Preserve
+    // that device's explicit edge even if its last sampled frame was held/tapped.
+    const game::WorldInput in = game::MakeWorldInput(nx, ny, b, prevButtons & ~pressed);
     prevButtons = b;
     return in;
 }
