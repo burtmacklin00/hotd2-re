@@ -248,10 +248,10 @@ LEADERBOARD
 Home > Leaderboard contains Arcade, Original, Horde and individual Boss Mode tables.
 Source: Local shows your own records. Source: Online queries the shared service.
 Shared records are unverified, client-reported results, not anti-cheat rankings.
-Publishing is manual: finish an eligible new run, choose Publish New Run, enter initials
-and confirm. Opening the page does not automatically publish existing saves.
-The public rankings service update is pending deployment; shared queries and publishing
-may remain unavailable until the matching service is installed. Local records work offline.
+Scores from eligible runs are sent automatically once you set a username in
+Settings > Gameplay > Username (this edition never asks for one at startup). Without a
+username, nothing is sent. Scores made offline are queued and sent when you reconnect.
+Local records work offline.
 
 UPDATES AND EXISTING SAVES
 Normal launches check the official GitHub release page once in the background. A newer
