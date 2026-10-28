@@ -42,6 +42,8 @@ All the game code and data come from the official HOTD2RE project. This edition 
 | `Graphics - Low.bat` | For older graphics cards (the default on first run) |
 | `Toggle 2x Graphics.bat` | Downloads (first time, about 720 MB) and turns on the official 2× texture pack |
 
+**House of the Dead 2 bezel (optional):** download **`bezel.png`** from the same release page (https://github.com/burtmacklin00/hotd2-re/releases/latest) and put it in the `hotd2re\4x3` folder, choosing *Replace* if asked. It shows in 4:3 mode and updates never overwrite it.
+
 **Your own bezel:** save a 1920×1080 PNG as `4x3\bezel.png`. Transparent areas show the game, and art may overlap the game picture. Shots on the bezel outside the game picture count as off-screen (reload).
 
 ### LaunchBox / front ends

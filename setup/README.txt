@@ -80,6 +80,8 @@ SWITCH FOLDERS
   "Toggle Crosshairs.bat" flips the crosshair folder (or: ... on / ... off)
   Bezel: 4x3\bezel.png (your own, 1920x1080 with art in the outer 240 px each side);
   4x3\bezel-placeholder.png is used if there is none.
+  Optional House of the Dead 2 bezel: download bezel.png from the release page
+  (github.com/burtmacklin00/hotd2-re/releases/latest) and put it in the 4x3 folder.
 
 CARTOON LOOK
   Options > Graphics, top of the list ("COMIC LOOK"):
