@@ -1955,6 +1955,12 @@ int main(int argc, char** argv) {
     bool active = true;  // focus gates local input and the system cursor, never the game clock or audio
     int optionsScroll = 0, optionsTabDelta = 0;
     // One frame of menu input from the keyboard edges and the pointing device (the given player's device first).
+    // Light Gun Edition: with light guns set up (LightgunHID.ini) and Player 1's gun connected, menus follow Player 1's
+    // gun only: its crosshair replaces the Windows pointer (which every gun moves), and Player 2's gun is ignored.
+    auto gunMenusP1Only = [&] {
+        const int dev = deviceForPlayer(0);
+        return hidActive && !netplay && guns && dev >= 0 && guns->Player(dev).connected;
+    };
     auto menuInput = [&](uint32_t pressedKeys, int firstPlayer) {
         play::MenuInput mi;
         if (!active) return mi;
@@ -1963,7 +1969,8 @@ int main(int argc, char** argv) {
         mi.preview = (pressedKeys & play::kPreviewKey) != 0;
         mi.scroll = optionsScroll;
         mi.pageDelta = optionsTabDelta;
-        for (int q = 0; q < 2 && guns; ++q) {
+        if (gunMenusP1Only()) firstPlayer = 0;
+        for (int q = 0; q < (gunMenusP1Only() ? 1 : 2) && guns; ++q) {
             const int dev = deviceForPlayer((q + firstPlayer) % 2);
             if (dev < 0) continue;
             const input::PlayerState ps = play::DisplayPointer(guns->Player(dev), volumes.display.graphics.crtCurvature);
@@ -2148,7 +2155,10 @@ int main(int argc, char** argv) {
     auto updateSystemCursor = [&] {
         const play::CursorContext context{active, menu.IsOpen() || optionsPage.IsOpen() || wiiPage.IsOpen() || lightgunPage.IsOpen() || modelGallery.IsOpen() || usernamePrompt.IsOpen(),
                                           lobby.page != Lobby::kOff || world.NetworkLobby(), world.PortHordeRun().active};
-        const bool visible = play::SystemCursorVisible(world.Hud(), context);
+        bool visible = play::SystemCursorVisible(world.Hud(), context);
+        if (visible && active && gunMenusP1Only() && !wiiPage.IsOpen() && !lightgunPage.IsOpen() && !modelGallery.IsOpen() &&
+            !usernamePrompt.IsOpen() && lobby.page == Lobby::kOff && !world.NetworkLobby())
+            visible = false;
         plat.SetCursorConfined(!visible);
         plat.SetCursorVisible(visible);
     };
@@ -2781,6 +2791,8 @@ int main(int argc, char** argv) {
                 in[p].held |= play::WorldKeyboardBits(frameKeys, playing, world.Hud().player[p].state == 5);
                 in[p].pressed |= play::WorldKeyboardBits(scriptedKeyEdges, playing, world.Hud().player[p].state == 5);
             }
+            if (gunMenusP1Only() && (world.GameMode() == 3 || world.GameMode() == 4) && keyboardPlayer() != 1)
+                in[1] = game::WorldInput{};  // Light Gun Edition: the main menus follow Player 1's gun only
             if (!headless && !active && script.empty()) {
                 // Keep sending neutral local input while the world and remote player advance. Desktop clicks and
                 // held controller buttons must not shoot, pause, join or operate a background menu.
@@ -3626,7 +3638,7 @@ int main(int argc, char** argv) {
             if (previewHidden) return;
             auto hs = MakeHudState(world, in, modeAge, blink, credits < 0);
             std::vector<game::SpriteDef> defs;
-            for (int p = 0; p < 2; ++p)
+            for (int p = 0; p < (gunMenusP1Only() ? 1 : 2); ++p)
                 if (in[p].kind == 1 && (netplay || (deviceForPlayer(p) >= 0 && guns && guns->Player(deviceForPlayer(p)).connected))) {
                     auto cross = game::HudCrosshair(hs, p);
                     for (auto& c : cross) {
@@ -3853,7 +3865,7 @@ int main(int argc, char** argv) {
                 if (uiFont.Available()) uiFont.Append(world.Hud().menuText, sprites, port::ViewportXScale(viewportAspect));
                 for (const auto& hint : world.Hud().menuScrollHints)
                     play::AppendMenuScrollHint(hint, sprites, viewportAspect);
-                if (world.NetworkLobby() || !world.Hud().menuScrollHints.empty()) appendMenuCrosshairs();
+                if (world.NetworkLobby() || !world.Hud().menuScrollHints.empty() || gunMenusP1Only()) appendMenuCrosshairs();
             }
         } else {
             vp = scene.BuildFromWorld(renderer, world);
