@@ -95,6 +95,11 @@ try {
         }
         Copy-Item -LiteralPath $f.FullName -Destination $dst -Force; $copied++
     }
+    # Files earlier releases had that are now gone or moved.
+    foreach ($old in 'Hook of the Reaper\defaultLG\hod2re - notes.txt') {
+        $o = Join-Path $root $old
+        if (Test-Path -LiteralPath $o) { Remove-Item -LiteralPath $o -Force -ErrorAction SilentlyContinue }
+    }
     # Fill in any of your own files that don't exist yet from defaults\.
     foreach ($n in 'LightgunHID.ini', 'Play HOTD2.ini') {
         $d = Join-Path $root "defaults\$n"

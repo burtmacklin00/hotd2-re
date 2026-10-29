@@ -9,7 +9,7 @@ QUICK START
   2. Plug in your guns and run "1 - Light Gun Setup.exe" once: pull the Player 1 trigger,
      then Player 2, then Save. (Or edit LightgunHID.ini by hand.)
   3. Start Hook of the Reaper (copy "Hook of the Reaper\defaultLG\hod2re.txt" into its defaultLG folder first).
-     That game file is from the Hook of the Reaper author; "hod2re - notes.txt" beside it has recoil
+     That game file is from the Hook of the Reaper author; "Hook of the Reaper\hod2re - notes.txt" has recoil
      timing tips and how to switch a gun to 4:3 automatically.
   4. Run "Play HOTD2.exe".  Esc = exit, 1 = pause during gameplay (the usual Start key on light guns).
   Later: run "Update HOTD2.bat" to get the newest version (your settings are kept).
