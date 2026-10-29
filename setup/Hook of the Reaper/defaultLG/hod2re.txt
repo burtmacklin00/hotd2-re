@@ -3,10 +3,10 @@ Players
 P1
 P2
 Recoil & Reload
-Ammo_Value 1
-Recoil 1
+Ammo_Value 1 Ammo_Value
+Recoil 1 Reload_Value
 Recoil_R2S 0
-Recoil_Value 1
+Recoil_Value 1 Reload_Value
 [Options]
 Ammo_Check
 End Options
@@ -22,6 +22,7 @@ End Options
 :P1_Ammo
 *P1
 #Ammo_Value
+#Reload_Value
 >Display_Ammo
 :P1_Clip
 :P1_CtmLmpStart
@@ -40,6 +41,7 @@ End Options
 :P2_Ammo
 *P2
 #Ammo_Value
+#Reload_Value
 >Display_Ammo
 :P2_Clip
 :P2_CtmLmpStart

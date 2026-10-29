@@ -25,7 +25,7 @@ All the game code and data come from the official HOTD2RE project. This edition 
 3. **Pick your guns.** Plug in your guns, run **`1 - Light Gun Setup.exe`** (it also opens by itself the first time you start the game with no guns set), pull the Player 1 trigger, then the Player 2 trigger (or click *No Player 2 gun*), and click **Save**.
    No guns? Click **No light guns (mouse)** in the setup and it won't ask again. With no guns connected, the game runs as one player with the mouse.
 
-4. **Hook of the Reaper (recoil)** *(optional)*. Copy `Hook of the Reaper\defaultLG\hod2re.txt` into the `defaultLG` folder of your Hook of the Reaper install.
+4. **Hook of the Reaper (recoil)** *(optional)*. Copy `Hook of the Reaper\defaultLG\hod2re.txt` into the `defaultLG` folder of your Hook of the Reaper install. This game file is from the Hook of the Reaper author; `hod2re - notes.txt` next to it has recoil timing tips and how to switch guns to 4:3 automatically.
    To have the launcher close Hook of the Reaper when the game exits, set `HotrCloseAfter=1` in `Play HOTD2.ini`. Set `HotrExe=` to its full path if you also want the launcher to start it.
 
 5. **Play.** Run **`Play HOTD2.exe`**.
