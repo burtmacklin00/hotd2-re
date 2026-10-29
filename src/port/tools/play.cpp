@@ -3637,6 +3637,13 @@ int main(int argc, char** argv) {
         auto appendMenuCrosshairs = [&] {
             if (previewHidden) return;
             auto hs = MakeHudState(world, in, modeAge, blink, credits < 0);
+            if (gunMenusP1Only()) {
+                // Light Gun Edition: show Player 1's sight on every menu, not only over a game in progress (the sight
+                // is drawn only in game mode 6, for a player with lives, while shooting is allowed).
+                hs.gameMode = 6;
+                hs.canShoot = 1;
+                if (hs.player[0].lives <= 0) hs.player[0].lives = 1;
+            }
             std::vector<game::SpriteDef> defs;
             for (int p = 0; p < (gunMenusP1Only() ? 1 : 2); ++p)
                 if (in[p].kind == 1 && (netplay || (deviceForPlayer(p) >= 0 && guns && guns->Player(deviceForPlayer(p)).connected))) {
