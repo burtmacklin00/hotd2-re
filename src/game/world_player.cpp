@@ -233,9 +233,10 @@ bool World::Impl::UseCredit(int p, bool cont) {
     // mode 4: only in the frame the mode select confirmed a game (0x009A21C0, world_front.cpp)
     if (gameMode != 6 && !(gameMode == 4 && front.menuConfirmed)) return false;
     if (cfg.freePlay) return true;
-    // Light Gun Edition: Boss Mode gives one credit (0x00496B70), so a second player could never join. The second
-    // player may join for free, once, while the other is playing; continues still need a credit (there is none).
-    if (!cont && gameMode == 6 && runner && runner->cfg.gameType == 3 && players == 1 && !portRunJoined[p] &&
+    // Light Gun Edition: Challenges and Boss Mode give one credit (0x00496B70), so a second player could never join.
+    // The second player may join for free, once, while the other is playing; continues still need a credit (none).
+    if (!cont && gameMode == 6 && runner && (runner->cfg.gameType == 2 || runner->cfg.gameType == 3) && players == 1 &&
+        !portRunJoined[p] &&
         (player[0].state == 5 || player[1].state == 5)) return true;
     const int cost = cont ? cfg.coinsContinue : cfg.coinsStart;
     if (cfg.credits < cost) return false;
