@@ -73,10 +73,10 @@ private:
     Pulse recoilPulse_[2], damagedPulse_[2];
     PlayerTrack track_[2];
     bool lampBlink_[2] = {};
-    // Light Gun Edition: leaving a game for the menus sends Life 0, which starts Hook of the Reaper's death light effect;
-    // its lights can come back on afterwards. Re-send the zeroed values once the effect is over.
+    // Light Gun Edition: leaving a game for the menus (quitting mid-game, not dying) left Hook of the Reaper's light
+    // displays as they were. Shortly after, restart the game session for the connected tools (mame_stop / mame_start,
+    // as on connect), which resets their lights, then send the current (zero) values.
     uint64_t refreshAt_ = 0;
-    void Resend(int output);
 };
 
 }  // namespace play

@@ -244,7 +244,7 @@ void GameOutputs::OnFrame(const game::WorldHud& hud, int slotForP1, bool live, u
         Set(dead_[out], dead ? 1 : 0);
         lampBlink_[out] = !playing;
 
-        if (t.wasPlaying && !inGame) refreshAt_ = nowMs + 2500;  // back to the menus mid-game (Light Gun Edition)
+        if (t.wasPlaying && !inGame) refreshAt_ = nowMs + 500;  // back to the menus (Light Gun Edition)
         if (playing) t.wasPlaying = true;
         else if (!inGame || (p.state == 9 && !hud.prototype)) t.wasPlaying = false;  // back to attract / title / not joined
         t.lastLives = inGame ? p.lives : -1;
@@ -254,21 +254,15 @@ void GameOutputs::OnFrame(const game::WorldHud& hud, int slotForP1, bool live, u
     Set(credits_, hud.credits < 0 ? 0 : hud.credits);
 }
 
-void GameOutputs::Resend(int output) {
-    if (output < 0) return;
-    const Output& o = outputs_[static_cast<size_t>(output)];
-    if (o.value >= 0) SendAll(Line(o.name, o.value));
-}
-
 void GameOutputs::Tick(uint64_t nowMs) {
     if (!Running()) return;
     AcceptClients();
     if (refreshAt_ && nowMs >= refreshAt_) {
         refreshAt_ = 0;
-        for (int i = 0; i < 2; ++i) {
-            Resend(ammo_[i]);
-            Resend(clip_[i]);  // (not Life: a repeated 0 would replay the death effect)
-        }
+        std::string reset = Line("mame_stop", 1) + "mame_start = " + kRomName + "\r";
+        for (const Output& o : outputs_)
+            if (o.value >= 0) reset += Line(o.name, o.value);
+        SendAll(reset);
     }
     for (int i = 0; i < 2; ++i) {
         RunPulse(recoilPulse_[i], nowMs);
