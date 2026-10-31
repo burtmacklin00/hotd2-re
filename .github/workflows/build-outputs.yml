@@ -170,9 +170,8 @@ jobs:
           $notes = "Unofficial HOTD2RE Light Gun Edition: game outputs (hod2re), lightgunHID.ini, launcher with bezel, DLSS/FSR/XeSS.`n`n" +
                    "New install: extract into an existing hotd2re folder (next to game\ and scenes\).`n" +
                    "Already installed: run ""Update HOTD2.bat"" (your settings, gun setup, saves and bezel are kept).`n`n" +
-                   "Optional House of the Dead 2 bezel: download bezel.png below and put it in the hotd2re\4x3 folder (replace if asked). It's used in 4:3 mode.`n`n" +
                    "Full install steps: https://github.com/burtmacklin00/hotd2-re#readme"
-          gh release create $tag hotd2re-outputs-package.zip "extras/bezel.png#bezel.png (optional HOTD2 bezel, goes in hotd2re\4x3)" --target (git rev-parse HEAD) --title "HOTD2RE Light Gun Edition $tag" --notes $notes
+          gh release create $tag hotd2re-outputs-package.zip --target (git rev-parse HEAD) --title "HOTD2RE Light Gun Edition $tag" --notes $notes
           if ($LASTEXITCODE -ne 0) {
             # gh can report an error after the release and its upload are done: only fail if the zip isn't there.
             $size = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" --jq '.assets[] | select(.name == "hotd2re-outputs-package.zip" and .state == "uploaded") | .size'

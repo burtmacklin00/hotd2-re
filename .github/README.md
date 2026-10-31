@@ -42,9 +42,9 @@ All the game code and data come from the official HOTD2RE project. This edition 
 | `Graphics - Low.bat` | For older graphics cards (the default on first run) |
 | `Toggle 2x Graphics.bat` | Downloads (first time, about 720 MB) and turns on the official 2× texture pack |
 
-**House of the Dead 2 bezel (optional):** download **`bezel.png`** from the same release page (https://github.com/burtmacklin00/hotd2-re/releases/latest) and put it in the `hotd2re\4x3` folder, choosing *Replace* if asked. It shows in 4:3 mode and updates never overwrite it.
-
-**Your own bezel:** save a 1920×1080 PNG as `4x3\bezel.png`. Transparent areas show the game, and art may overlap the game picture. Shots on the bezel outside the game picture count as off-screen (reload).
+**Bezel and logo:** the edition comes with a House of the Dead 2 bezel (4:3 mode) and a "Rebuild" title logo (`logo.png`, shown on the title screen and menus).
+- **Your own bezel:** save a 1920×1080 PNG as `4x3\bezel.png`. Transparent areas show the game, and art may overlap the game picture. Shots on the bezel outside the game picture count as off-screen (reload).
+- **Your own logo:** replace `logo.png` with your own PNG (transparent background). Delete it for the original logo.
 
 ### LaunchBox / front ends
 
@@ -71,7 +71,7 @@ Buttons and calibration can be changed per player in *Options → Light Guns*. G
 
 ## Updating
 
-Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, texture packs and `bezel.png` are never replaced.
+Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, texture packs, `bezel.png` and `logo.png` are never replaced (`logo.png` is only added if it's missing).
 No internet on the game PC? Download `hotd2re-outputs-package.zip` on another PC and drag it onto `Update HOTD2.bat`.
 
 **Online leaderboards:** there's no username screen at startup. To send your scores to the online leaderboards, set a name in *Settings → Gameplay → Username*.

@@ -20,7 +20,9 @@ $root = Split-Path $PSScriptRoot -Parent
 $asset = 'hotd2re-outputs-package.zip'
 
 # Files that are yours: never replaced (the package doesn't contain them either; this is a second guard).
-$keep = @('LightgunHID.ini', 'Play HOTD2.ini', 'hotd2re_settings.ini', '4x3\bezel.png', 'hotd2re_rejoin.bin')
+$keep = @('LightgunHID.ini', 'Play HOTD2.ini', 'hotd2re_settings.ini', '4x3\bezel.png', 'hotd2re_rejoin.bin', 'logo.png')
+# Of those, added from the package when missing (never replaced): the title logo.
+$addIfMissing = @('logo.png')
 function Is-Kept([string]$rel) {
     if ($keep -contains $rel) { return $true }
     if ($rel -notmatch '\\' -and $rel -match '^hotd2re_') { return $true }   # saves, records, lightgun / Wii setup
@@ -81,7 +83,11 @@ try {
         $rel = $f.FullName.Substring($src.Length + 1)
         $dst = Join-Path $root $rel
         $rel = $rel -replace '/', '\'
-        if (Is-Kept $rel) { $skipped++; continue }
+        if (Is-Kept $rel) {
+            if ($addIfMissing -contains $rel -and -not (Test-Path -LiteralPath $dst)) { Copy-Item -LiteralPath $f.FullName -Destination $dst; $copied++ }
+            else { $skipped++ }
+            continue
+        }
         if (Test-Path -LiteralPath $dst) {
             if ((Get-FileHash -LiteralPath $dst).Hash -eq (Get-FileHash -LiteralPath $f.FullName).Hash) { continue }
             # A text/config file that differs may be your edit: keep a copy (exes and DLLs are just replaced).
