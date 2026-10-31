@@ -99,6 +99,7 @@
 #include "render/gpu_budget.h"
 #include "render/hud_composition.h"
 #include "render/output_resolution.h"
+#include "render/png_read.h"
 #include "render/ui_font.h"
 #ifdef _WIN32
 #include "port/play/reconstruction_fallback.h"
@@ -2246,6 +2247,52 @@ int main(int argc, char** argv) {
         homeRooms.clear();
         world.SetPortHomeRooms({}, "CHECKING WAITING ROOMS...");
     };
+    // Light Gun Edition: an optional "logo.png" next to the game replaces the House of the Dead 2 title logo (the five
+    // logo strips 0xAB1..0xAB5) on the title screen and the menus. It is fitted, keeping its shape, into the original
+    // artwork's area of the strips ((9,0)..(590,349) of their 640-wide canvas). No file: the original logo.
+    static port::RgbaImage customLogo;
+    {
+        port::PngImage png;
+        std::error_code logoEc;
+        const auto logoPath = std::filesystem::path(settingsPath).parent_path() / "logo.png";
+        if (!headless && std::filesystem::is_regular_file(logoPath, logoEc) && port::ReadPngFile(logoPath.string(), png) &&
+            png.width > 0 && png.height > 0) {
+            customLogo.width = png.width;
+            customLogo.height = png.height;
+            customLogo.pixels = std::move(png.rgba);
+        }
+    }
+    auto spriteDrawsWithLogo = [&](const std::vector<game::SpriteDef>& defs, float zNear, const std::vector<uint8_t>* texFiles) {
+        if (!customLogo.width) return scene.MakeSpriteDraws(defs, zNear, texFiles);
+        std::vector<game::SpriteDef> logo, rest;
+        for (const auto& d : defs) (d.id >= 0xAB1 && d.id <= 0xAB5 ? logo : rest).push_back(d);
+        if (logo.empty()) return scene.MakeSpriteDraws(defs, zNear, texFiles);
+        const auto strips = scene.MakeSpriteDraws(logo, zNear, texFiles);
+        auto out = scene.MakeSpriteDraws(rest, zNear, texFiles);
+        if (strips.empty()) return out;
+        float minX = 1e9f, minY = 1e9f, maxX = -1e9f, maxY = -1e9f;
+        for (const auto& d : strips)
+            for (const auto& v : d.v) minX = std::min(minX, v.x), maxX = std::max(maxX, v.x), minY = std::min(minY, v.y), maxY = std::max(maxY, v.y);
+        const float canvasH = strips[0].texture ? float(strips[0].texture->LogicalHeight()) : 349.f;
+        const float ax0 = minX + (maxX - minX) * 9.f / 640.f, ax1 = minX + (maxX - minX) * 590.f / 640.f;
+        const float ay0 = minY, ay1 = minY + (maxY - minY) * std::min(1.f, 349.f / std::max(1.f, canvasH));
+        const float aspect = float(customLogo.width) / float(customLogo.height);
+        float w = ax1 - ax0, h = ay1 - ay0;
+        if (w / h > aspect) w = h * aspect; else h = w / aspect;
+        const float x0 = (ax0 + ax1 - w) * .5f, y0 = (ay0 + ay1 - h) * .5f;
+        port::ModelRenderer::SpriteDraw b = strips[0];
+        b.texture = &customLogo;
+        b.linear = true;
+        b.isp = 0xE4000000;
+        b.tsp = 0x94918000;
+        const game::TLVertex t = strips[0].v[0];
+        b.v[0] = t; b.v[0].x = x0;     b.v[0].y = y0;     b.v[0].u = 0; b.v[0].v = 0;
+        b.v[1] = t; b.v[1].x = x0;     b.v[1].y = y0 + h; b.v[1].u = 0; b.v[1].v = 1;
+        b.v[2] = t; b.v[2].x = x0 + w; b.v[2].y = y0;     b.v[2].u = 1; b.v[2].v = 0;
+        b.v[3] = t; b.v[3].x = x0 + w; b.v[3].y = y0 + h; b.v[3].u = 1; b.v[3].v = 1;
+        out.push_back(b);
+        return out;
+    };
     auto updateSystemCursor = [&] {
         const play::CursorContext context{active, menu.IsOpen() || optionsPage.IsOpen() || wiiPage.IsOpen() || lightgunPage.IsOpen() || modelGallery.IsOpen() || usernamePrompt.IsOpen(),
                                           lobby.page != Lobby::kOff || world.NetworkLobby(), world.PortHordeRun().active};
@@ -4135,7 +4182,7 @@ int main(int argc, char** argv) {
                         (world.Hud().nightShiftPage == 12 && (definition.id >= 0x4000||definition.id==0x8E7||definition.id==0x8E8)) ||
                         (world.Hud().nightShiftPage == 7 && definition.id >= 0xAA8 && definition.id <= 0xAAF))
                         menuDefs.push_back(definition);
-                auto menuSprites = scene.MakeSpriteDraws(menuDefs, .001f, nullptr);
+                auto menuSprites = spriteDrawsWithLogo(menuDefs, .001f, (const std::vector<uint8_t>*)nullptr);
                 if(world.Hud().nightShiftPage==12)for(auto& draw:menuSprites)draw.hud=false;
                 sprites.insert(sprites.end(), menuSprites.begin(), menuSprites.end());
                 auto appendText=[&](const auto& lines,auto& out) {
@@ -4154,7 +4201,7 @@ int main(int argc, char** argv) {
                     out.insert(out.end(),rendered.begin(),rendered.end());
                 };
                 if(uiFont.Available() || originalPrompt)appendText(menuHud.menuText,sprites);
-                const auto logos=scene.MakeSpriteDraws(play::MenuGameLogos(menuHud),.001f,nullptr);
+                const auto logos=spriteDrawsWithLogo(play::MenuGameLogos(menuHud),.001f,(const std::vector<uint8_t>*)nullptr);
                 sprites.insert(sprites.end(),logos.begin(),logos.end());
                 if(originalPrompt) {
                     std::vector<port::ModelRenderer::SpriteDraw> panels,text;
@@ -4190,7 +4237,7 @@ int main(int argc, char** argv) {
             // Game_UpdatePause 0x0040E500 sets the near plane to 0.001 (0x004194C0) before the PAUSE label
             if (!noHud) sprites = screens.Draws(world.Hud());                   // front-end bitmap screens first
             static const bool noTexRes = getenv("HOTD2_NO_TEXRES") != nullptr;  // comparisons: every sprite file loaded
-            const auto spr = scene.MakeSpriteDraws(defs, world.Hud().paused ? 0.001f : 0.8f, noTexRes ? nullptr : &world.Hud().texFiles);
+            const auto spr = spriteDrawsWithLogo(defs, world.Hud().paused ? 0.001f : 0.8f, noTexRes ? nullptr : &world.Hud().texFiles);
             sprites.insert(sprites.end(), spr.begin(), spr.end());
             {
                 // Light Gun Edition: comic pop-ups ("BLAM!", "SPLAT!"...) where a player's shot hits. Display only: driven by
