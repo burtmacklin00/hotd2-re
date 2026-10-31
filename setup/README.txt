@@ -36,7 +36,8 @@ UPDATING
   release from github.com/burtmacklin00/hotd2-re/releases, checks it, and copies it over this
   folder. It never replaces your own files:
     LightgunHID.ini, Play HOTD2.ini, hotd2re_settings.ini, saves / records (hotd2re_*),
-    4x3\bezel.png and installed texture packs.
+    4x3\bezel.png, logo.png, Play HOTD2.ahk (a customized launcher script stays as it is)
+    and installed texture packs.
   If you edited one of the shipped files (e.g. "Graphics Max\settings.ini" or a .bat), the old
   copy is saved in backup\<date>\ before the new one goes in.
   "Update HOTD2.bat" check   only tells you whether an update is available.

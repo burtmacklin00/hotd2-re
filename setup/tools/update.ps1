@@ -1,7 +1,7 @@
 # Updates this Light Gun Edition folder to the newest release on GitHub.
 #   Downloads the release zip, checks it, and copies it over this folder.
 #   Never touches your own files: LightgunHID.ini, Play HOTD2.ini, hotd2re_settings.ini, saves, records,
-#   4x3\bezel.png, texture packs. Any other file that you changed (a preset settings.ini, a .bat) is copied
+#   4x3\bezel.png, logo.png, Play HOTD2.ahk (customized launchers), texture packs. Any other file that you changed (a preset settings.ini, a .bat) is copied
 #   to "backup\<date>" first.
 #   -Check   only say whether an update is available
 #   -Force   reinstall the newest release even if this folder already has it
@@ -20,9 +20,11 @@ $root = Split-Path $PSScriptRoot -Parent
 $asset = 'hotd2re-outputs-package.zip'
 
 # Files that are yours: never replaced (the package doesn't contain them either; this is a second guard).
-$keep = @('LightgunHID.ini', 'Play HOTD2.ini', 'hotd2re_settings.ini', '4x3\bezel.png', 'hotd2re_rejoin.bin', 'logo.png')
-# Of those, added from the package when missing (never replaced): the title logo.
-$addIfMissing = @('logo.png')
+$keep = @('LightgunHID.ini', 'Play HOTD2.ini', 'hotd2re_settings.ini', '4x3\bezel.png', 'hotd2re_rejoin.bin', 'logo.png',
+           'Play HOTD2.ahk')
+# Of those, added from the package when missing (never replaced): the title logo and the launcher script (front-end
+# builds such as LaunchBox setups customize it).
+$addIfMissing = @('logo.png', 'Play HOTD2.ahk')
 function Is-Kept([string]$rel) {
     if ($keep -contains $rel) { return $true }
     if ($rel -notmatch '\\' -and $rel -match '^hotd2re_') { return $true }   # saves, records, lightgun / Wii setup

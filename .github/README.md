@@ -78,7 +78,7 @@ Buttons and calibration can be changed per player in *Options → Light Guns*. G
 
 ## Updating
 
-Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, texture packs, `bezel.png` and `logo.png` are never replaced (`logo.png` is only added if it's missing).
+Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, texture packs, `bezel.png`, `logo.png` and `Play HOTD2.ahk` are never replaced (`logo.png` and `Play HOTD2.ahk` are only added if they're missing, so a customized launcher script stays as it is).
 No internet on the game PC? Download `hotd2re-outputs-package.zip` on another PC and drag it onto `Update HOTD2.bat`.
 Since 1.6 the package also carries the Typing of the Dead data (about 90 MB), so updates are about 230 MB. The game itself never downloads anything at startup.
 
