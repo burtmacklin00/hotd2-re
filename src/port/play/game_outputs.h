@@ -73,11 +73,6 @@ private:
     Pulse recoilPulse_[2], damagedPulse_[2];
     PlayerTrack track_[2];
     bool lampBlink_[2] = {};
-    // Light Gun Edition: leaving a game for the menus left Hook of the Reaper's light displays lit (an Ammo 0 alone does
-    // not clear its range displays). Shortly after, restart the tools' game session (mame_stop / mame_start, as when
-    // they connect at launch, which resets their lights) and send the current values (Ammo / Life 0). Only after
-    // playing, never during a game.
-    uint64_t refreshAt_ = 0;
 };
 
 }  // namespace play
