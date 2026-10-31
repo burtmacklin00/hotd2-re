@@ -134,6 +134,17 @@ jobs:
           Copy-Item PlayHOTD2.exe "$out\Play HOTD2.exe"
           Copy-Item LICENSE "$out\LICENSE-native-code.txt"
           Copy-Item THIRD_PARTY_NOTICES.txt $out
+          # Typing of the Dead data (official 1.6+): the same file the official game downloads, fetched from the official
+          # release and checked, so "Update HOTD2.bat" installs it (the edition's game never downloads at startup).
+          $tc = Get-Content -Raw src\port\update\typing_content.cpp; $th = Get-Content -Raw src\port\update\typing_content.h
+          if ($tc -match 'kDownload\[\]\s*=\s*L"([^"]+)"') {
+            $tdUrl = 'https://github.com' + $Matches[1]
+            if ($th -notmatch 'kTypingContentSha256\s*=\s*"([0-9a-f]{64})"') { throw 'Typing data hash not found' }
+            $tdSha = $Matches[1]
+            New-Item -ItemType Directory -Force -Path "$out\game" | Out-Null
+            Invoke-WebRequest -UseBasicParsing -Uri $tdUrl -OutFile "$out\game\typing_reference.bank"
+            if ((Get-FileHash "$out\game\typing_reference.bank" -Algorithm SHA256).Hash.ToLower() -ne $tdSha) { throw 'Typing data hash mismatch' }
+          }
           $sha = git rev-parse HEAD
           $tag = '${{ inputs.release_tag }}'
           if (-not $tag -and '${{ github.ref_type }}' -eq 'tag') { $tag = '${{ github.ref_name }}' }
