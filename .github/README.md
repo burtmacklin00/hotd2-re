@@ -6,6 +6,8 @@ An unofficial add-on for [HOTD2RE](https://github.com/GitFist/hotd2-re), the nat
 - **Recoil and outputs** for Hook of the Reaper / MAMEHooker (ammo, life, damage, death, recoil, start lamps)
 - **Launcher** with a 4:3 bezel, Esc to quit and 1 (a light gun's Start key) to pause, and no pop-ups (works in LaunchBox and other front ends)
 - **One-click switches** for 4:3 or 16:9, crosshairs on or off, and max or low graphics (DLSS / FSR / XeSS on the 64-bit build)
+- **Menus for arcade cabinets:** Player 1's gun drives the menus with its crosshair (no Windows pointer); Player 2 joins any mode, including Boss Mode and Challenges, by pulling the trigger
+- **House of the Dead 2 bezel and "Rebuild" title logo** included
 - **Updater** that keeps your settings, gun setup, saves and bezel
 
 All the game code and data come from the official HOTD2RE project. This edition adds the light-gun features on top. New official releases are merged in automatically.
@@ -14,7 +16,7 @@ All the game code and data come from the official HOTD2RE project. This edition 
 
 ## Install (new users)
 
-1. **Get the official game.** Download the official Windows x64 zip (named like **`HOTD2RE-1.1-Windows-x64.zip`**) from the official releases:
+1. **Get the official game.** Download the official Windows x64 zip (named like **`HOTD2RE-1.6-Windows-x64.zip`**) from the official releases:
    👉 https://github.com/GitFist/hotd2-re/releases/latest
    Extract it into a normal, writable folder (for example `C:\Games\HOTD2`, not inside *Program Files*). You get a `hotd2re` folder.
 
@@ -62,8 +64,11 @@ Point the game entry at **`Play HOTD2.exe`** in the `hotd2re` folder. It shows t
 | Middle / Start button | Off, so nobody pauses by accident (`StartButton = 1` in `LightgunHID.ini` turns it back on) |
 | **Esc** | Quit the game |
 | **1** | Pause, during gameplay only (the usual Start key on light guns). Shoot *Resume* to carry on |
+| Menus | Player 1's gun only (Player 2's gun is ignored there) |
 
 **Hidden prototype** (a short HOTD4-style bonus chapter): press **1** (or F8) on the title screen or the Home / Play / Practice menu. Hold the trigger for its SMG, **middle button = grenade**, reload button or a shot off screen = reload.
+
+**Typing of the Dead** (official 1.6, keyboard only): switch to it with the logo card on the main menu. Use **F10** to pause there, since Esc quits the game through the launcher. The guns aren't used in Typing mode.
 
 Buttons and calibration can be changed per player in *Options → Light Guns*. Guns calibrated in their own software work without in-game calibration.
 
@@ -73,6 +78,7 @@ Buttons and calibration can be changed per player in *Options → Light Guns*. G
 
 Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, texture packs, `bezel.png` and `logo.png` are never replaced (`logo.png` is only added if it's missing).
 No internet on the game PC? Download `hotd2re-outputs-package.zip` on another PC and drag it onto `Update HOTD2.bat`.
+Since 1.6 the package also carries the Typing of the Dead data (about 90 MB), so updates are about 230 MB. The game itself never downloads anything at startup.
 
 **Online leaderboards:** there's no username screen at startup. To send your scores to the online leaderboards, set a name in *Settings → Gameplay → Username*.
 
