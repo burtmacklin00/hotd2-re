@@ -4389,6 +4389,20 @@ int main(int argc, char** argv) {
                 }
             }
             if (!noHud && world.PortTypingActive() && !menu.IsOpen() && !optionsPage.IsOpen()) {
+                // Light Gun Edition: the Typing item bar's dark backing. AppendNightShiftPanels draws only on menu pages
+                // (nightShiftPage >= 0), so during Typing gameplay the bar's text sat on the bare scene.
+                if (world.Hud().nightShiftPage < 0) {
+                    size_t index = 0;
+                    for (const auto& p : world.Hud().menuPanels) {
+                        port::ModelRenderer::SpriteDraw panel{};
+                        panel.depth = .1f - float(index++) * .0001f;
+                        panel.key = 0x8000000F; panel.isp = 0xE4000000; panel.tsp = 0x94918000;
+                        const float px[] = {p.left, p.left, p.right, p.right}, py[] = {p.top, p.bottom, p.top, p.bottom};
+                        for (int i = 0; i < 4; ++i)
+                            panel.v[i] = {port::CenteredViewportX(px[i], viewportAspect), py[i], 0, 1, p.color, 0, float(i >= 2), float(i & 1)};
+                        sprites.push_back(panel);
+                    }
+                }
                 play::AppendNightShiftPanels(world.Hud(),sprites,viewportAspect,100);
                 if (uiFont.Available()) uiFont.Append(world.Hud().menuText,sprites,port::ViewportXScale(viewportAspect));
             }
