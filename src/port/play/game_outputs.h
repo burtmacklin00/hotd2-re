@@ -73,9 +73,8 @@ private:
     Pulse recoilPulse_[2], damagedPulse_[2];
     PlayerTrack track_[2];
     bool lampBlink_[2] = {};
-    // Light Gun Edition: leaving a game for the menus (quitting mid-game, not dying) left Hook of the Reaper's light
-    // displays as they were. Shortly after, restart the game session for the connected tools (mame_stop / mame_start,
-    // as on connect), which resets their lights, then send the current (zero) values.
+    // Light Gun Edition: leaving a game for the menus left Hook of the Reaper's ammo light display lit. Shortly after,
+    // send Ammo 0 once more for both players (only after playing; never during a game).
     uint64_t refreshAt_ = 0;
 };
 

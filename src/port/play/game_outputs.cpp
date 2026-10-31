@@ -259,10 +259,8 @@ void GameOutputs::Tick(uint64_t nowMs) {
     AcceptClients();
     if (refreshAt_ && nowMs >= refreshAt_) {
         refreshAt_ = 0;
-        std::string reset = Line("mame_stop", 1) + "mame_start = " + kRomName + "\r";
-        for (const Output& o : outputs_)
-            if (o.value >= 0) reset += Line(o.name, o.value);
-        SendAll(reset);
+        for (int i = 0; i < 2; ++i)
+            if (ammo_[i] >= 0 && outputs_[static_cast<size_t>(ammo_[i])].value == 0) SendAll(Line(outputs_[static_cast<size_t>(ammo_[i])].name, 0));
     }
     for (int i = 0; i < 2; ++i) {
         RunPulse(recoilPulse_[i], nowMs);
