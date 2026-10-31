@@ -171,7 +171,8 @@ jobs:
                    "New install: extract into an existing hotd2re folder (next to game\ and scenes\).`n" +
                    "Already installed: run ""Update HOTD2.bat"" (your settings, gun setup, saves and bezel are kept).`n`n" +
                    "Full install steps: https://github.com/burtmacklin00/hotd2-re#readme"
-          gh release create $tag hotd2re-outputs-package.zip --target (git rev-parse HEAD) --title "HOTD2RE Light Gun Edition $tag" --notes $notes
+          $ver = if ((Get-Content -Raw src\port\tools\play.cpp) -match 'kReleaseVersion = "([0-9.]+)"') { "$($Matches[1]) LG " } else { '' }
+          gh release create $tag hotd2re-outputs-package.zip --target (git rev-parse HEAD) --title "HOTD2RE Light Gun Edition $ver($tag)" --notes $notes
           if ($LASTEXITCODE -ne 0) {
             # gh can report an error after the release and its upload are done: only fail if the zip isn't there.
             $size = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" --jq '.assets[] | select(.name == "hotd2re-outputs-package.zip" and .state == "uploaded") | .size'
@@ -181,3 +182,26 @@ jobs:
             }
             exit 1
           }
+
+      - name: Update the front-page README for this release
+        if: inputs.release_tag
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Keeps the fork's front page in step with each public release: the official zip name in the install steps
+          # and the "Current release" line. Edits the default branch's .github/README.md through the API (no push of
+          # this build's checkout); does nothing when the text is already current.
+          $tag = '${{ inputs.release_tag }}'
+          if ((Get-Content -Raw src\port\tools\play.cpp) -notmatch 'kReleaseVersion = "([0-9.]+)"') { Write-Host '::warning::No release version found'; exit 0 }
+          $ver = $Matches[1]
+          $branch = gh api "repos/$env:GITHUB_REPOSITORY" --jq .default_branch
+          $file = gh api "repos/$env:GITHUB_REPOSITORY/contents/.github/README.md?ref=$branch" | ConvertFrom-Json
+          $text = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(($file.content -replace '\s', '')))
+          $new = $text -replace 'HOTD2RE-[0-9.]+-Windows-x64\.zip', "HOTD2RE-$ver-Windows-x64.zip"
+          $new = $new -replace '<!-- release -->.*?<!-- /release -->', "<!-- release -->**Current release: $ver LG** (``$tag``)<!-- /release -->"
+          if ($new -eq $text) { Write-Host 'README already current.'; exit 0 }
+          $body = @{ message = "README: current release $ver LG ($tag)"; content = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($new)); sha = $file.sha; branch = $branch } | ConvertTo-Json
+          $body | gh api -X PUT "repos/$env:GITHUB_REPOSITORY/contents/.github/README.md" --input - | Out-Null
+          if ($LASTEXITCODE -ne 0) { Write-Host '::warning::Could not update the README' } else { Write-Host "README updated for $ver LG ($tag)." }
+
