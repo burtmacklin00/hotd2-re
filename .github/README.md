@@ -67,6 +67,7 @@ Point the game entry at **`Play HOTD2.exe`** in the `hotd2re` folder. It shows t
 | **Esc** | Quit the game |
 | **1** | Pause, during gameplay only (the usual Start key on light guns). Shoot *Resume* to carry on |
 | Menus | Player 1's gun only (Player 2's gun is ignored there) |
+| Xbox / PlayStation controllers | Not used (the official game supports them since 1.8; this edition is light guns, mouse and keyboard only) |
 
 **Hidden prototype** (a short HOTD4-style bonus chapter): press **1** (or F8) on the title screen or the Home / Play / Practice menu. Hold the trigger for its SMG, **middle button = grenade**, reload button or a shot off screen = reload.
 

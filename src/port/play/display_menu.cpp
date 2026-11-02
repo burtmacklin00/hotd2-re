@@ -93,7 +93,7 @@ int VolumeIndex(int row) {
 }
 bool IsAction(int row) {
     return row == DisplayMenu::kResetGraphics || row == DisplayMenu::kResetGameplay || row == DisplayMenu::kLightguns ||
-           row == DisplayMenu::kWiiRemotes || row == DisplayMenu::kCalibration || row == DisplayMenu::kUsername;
+           row == DisplayMenu::kWiiRemotes || row == DisplayMenu::kControllers || row == DisplayMenu::kCalibration || row == DisplayMenu::kUsername;
 }
 const char* Help(int r) {
     switch (r) {
@@ -255,6 +255,8 @@ const char* Help(int r) {
             return "Open lightgun assignment, input mapping, calibration and the two-player gun test.";
         case DisplayMenu::kWiiRemotes:
             return "Open Wii Remote player slots, button binding, calibration and aiming tests.";
+        case DisplayMenu::kControllers:
+            return "Set each controller's aim sensitivity, stick deadzone and gameplay buttons.";
         default:
             return "Back returns to the previous menu.";
     }
@@ -270,7 +272,7 @@ const std::vector<int>& DisplayMenu::Rows(Page p) {
          kRayShadows, kBloom, kFog, kReflections, kCinematicFocus, kContrast, kSaturation, kColorGrade, kStatistics, kBack},
         {kUsername, kDifficulty, kLives, kContinues, kCrosshairP1, kCrosshairP2, kCrosshairs, kBlood, kResetGameplay, kBack},
         {kMasterVolume, kMusicVolume, kGunVolume, kEffectsVolume, kAttractionVolume, kBack},
-        {kLightguns, kWiiRemotes, kBack},
+        {kLightguns, kWiiRemotes, kBack},  // Light Gun Edition: no Controllers page (controllers are never used)
         {kCrt, kCrtMask, kCrtCurvature, kCrtGlow, kBack},
         {kPack, kMaterialMaps, kMeshRefinement, kBack}};
     return rows[p >= 0 && p < kPageCount ? p : kDisplay];
@@ -449,7 +451,8 @@ const char* DisplayMenu::Label(int r) {
                                                  "Wii Remotes",
                                                  "Cartoon",
                                                  "Comic Pop-ups",
-                                                 "Username"};
+                                                 "Username",
+                                                 "Controllers"};
     return r >= 0 && r < kRowCount ? names[r] : "";
 }
 void DisplayMenu::ApplyPreset(DisplaySettings& d, int p, const port::GraphicsCapabilities* caps) {
@@ -917,7 +920,8 @@ std::string DisplayMenu::ShownValue(const DisplaySettings& d, int row) const {
         case kCrosshairP1:
         case kCrosshairP2: return "Style " + std::to_string(optionValues_.crosshair[row == kCrosshairP2] + 1);
         case kLightguns:
-        case kWiiRemotes: return "Open";
+        case kWiiRemotes:
+        case kControllers: return "Open";
         case kResetGameplay:
         case kResetGraphics: return "Reset";
         default: break;
@@ -1181,11 +1185,12 @@ bool DisplayMenu::Update(const MenuInput& in, DisplaySettings& d, std::vector<ui
         return true;
     }
     int delta = ((in.pressed & 0x80) ? 1 : 0) - ((in.pressed & 0x40) ? 1 : 0);
-    if (cursor_ == kLightguns || cursor_ == kWiiRemotes || cursor_ == kCalibration || cursor_ == kUsername) {
+    if (cursor_ == kLightguns || cursor_ == kWiiRemotes || cursor_ == kControllers || cursor_ == kCalibration || cursor_ == kUsername) {
         if ((in.pressed & 0xC) || (in.trigger && over)) {
             if (cursor_ == kCalibration) calibration_ = 0;
             else if (cursor_ == kUsername) usernameEdit_ = true;
-            else deviceAction_ = cursor_ == kLightguns ? DeviceAction::Lightguns : DeviceAction::WiiRemotes;
+            else deviceAction_ = cursor_ == kLightguns ? DeviceAction::Lightguns :
+                                 cursor_ == kWiiRemotes ? DeviceAction::WiiRemotes : DeviceAction::Controllers;
             sounds.push_back(game::kOptionSelectSound);
         }
         return false;
@@ -1341,6 +1346,7 @@ void DisplayMenu::Sprites(const game::ExeImage& exe, const DisplaySettings& d, s
         }
     }
     if (page_ == kPacks) text(34, 219, "Loaded: " + activePackName_.substr(0, 58), .45f, 0x40);
+    text(28, 461, "LB/L1 / RB/R1: CATEGORY", .42f, 0x40);
     text(kPreviewTextX, kPreviewTextY, "Hide UI [H]", kPreviewTextScale);
     finish();
 }
@@ -1421,6 +1427,7 @@ void DisplayMenu::ModernHud(const DisplaySettings& d, game::WorldHud& hud) const
         }
     }
     if (page_ == kPacks) text(34, 225, "Loaded: " + activePackName_.substr(0, 58), .45f, 0xFFC1BAAC);
+    text(28, 461, "LB/L1 / RB/R1: CATEGORY", .42f, 0xFFC1BAAC);
     hud.menuPanels.push_back({550, 456, 630, 476, 0xE6090D10});
     text(kPreviewTextX, kPreviewTextY, "Hide UI [H]", kPreviewTextScale);
 }
