@@ -1,6 +1,7 @@
 # Keeps the Light Gun Edition up to date with the official HOTD2RE releases (github.com/GitFist/hotd2-re).
-# Once a day: if the official project has published a new release, merge it into this branch, build, and publish
-# "outputs-<official tag>" as the newest release (which "Update HOTD2.bat" then installs).
+# Once a day: if the official project has published a new release, merge it into this branch and make a TEST build
+# (a downloadable artifact of this run). Nothing is published: an issue "Official update ... merged, test build ready"
+# links the build (GitHub emails you). Publish only after testing (build-outputs.yml with a release tag).
 #   - Does nothing until the first Light Gun Edition release has been published by hand (outputs-* tag).
 #   - If the official changes clash with this edition's changes, nothing is merged or released: an issue
 #     "Official update needs a manual merge" is opened instead (and the run fails, so GitHub emails you).
@@ -72,6 +73,9 @@ jobs:
             exit 1
           else
             git push origin "HEAD:$BRANCH"
+            title="Official update $official merged: test build ready (not published)"
+            body=$(printf 'The official release **%s** was merged into %s. A test build is attached to this run as the artifact **hotd2re-outputs-package** (ready about 20 minutes after this issue opens):\n\n%s\n\nNothing was published. Test it, then ask Claude to publish it (or run *Build outputs package* with a release tag).' "$official" "$BRANCH" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+            gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body "$body" || echo "::warning::Couldn't open an issue"
           fi
           echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "tag=$ours" >> "$GITHUB_OUTPUT"
@@ -82,5 +86,5 @@ jobs:
     uses: ./.github/workflows/build-outputs.yml
     with:
       ref: ${{ needs.sync.outputs.ref }}
-      release_tag: ${{ needs.sync.outputs.tag }}
+      release_tag: ''   # test build only: publishing needs your OK
     secrets: inherit
