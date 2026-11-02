@@ -12,7 +12,7 @@ An unofficial add-on for [HOTD2RE](https://github.com/GitFist/hotd2-re), the nat
 
 <!-- release -->**Current release: 1.6 LG** (`outputs-v2026.10.30-b`)<!-- /release -->
 
-All the game code and data come from the official HOTD2RE project. This edition adds the light-gun features on top. New official releases are merged in automatically.
+All the game code and data come from the official HOTD2RE project. This edition adds the light-gun features on top. New official releases are merged in automatically and published after testing.
 
 ---
 
