@@ -8,7 +8,7 @@ namespace play {
 
 class FeedbackMenu {
 public:
-    enum Row { kPlayer, kController, kGun, kPort, kRecoil, kDamage, kTestShot, kTestDamage, kBack, kRowCount };
+    enum Row { kPlayer, kController, kGun, kPort, kRecoil, kDamage, kTestShot, kTestDamage, kDefaults, kBack, kRowCount };  // kDefaults: Light Gun Edition
     enum class Action { None, TestShot, TestDamage };
 
     void Open() { open_ = true; player_ = cursor_ = 0; pointer_ = {}; notice_.clear(); }

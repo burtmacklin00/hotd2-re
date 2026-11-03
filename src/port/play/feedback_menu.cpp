@@ -7,7 +7,7 @@
 
 namespace play {
 namespace {
-constexpr const char* kLabels[]{"Player", "Controller rumble", "Light gun", "COM port", "Gun recoil", "Damage rumble", "Test shot", "Test damage", "Back"};
+constexpr const char* kLabels[]{"Player", "Controller rumble", "Light gun", "COM port", "Gun recoil", "Damage rumble", "Test shot", "Test damage", "Reset to Light Gun Edition defaults", "Back"};
 constexpr float kValueX = 330;
 bool Adjustable(int row) { return row >= FeedbackMenu::kPlayer && row <= FeedbackMenu::kDamage; }
 // Light Gun Edition: built-in feedback is off by default; the edition's outputs drive Hook of the Reaper. While a light
@@ -38,6 +38,13 @@ FeedbackMenu::Action FeedbackMenu::Update(const MenuInput& in, input::feedback::
     if (in.pressed & 0x20) cursor_ = (cursor_ + 1) % kRowCount;
     const bool choose = (in.pressed & 0xc) || (in.trigger && under == cursor_);
     if (cursor_ == kBack) return choose ? close() : Action::None;
+    if (cursor_ == kDefaults) {  // Light Gun Edition: built-in feedback off for both players (Hook of the Reaper drives recoil)
+        if (!choose) return Action::None;
+        settings = input::feedback::Settings{};
+        notice_ = "Reset: built-in feedback is off for both players.";
+        sound(game::kOptionSelectSound);
+        return Action::None;
+    }
     if (cursor_ == kTestShot || cursor_ == kTestDamage) {
         if (!choose) return Action::None;
         notice_.clear();
@@ -134,10 +141,17 @@ void FeedbackMenu::ModernHud(const input::feedback::Settings& settings, game::Wo
         device_ui::Text(hud, 34, 360.f + 25.f * slot, value, TextScale(value), device_ui::kMuted);
     }
     const bool warn = settings.player[player_].gun != input::feedback::GunType::Off;
-    const std::string line1 = notice_.empty() && warn ? kHotrWarning1 : notice_;
-    device_ui::Text(hud, 34, 410, line1, TextScale(line1), warn && notice_.empty() ? 0xFFF3D270u : device_ui::kMuted);
-    if (warn) device_ui::Text(hud, 28, 444, kHotrWarning2, TextScale(kHotrWarning2, .4f, 584), 0xFFF3D270u);
-    else device_ui::Footer(hud, "Online play uses local Player 1 feedback.");
+    if (warn) {
+        // Light Gun Edition: a solid red banner, impossible to miss, while a light gun is chosen for this player.
+        hud.menuPanels.push_back({20, 398, 620, 458, 0xF0B01818});
+        device_ui::Text(hud, 32, 404, "WARNING: DON'T USE WITH HOOK OF THE REAPER", TextScale("WARNING: DON'T USE WITH HOOK OF THE REAPER", .62f, 576), 0xFFFFFFFFu);
+        device_ui::Text(hud, 32, 432, "Both drive the same gun: recoil may stop working or fire twice. Use one or the other.",
+                        TextScale("Both drive the same gun: recoil may stop working or fire twice. Use one or the other.", .44f, 576), 0xFFFFFFFFu);
+        if (!notice_.empty()) device_ui::Text(hud, 34, 336, notice_, TextScale(notice_), device_ui::kMuted);
+    } else {
+        device_ui::Text(hud, 34, 410, notice_, TextScale(notice_), device_ui::kMuted);
+        device_ui::Footer(hud, "Online play uses local Player 1 feedback.");
+    }
     device_ui::Text(hud, 28, 461, "LEFT / RIGHT: ADJUST   ENTER: TEST / CHANGE   ESC: BACK", .36f, device_ui::kMuted);
 }
 } // namespace play

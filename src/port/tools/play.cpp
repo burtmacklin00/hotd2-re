@@ -2397,8 +2397,7 @@ int main(int argc, char** argv) {
         const play::CursorContext context{active, menu.IsOpen() || optionsPage.IsOpen() || feedbackPage.IsOpen() || controllerPage.IsOpen() || wiiPage.IsOpen() || lightgunPage.IsOpen() || modelGallery.IsOpen() || usernamePrompt.IsOpen() || updatePrompt.IsOpen(),
                                           lobby.page != Lobby::kOff || world.NetworkLobby(), world.PortHordeRun().active};
         bool visible = play::SystemCursorVisible(world.Hud(), context);
-        if (visible && active && gunMenusP1Only() && !wiiPage.IsOpen() && !lightgunPage.IsOpen() && !modelGallery.IsOpen() &&
-            !usernamePrompt.IsOpen() && lobby.page == Lobby::kOff && !world.NetworkLobby())
+        if (visible && active && gunMenusP1Only() && !modelGallery.IsOpen() && lobby.page == Lobby::kOff && !world.NetworkLobby())
             visible = false;
         plat.SetCursorConfined(!visible);
         plat.SetCursorVisible(visible);
@@ -4209,7 +4208,23 @@ int main(int argc, char** argv) {
                 if (hs.player[0].lives <= 0) hs.player[0].lives = 1;
             }
             std::vector<game::SpriteDef> defs;
-            for (int p = 0; p < (gunMenusP1Only() ? 1 : 2); ++p)
+            if (gunMenusP1Only()) {
+                // Light Gun Edition: Player 1's sight straight from the gun (every menu and device page), so it shows
+                // even where the world input is not updated while a page is open.
+                const input::PlayerState ps = play::DisplayPointer(guns->Player(deviceForPlayer(0)), volumes.display.graphics.crtCurvature);
+                if (ps.connected && ps.onScreen) {
+                    hs.player[0].deviceMode = 6;
+                    hs.player[0].gunPosX = static_cast<int16_t>(play::MenuPointerX(ps.x, viewportAspect) * 640.0f);
+                    hs.player[0].gunPosY = static_cast<int16_t>(ps.y * 480.0f);
+                    auto cross = game::HudCrosshair(hs, 0);
+                    for (auto& c : cross) {
+                        c.depth = 0.0002f;
+                        c.flags |= 0x700;
+                    }
+                    defs.insert(defs.end(), cross.begin(), cross.end());
+                }
+            }
+            else for (int p = 0; p < 2; ++p)
                 if (in[p].kind == 1 && (netplay || (deviceForPlayer(p) >= 0 && guns && guns->Player(deviceForPlayer(p)).connected))) {
                     auto cross = game::HudCrosshair(hs, p);
                     for (auto& c : cross) {
@@ -4246,6 +4261,7 @@ int main(int argc, char** argv) {
                 auto draws = scene.MakeSpriteDraws(text, .0001f, nullptr);
                 sprites.insert(sprites.end(), draws.begin(), draws.end());
             }
+            if (gunMenusP1Only()) appendMenuCrosshairs();  // Light Gun Edition: the same sight as the main menu
         } else if (modelGallery.IsOpen()) {
             modelGallery.Prepare(assets, renderer);
             vp = game::Mat4::Identity();
@@ -4306,6 +4322,7 @@ int main(int argc, char** argv) {
                                                         : wiiPage.CalibrationStep() >= 0);
             play::AppendNightShiftPanels(deviceHud, sprites, viewportAspect, aimCanvas ? 100 : volumes.display.menuOpacity);
             uiFont.Append(deviceHud.menuText, sprites, port::ViewportXScale(viewportAspect));
+            if (!aimCanvas && gunMenusP1Only()) appendMenuCrosshairs();  // Light Gun Edition: Player 1's sight on device pages
         } else if (world.Hud().stageResults.active) {
             renderer.SetScene(assets, {});
             vp = game::Mat4::Identity();
