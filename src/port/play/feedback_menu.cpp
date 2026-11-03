@@ -7,7 +7,7 @@
 
 namespace play {
 namespace {
-constexpr const char* kLabels[]{"Player", "Controller rumble", "Light gun", "COM port", "Gun recoil", "Damage rumble", "Test shot", "Test damage", "Reset to Light Gun Edition defaults", "Back"};
+constexpr const char* kLabels[]{"Player", "Light gun", "COM port", "Gun recoil", "Damage rumble", "Test shot", "Test damage", "Reset to Light Gun Edition defaults", "Back"};
 constexpr float kValueX = 330;
 bool Adjustable(int row) { return row >= FeedbackMenu::kPlayer && row <= FeedbackMenu::kDamage; }
 // Light Gun Edition: built-in feedback is off by default; the edition's outputs drive Hook of the Reaper. While a light
@@ -64,8 +64,7 @@ FeedbackMenu::Action FeedbackMenu::Update(const MenuInput& in, input::feedback::
     auto& profile = settings.player[player_];
     const auto before = profile;
     profile.Normalize();
-    if (cursor_ == kController) profile.controllerStrength = std::clamp(profile.controllerStrength + 25 * delta, 0, 100);
-    else if (cursor_ == kGun) {
+    if (cursor_ == kGun) {
         constexpr int count = input::feedback::kGunTypeCount;
         profile.gun = static_cast<input::feedback::GunType>((static_cast<int>(profile.gun) + delta % count + count) % count);
     }
@@ -82,7 +81,6 @@ FeedbackMenu::Action FeedbackMenu::Update(const MenuInput& in, input::feedback::
 std::string FeedbackMenu::Value(const input::feedback::Settings& settings, int row) const {
     const auto& profile = settings.player[player_];
     if (row == kPlayer) return "Player " + std::to_string(player_ + 1);
-    if (row == kController) return profile.controllerStrength ? std::to_string(profile.controllerStrength) + "%" : "Off";
     if (row == kGun) return input::feedback::GunTypeName(profile.gun);
     if (row == kPort) {
         if (profile.gun == input::feedback::GunType::Sinden) return profile.sindenGun == 2 ? "B / Gun 2" : "A / Gun 1";
@@ -100,7 +98,7 @@ void FeedbackMenu::Sprites(const game::ExeImage& exe, const input::feedback::Set
         game::MenuTextScaled(exe, x, y, value, selected ? 0x110 : 0, scale, out);
     };
     text(26, 20, "FEEDBACK", 1.05f);
-    text(34, 73, "NATIVE CONTROLLER / LIGHT-GUN FEEDBACK", .42f);
+    text(34, 73, "BUILT-IN LIGHT-GUN RECOIL", .42f);
     for (int row = 0; row < kRowCount; ++row) {
         const float y = RowY(row);
         const auto value = Value(settings, row);
@@ -123,7 +121,7 @@ void FeedbackMenu::Sprites(const game::ExeImage& exe, const input::feedback::Set
 
 void FeedbackMenu::ModernHud(const input::feedback::Settings& settings, game::WorldHud& hud) const {
     if (!open_) return;
-    device_ui::Begin(hud, 12, "FEEDBACK", "NATIVE CONTROLLER / LIGHT-GUN FEEDBACK");
+    device_ui::Begin(hud, 12, "FEEDBACK", "BUILT-IN LIGHT-GUN RECOIL");
     hud.nightShiftRow = cursor_;
     for (int row = 0; row < kRowCount; ++row) {
         const char* label = row == kPort && settings.player[player_].gun == input::feedback::GunType::Sinden ? "Driver gun" : kLabels[row];

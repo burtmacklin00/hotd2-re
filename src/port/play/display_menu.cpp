@@ -258,7 +258,7 @@ const char* Help(int r) {
         case DisplayMenu::kControllers:
             return "Set each controller's aim sensitivity, stick deadzone and gameplay buttons.";
         case DisplayMenu::kFeedback:
-            return "Set native controller rumble and light-gun recoil separately for each local player.";
+            return "Built-in light-gun recoil, off by default. Don't combine it with Hook of the Reaper for the same gun.";
         default:
             return "Back returns to the previous menu.";
     }
@@ -1351,7 +1351,6 @@ void DisplayMenu::Sprites(const game::ExeImage& exe, const DisplaySettings& d, s
         }
     }
     if (page_ == kPacks) text(34, 219, "Loaded: " + activePackName_.substr(0, 58), .45f, 0x40);
-    text(28, 461, "LB/L1 / RB/R1: CATEGORY", .42f, 0x40);
     text(kPreviewTextX, kPreviewTextY, "Hide UI [H]", kPreviewTextScale);
     finish();
 }
@@ -1432,7 +1431,6 @@ void DisplayMenu::ModernHud(const DisplaySettings& d, game::WorldHud& hud) const
         }
     }
     if (page_ == kPacks) text(34, 225, "Loaded: " + activePackName_.substr(0, 58), .45f, 0xFFC1BAAC);
-    text(28, 461, "LB/L1 / RB/R1: CATEGORY", .42f, 0xFFC1BAAC);
     hud.menuPanels.push_back({550, 456, 630, 476, 0xE6090D10});
     text(kPreviewTextX, kPreviewTextY, "Hide UI [H]", kPreviewTextScale);
 }

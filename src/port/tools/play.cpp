@@ -3032,7 +3032,7 @@ int main(int argc, char** argv) {
                     emitFeedback(test,true);
                     const auto& profile=feedbackSettings.player[p];
                     if(!profile.controllerStrength && profile.gun==input::feedback::GunType::Off)
-                        feedbackPage.Notice("Enable controller rumble or choose a light gun first");
+                        feedbackPage.Notice("Choose a light gun first");
                     else if(profile.gun==input::feedback::GunType::Sinden && test.damage[p] && !profile.controllerStrength)
                         feedbackPage.Notice("Sinden supports recoil; damage rumble needs a controller");
                 }
