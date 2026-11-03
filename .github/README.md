@@ -95,6 +95,8 @@ MAME network outputs on `127.0.0.1:8000`, game name **`hod2re`**:
 `P1_/P2_CtmRecoil`, `P1_/P2_Damaged`, `P1_/P2_Dead`, `P1_/P2_Ammo`, `P1_/P2_Clip`, `P1_/P2_Life`, `P1_/P2_CtmLmpStart`, `Credits`.
 Don't run DemulShooter's outputs at the same time, because both use port 8000.
 
+**Built-in recoil (official 1.9, off by default):** *Options → Devices → Feedback* can send recoil straight to OpenFIRE, GUN4IR, Blamcon or Sinden guns without Hook of the Reaper. Use it **or** Hook of the Reaper for a gun, not both: they share the gun's COM port, so recoil may fail or fire twice. The page warns about this when a gun is chosen.
+
 ---
 
 Unofficial and not affiliated with SEGA or the HOTD2RE authors. Source for this edition: branch [`hotd2re-outputs-lightgunhid`](https://github.com/burtmacklin00/hotd2-re/tree/hotd2re-outputs-lightgunhid). Full details are in `README.txt` in the package.
