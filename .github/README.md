@@ -67,7 +67,6 @@ Point the game entry at **`Play HOTD2.exe`** in the `hotd2re` folder. It shows t
 | **Esc** | Quit the game |
 | **1** | Pause, during gameplay only (the usual Start key on light guns). Shoot *Resume* to carry on |
 | Menus | Player 1's gun only (Player 2's gun is ignored there) |
-| Xbox / PlayStation controllers | Not used (the official game supports them since 1.8; this edition is light guns, mouse and keyboard only) |
 
 **Hidden prototype** (a short HOTD4-style bonus chapter): press **1** (or F8) on the title screen or the Home / Play / Practice menu. Hold the trigger for its SMG, **middle button = grenade**, reload button or a shot off screen = reload.
 
@@ -95,7 +94,7 @@ MAME network outputs on `127.0.0.1:8000`, game name **`hod2re`**:
 `P1_/P2_CtmRecoil`, `P1_/P2_Damaged`, `P1_/P2_Dead`, `P1_/P2_Ammo`, `P1_/P2_Clip`, `P1_/P2_Life`, `P1_/P2_CtmLmpStart`, `Credits`.
 Don't run DemulShooter's outputs at the same time, because both use port 8000.
 
-**Built-in recoil (official 1.9, off by default):** *Options → Devices → Feedback* can send recoil straight to OpenFIRE, GUN4IR, Blamcon or Sinden guns without Hook of the Reaper. Use it **or** Hook of the Reaper for a gun, not both: they share the gun's COM port, so recoil may fail or fire twice. The page warns about this when a gun is chosen.
+**Built-in recoil (official 1.9, off by default):** *Options → Devices → Feedback* can send recoil straight to OpenFIRE, GUN4IR, Blamcon or Sinden guns without Hook of the Reaper. Use it **or** Hook of the Reaper for a gun, not both: they share the gun's COM port, so recoil may fail or fire twice. The page warns about this when a gun is chosen, and **Reset to Light Gun Edition defaults** on that page turns it back off for both players.
 
 ---
 
