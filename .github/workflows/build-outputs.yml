@@ -104,7 +104,7 @@ jobs:
           Copy-Item 'ahk\Compiler\Unicode 32-bit.bin' base32.bin
           # Full paths: Ahk2Exe resolves a relative /out against the script's folder, not the current one.
           $w = (Get-Location).Path
-          $a = @('/in', "`"$w\setup\Play HOTD2.ahk`"", '/out', "`"$w\PlayHOTD2.exe`"", '/base', "`"$w\base32.bin`"", '/silent')
+          $a = @('/in', "`"$w\setup\defaults\Play HOTD2.ahk`"", '/out', "`"$w\PlayHOTD2.exe`"", '/base', "`"$w\base32.bin`"", '/silent')
           # The game's own icon (official src/port/resources/hotd2re.ico, 1.8+).
           $ico = "$w\src\port\resources\hotd2re.ico"
           if (Test-Path $ico) { $a += @('/icon', "`"$ico`"") } else { Write-Host '::warning::No launcher icon' }

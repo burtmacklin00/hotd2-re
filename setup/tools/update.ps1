@@ -109,7 +109,9 @@ try {
         if (Test-Path -LiteralPath $o) { Remove-Item -LiteralPath $o -Force -ErrorAction SilentlyContinue }
     }
     # Fill in any of your own files that don't exist yet from defaults\.
-    foreach ($n in 'LightgunHID.ini', 'Play HOTD2.ini') {
+    # The launcher script ships as defaults\Play HOTD2.ahk (never in the main folder, so no updater, old or new,
+    # replaces a customized one); put it in place only when there is none.
+    foreach ($n in 'LightgunHID.ini', 'Play HOTD2.ini', 'Play HOTD2.ahk') {
         $d = Join-Path $root "defaults\$n"
         if (-not (Test-Path -LiteralPath (Join-Path $root $n)) -and (Test-Path -LiteralPath $d)) { Copy-Item -LiteralPath $d -Destination (Join-Path $root $n) }
     }

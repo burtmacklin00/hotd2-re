@@ -26,7 +26,7 @@ LAUNCHER_INI := A_ScriptDir . "\Play HOTD2.ini"
 ; Your own settings files are never in the package (so updates can't overwrite them): the first run copies
 ; the defaults\ versions into place. No "Play HOTD2.ini" yet = the first launch on this install.
 FirstRun := !FileExist(LAUNCHER_INI)
-for i, name in ["Play HOTD2.ini", "LightgunHID.ini"]
+for i, name in ["Play HOTD2.ini", "LightgunHID.ini", "Play HOTD2.ahk"]   ; (the script copy: for front ends that run the .ahk)
     if (!FileExist(A_ScriptDir . "\" . name) && FileExist(A_ScriptDir . "\defaults\" . name))
         FileCopy, %A_ScriptDir%\defaults\%name%, %A_ScriptDir%\%name%
 IniRead, HOTR_EXE, %LAUNCHER_INI%, Launcher, HotrExe, %A_Space%

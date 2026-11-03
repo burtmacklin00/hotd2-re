@@ -15,7 +15,9 @@ QUICK START
 
 WHICH FILE DOES WHAT
   Play HOTD2.exe            Starts the game. No AutoHotkey needed.
-  Play HOTD2.ahk            Same launcher as a script, for AutoHotkey 1.1 users / front-ends.
+  Play HOTD2.ahk            Same launcher as a script, for AutoHotkey 1.1 users / front-ends. It ships as
+                            defaults\Play HOTD2.ahk and is put in this folder on the first launch or update;
+                            after that it is yours: updates never replace it.
   Play HOTD2.ini            Launcher settings: Hook of the Reaper path, exit and pause keys.
                             (Made from defaults\ on the first run; updates never replace it.)
   1 - Light Gun Setup.exe   Pick the Player 1 / Player 2 guns (writes LightgunHID.ini). Opens by itself
