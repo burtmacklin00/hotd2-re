@@ -6,7 +6,7 @@ An unofficial add-on for [HOTD2RE](https://github.com/GitFist/hotd2-re), the nat
 - **Recoil and outputs** for Hook of the Reaper / MAMEHooker (ammo, life, damage, death, recoil, start lamps)
 - **Launcher** with a 4:3 bezel, Esc to quit and 1 (a light gun's Start key) to pause, and no pop-ups (works in LaunchBox and other front ends)
 - **One-click switches** for 4:3 or 16:9, crosshairs on or off, and max or low graphics (DLSS / FSR / XeSS on the 64-bit build)
-- **Menus for arcade cabinets:** Player 1's gun drives the menus with its crosshair (no Windows pointer); Player 2 joins any mode, including Boss Mode and Challenges, by pulling the trigger
+- **Menus for arcade cabinets:** Player 1's gun drives the menus with its crosshair (no Windows pointer); Player 2 joins Arcade, Original, Horde, Boss Mode and Challenges by pulling the trigger
 - **House of the Dead 2 bezel and "Rebuild" title logo** included
 - **Updater** that keeps your settings, gun setup, saves and bezel
 
@@ -82,7 +82,7 @@ Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, 
 No internet on the game PC? Download `hotd2re-outputs-package.zip` on another PC and drag it onto `Update HOTD2.bat`.
 Since 1.6 the package also carries the Typing of the Dead data (about 90 MB), so updates are about 230 MB. The game itself never downloads anything at startup.
 
-**Online leaderboards:** there's no username screen at startup. To send your scores to the online leaderboards, set a name in *Settings → Gameplay → Username*.
+**Online leaderboards:** there's no username screen at startup. To send your scores to the online leaderboards, set a name in *Options → Gameplay → Username*.
 
 **Online play:** both players need the same Light Gun Edition release, so update together. This edition can't join rooms made by the official build.
 
@@ -94,7 +94,7 @@ MAME network outputs on `127.0.0.1:8000`, game name **`hod2re`**:
 `P1_/P2_CtmRecoil`, `P1_/P2_Damaged`, `P1_/P2_Dead`, `P1_/P2_Ammo`, `P1_/P2_Clip`, `P1_/P2_Life`, `P1_/P2_CtmLmpStart`, `Credits`.
 Don't run DemulShooter's outputs at the same time, because both use port 8000.
 
-**Built-in recoil (official 1.9, off by default):** *Options → Devices → Feedback* can send recoil straight to OpenFIRE, GUN4IR, Blamcon or Sinden guns without Hook of the Reaper. Use it **or** Hook of the Reaper for a gun, not both: they share the gun's COM port, so recoil may fail or fire twice. The page warns about this when a gun is chosen, and **Reset to Light Gun Edition defaults** on that page turns it back off for both players.
+**Built-in recoil (official 1.9, off by default):** *Options → Devices → Feedback* can send recoil straight to OpenFIRE, GUN4IR, Blamcon or Sinden guns without Hook of the Reaper. Use it **or** Hook of the Reaper for a gun, not both: both drive the same gun, so recoil may fail or fire twice. The page warns about this when a gun is chosen, and **Reset to Light Gun Edition defaults** on that page turns it back off for both players.
 
 ---
 
