@@ -138,25 +138,24 @@ LIGHT GUNS (LightgunHID.ini)
   - StartButton = 1 turns the guns' / mouse's Start button (middle) back on. Default: off.
   - Each launch writes lightgunHID_devices.txt listing connected devices and their IDs.
   - Two identical guns: give both the same ID; Player 2 gets the second one.
-  - Remove the file to use the in-game Options > Light Guns assignment instead.
   - No guns? Click "No light guns (mouse)" in the setup: it saves mouse play and the setup
     never opens by itself again.
-  Buttons and calibration are still set per player in Options > Light Guns.
+  Calibrate the guns in their own software (this edition has no in-game Light Guns page).
 
-GUN CONTROLS (defaults; change them per player in Options > Light Guns)
+GUN CONTROLS
   Trigger (left button)      shoot; also joins a game and continues on the CONTINUE countdown
   Shoot off screen           reload (anywhere outside the game picture, including the bezel)
   Reload (right button)      reload
   Start / Pause (middle)     OFF in this edition, so nobody pauses by accident: the trigger joins
-                             and continues, P on the keyboard pauses. To turn it back on, add
+                             and continues, 1 on the keyboard pauses. To turn it back on, add
                              StartButton = 1 to LightgunHID.ini (then it starts, continues and pauses).
   Confirm (4th button)       Enter in menus
   Keyboard:                  Esc = quit the game (Play HOTD2), 1 = pause during gameplay
   Hidden prototype (HOTD4-style bonus chapter): press 1 (or F8) on the title screen or the Home /
   Play / Practice menu. In it: hold the trigger for the SMG, middle button = grenade, reload
   button or a shot off screen = reload. It is local play only and has no leaderboard.
-  Which physical button on your gun sends left / right / middle / 4th depends on the gun's own
-  software; Options > Light Guns > button capture lets you assign them in game.
+  Which physical button on your gun sends left / right / middle / 4th is set in the gun's own
+  software.
 
 HOOK OF THE REAPER
   Copy "Hook of the Reaper\defaultLG\hod2re.txt" into the defaultLG folder where Hook of
@@ -336,10 +335,8 @@ Native Wii support has automated coverage; real-hardware pairing and aiming are 
 
 Close the window or use Exit on the main menu to quit.
 Pause also offers separate music, gunshot, and sound-effect volumes.
-Mouse/touchpad input is enabled by default. Open Options > Game Options > Light Guns,
-or Pause > Light Guns. Classic menus retain Options > Light Guns.
-Choose LIGHT GUNS, then Assign Player 1 and pull that gun's trigger. Repeat for Player 2.
-Player settings offer button capture, four-target aim calibration, and Test both guns.
+Light guns are picked in LightgunHID.ini (run "1 - Light Gun Setup.exe"); this edition has no
+in-game Light Guns page. With no configured gun connected, one player uses the mouse.
 ESC cancels setup or leaves the test. Assignments and settings save automatically.
 Choose MOUSE to use a mouse or touchpad again. Input changes release native Wii Remote
 control; it can be enabled again in Wii Remotes. Sinden users must keep their border enabled.

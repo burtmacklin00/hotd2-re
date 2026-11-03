@@ -274,7 +274,7 @@ const std::vector<int>& DisplayMenu::Rows(Page p) {
          kRayShadows, kBloom, kFog, kReflections, kCinematicFocus, kContrast, kSaturation, kColorGrade, kStatistics, kBack},
         {kUsername, kDifficulty, kLives, kContinues, kCrosshairP1, kCrosshairP2, kCrosshairs, kBlood, kResetGameplay, kBack},
         {kMasterVolume, kMusicVolume, kGunVolume, kEffectsVolume, kAttractionVolume, kBack},
-        {kLightguns, kWiiRemotes, kFeedback, kBack},  // Light Gun Edition: no Controllers page (controllers are never used)
+        {kWiiRemotes, kFeedback, kBack},  // Light Gun Edition: no Light Guns page (LightgunHID.ini picks the guns) or Controllers page
         {kCrt, kCrtMask, kCrtCurvature, kCrtGlow, kBack},
         {kPack, kMaterialMaps, kMeshRefinement, kBack}};
     return rows[p >= 0 && p < kPageCount ? p : kDisplay];

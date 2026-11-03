@@ -73,7 +73,7 @@ Point the game entry at **`Play HOTD2.exe`** in the `hotd2re` folder. It shows t
 
 **Typing of the Dead** (official 1.6, keyboard only): switch to it with the logo card on the main menu. Use **F10** to pause there, since Esc quits the game through the launcher. The guns aren't used in Typing mode.
 
-Buttons and calibration can be changed per player in *Options → Light Guns*. Guns calibrated in their own software work without in-game calibration.
+Guns are picked in `LightgunHID.ini` (with `1 - Light Gun Setup.exe`) and calibrated in their own software, so the game has no in-game Light Guns page.
 
 ---
 

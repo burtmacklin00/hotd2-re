@@ -4026,10 +4026,7 @@ int main(int argc, char** argv) {
                 displayRequestsSeen = req;
             }
             if (const int req = world.Hud().portLightgunRequests; req != lightgunRequestsSeen) {
-                if (req > lightgunRequestsSeen && menuEnabled) {
-                    lightgunPage.Open();
-                    wii.BeginFrame();
-                }
+                // Light Gun Edition: no in-game Light Guns page (LightgunHID.ini picks the guns), also from the classic menus.
                 lightgunRequestsSeen = req;
             }
             if (const int req = world.Hud().portWiiRequests; req != wiiRequestsSeen) {
