@@ -31,6 +31,22 @@ function Is-Kept([string]$rel) {
     return $false
 }
 
+# Files earlier releases had that are now gone or moved. Also runs when the folder is already up to date, so a folder
+# updated by an older updater (which didn't know about these) is cleaned on the next run.
+function Remove-Obsolete {
+    foreach ($old in 'Hook of the Reaper\defaultLG\hod2re - notes.txt', 'Hook of the Reaper\hod2re - notes.txt',
+                     'Toggle 2x Graphics.bat', 'tools\graphics_2x.ps1') {
+        $o = Join-Path $root $old
+        if (Test-Path -LiteralPath $o) { Remove-Item -LiteralPath $o -Force -ErrorAction SilentlyContinue }
+    }
+    # The old official 2x texture pack (remaster-2x, about 700 MB): the game no longer uses texture packs (official 2.0+).
+    $pack = Join-Path $root 'remaster-2x'
+    if ((Test-Path -LiteralPath $pack -PathType Container) -and (Test-Path -LiteralPath (Join-Path $pack 'tex'))) {
+        Remove-Item -LiteralPath $pack -Recurse -Force -ErrorAction SilentlyContinue
+        if (-not (Test-Path -LiteralPath $pack)) { Write-Host 'Removed the old 2x texture pack (no longer used), freeing about 700 MB.' }
+    }
+}
+
 $current = ''
 $verFile = Join-Path $root 'VERSION.txt'
 if (Test-Path -LiteralPath $verFile) { $current = (Get-Content -LiteralPath $verFile -TotalCount 1).Trim() }
@@ -53,7 +69,10 @@ if (-not $zipInfo) { Write-Host "The newest release ($latest) has no $asset." -F
 
 $shownCurrent = if ($current) { $current } else { 'unknown' }
 Write-Host "This folder: $shownCurrent    Newest: $latest"
-if ($current -eq $latest -and -not $Force) { Write-Host 'Already up to date.' -ForegroundColor Green; exit 0 }
+if ($current -eq $latest -and -not $Force) {
+    if (-not $Check) { Remove-Obsolete }
+    Write-Host 'Already up to date.' -ForegroundColor Green; exit 0
+}
 if ($Check) { Write-Host 'An update is available. Run "Update HOTD2.bat" to install it.' -ForegroundColor Yellow; exit 0 }
 }
 
@@ -103,18 +122,7 @@ try {
         }
         Copy-Item -LiteralPath $f.FullName -Destination $dst -Force; $copied++
     }
-    # Files earlier releases had that are now gone or moved.
-    foreach ($old in 'Hook of the Reaper\defaultLG\hod2re - notes.txt', 'Hook of the Reaper\hod2re - notes.txt',
-                     'Toggle 2x Graphics.bat', 'tools\graphics_2x.ps1') {
-        $o = Join-Path $root $old
-        if (Test-Path -LiteralPath $o) { Remove-Item -LiteralPath $o -Force -ErrorAction SilentlyContinue }
-    }
-    # The old official 2x texture pack (remaster-2x, about 700 MB): the game no longer uses texture packs (official 2.0+).
-    $pack = Join-Path $root 'remaster-2x'
-    if ((Test-Path -LiteralPath $pack -PathType Container) -and (Test-Path -LiteralPath (Join-Path $pack 'tex'))) {
-        Remove-Item -LiteralPath $pack -Recurse -Force -ErrorAction SilentlyContinue
-        if (-not (Test-Path -LiteralPath $pack)) { Write-Host 'Removed the old 2x texture pack (no longer used), freeing about 700 MB.' }
-    }
+    Remove-Obsolete
     # Fill in any of your own files that don't exist yet from defaults\.
     # The launcher script ships as defaults\Play HOTD2.ahk (never in the main folder, so no updater, old or new,
     # replaces a customized one); put it in place only when there is none.
