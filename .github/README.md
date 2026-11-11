@@ -81,7 +81,8 @@ Guns are picked in `LightgunHID.ini` (with `1 - Light Gun Setup.exe`) and calibr
 
 Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, `bezel.png`, `logo.png` and `Play HOTD2.ahk` are never replaced (`logo.png` and `Play HOTD2.ahk` are only added if they're missing, so a customized launcher script stays as it is).
 No internet on the game PC? Download `hotd2re-outputs-package.zip` on another PC and drag it onto `Update HOTD2.bat`.
-The package also carries the game's data files (Typing of the Dead, Naomi arcade graphics and arcade audio), so updates are about 550 MB, and the game itself never downloads anything at startup.
+The package also carries the game's data files (Typing of the Dead, Naomi arcade graphics and arcade audio), so updates are about 530 MB, and the game itself never downloads anything at startup.
+Texture packs are no longer used (official 2.0+), so the updater also deletes the old `remaster-2x` pack folder (about 700 MB).
 
 **Online leaderboards:** there's no username screen at startup. To send your scores to the online leaderboards, set a name in *Options → Gameplay → Username*.
 
