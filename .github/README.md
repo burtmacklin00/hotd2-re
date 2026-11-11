@@ -10,7 +10,7 @@ An unofficial add-on for [HOTD2RE](https://github.com/GitFist/hotd2-re), the nat
 - **House of the Dead 2 bezel and "Rebuild" title logo** included
 - **Updater** that keeps your settings, gun setup, saves and bezel
 
-<!-- release -->**Current release: 2.3 LG** (`outputs-v2026.11.10-a`)<!-- /release -->
+<!-- release -->**Current release: 2.3 LG** (`outputs-v2026.11.10-b`)<!-- /release -->
 
 All the game code and data come from the official HOTD2RE project. This edition adds the light-gun features on top. New official releases are merged in automatically and published after testing.
 
