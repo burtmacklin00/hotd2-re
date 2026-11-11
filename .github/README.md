@@ -5,7 +5,7 @@ An unofficial add-on for [HOTD2RE](https://github.com/GitFist/hotd2-re), the nat
 - **Two-player light guns** (Raw Input) with fixed Player 1 / Player 2 guns, and a one-click gun picker
 - **Recoil and outputs** for Hook of the Reaper / MAMEHooker (ammo, life, damage, death, recoil, start lamps)
 - **Launcher** with a 4:3 bezel, Esc to quit and 1 (a light gun's Start key) to pause, and no pop-ups (works in LaunchBox and other front ends)
-- **One-click switches** for 4:3 or 16:9, crosshairs on or off, and max or low graphics (DLSS / FSR / XeSS on the 64-bit build)
+- **One-click switches** for 4:3 or 16:9, crosshairs on or off, Cartoon look, and max or low graphics (DLSS / FSR / XeSS on the 64-bit build)
 - **Menus for arcade cabinets:** Player 1's gun drives the menus with its crosshair (no Windows pointer); Player 2 joins Arcade, Original, Horde, Boss Mode and Challenges by pulling the trigger
 - **House of the Dead 2 bezel and "Rebuild" title logo** included
 - **Updater** that keeps your settings, gun setup, saves and bezel
@@ -44,7 +44,8 @@ All the game code and data come from the official HOTD2RE project. This edition 
 | `Toggle Cartoon.bat` | Cartoon look (comic outlines + flat shading) on ↔ off. Also in *Options → Graphics → Cartoon* |
 | `Graphics - Max.bat` | Best quality (DLSS on NVIDIA RTX, FSR 3 on other cards) |
 | `Graphics - Low.bat` | For older graphics cards (the default on first run) |
-| `Toggle 2x Graphics.bat` | Downloads (first time, about 720 MB) and turns on the official 2× texture pack |
+
+**Graphics:** the official Naomi arcade graphics and audio are the default (official 2.0+); *Options → Graphics → Graphics Mode* switches to the PC graphics.
 
 **Bezel and logo:** the edition comes with a House of the Dead 2 bezel (4:3 mode) and a "Rebuild" title logo (`logo.png`, shown on the title screen and menus).
 - **Your own bezel:** save a 1920×1080 PNG as `4x3\bezel.png`. Transparent areas show the game, and art may overlap the game picture. Shots on the bezel outside the game picture count as off-screen (reload).
@@ -78,9 +79,9 @@ Guns are picked in `LightgunHID.ini` (with `1 - Light Gun Setup.exe`) and calibr
 
 ## Updating
 
-Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, texture packs, `bezel.png`, `logo.png` and `Play HOTD2.ahk` are never replaced (`logo.png` and `Play HOTD2.ahk` are only added if they're missing, so a customized launcher script stays as it is).
+Close the game and run **`Update HOTD2.bat`**. It downloads the newest release, checks it, and installs it. Your `LightgunHID.ini`, `Play HOTD2.ini`, settings, saves, records, `bezel.png`, `logo.png` and `Play HOTD2.ahk` are never replaced (`logo.png` and `Play HOTD2.ahk` are only added if they're missing, so a customized launcher script stays as it is).
 No internet on the game PC? Download `hotd2re-outputs-package.zip` on another PC and drag it onto `Update HOTD2.bat`.
-Since 1.6 the package also carries the Typing of the Dead data (about 90 MB), so updates are about 230 MB. The game itself never downloads anything at startup.
+The package also carries the game's data files (Typing of the Dead, Naomi arcade graphics and arcade audio), so updates are about 550 MB, and the game itself never downloads anything at startup.
 
 **Online leaderboards:** there's no username screen at startup. To send your scores to the online leaderboards, set a name in *Options → Gameplay → Username*.
 

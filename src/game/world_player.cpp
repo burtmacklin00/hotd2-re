@@ -230,6 +230,7 @@ int World::Impl::CreditOf(int) const { return cfg.credits; }  // 0x00406780 (sha
 
 // 0x00406ED0 (0x00406F00): free play, or enough credits to start or continue
 bool World::Impl::CanContinue() const {
+    if (cfg.portFeatures && !cfg.portNetworkRoom && cfg.gameType == 3) return false;
     if (cfg.freePlay) return true;
     return !(cfg.credits < cfg.coinsStart && cfg.credits < cfg.coinsContinue);
 }
@@ -238,10 +239,20 @@ bool World::Impl::CanContinue() const {
 bool World::Impl::UseCredit(int p, bool cont) {
     // mode 4: only in the frame the mode select confirmed a game (0x009A21C0, world_front.cpp)
     if (gameMode != 6 && !(gameMode == 4 && front.menuConfirmed)) return false;
+    if (cfg.portFeatures && !cfg.portNetworkRoom && modes &&
+        (gameMode == 4 ? front.gameType : cfg.gameType) == 3) {
+        // The original's single shared credit lets the first player consume
+        // the second player's entry. Reserve one start each, without granting
+        // continues or letting an eliminated player rejoin the same attempt.
+        if (p < 0 || p > 1 || cont || (gameMode == 6 && subState != 2) ||
+            (modes->bossJoinedPlayers & (1u << p))) return false;
+        modes->bossJoinedPlayers |= static_cast<uint8_t>(1u << p);
+        return true;
+    }
     if (cfg.freePlay) return true;
-    // Light Gun Edition: Challenges and Boss Mode give one credit (0x00496B70), so a second player could never join.
-    // The second player may join for free, once, while the other is playing; continues still need a credit (none).
-    if (!cont && gameMode == 6 && runner && (runner->cfg.gameType == 2 || runner->cfg.gameType == 3) && players == 1 &&
+    // Light Gun Edition: Challenges give one credit (0x00496B70), so a second player could never join. The second
+    // player may join for free, once, while the other is playing (Boss Mode: the official per-player entries above).
+    if (!cont && gameMode == 6 && runner && runner->cfg.gameType == 2 && players == 1 &&
         !portRunJoined[p] &&
         (player[0].state == 5 || player[1].state == 5)) return true;
     const int cost = cont ? cfg.coinsContinue : cfg.coinsStart;
@@ -250,11 +261,13 @@ bool World::Impl::UseCredit(int p, bool cont) {
     return true;
 }
 
-// 0x007DCCA4 (top of Evt_Run 0x0045ECC0): a player in state 5 with lives, or a non-interactive mode
+// 0x007DCCA4 (top of Evt_Run 0x0045ECC0): Training tests playing state alone;
+// other game types require lives, or a non-interactive mode.
 bool World::Impl::GameRunning() {
-    // PC44E000's training branch tests playing state alone. Cleanup attacks
-    // may exhaust lives after the result has latched without stopping its VM.
-    if(TypingDrillGameActive(*this))return player[0].state==5||player[1].state==5;
+    // Failed lessons retain state 5 at zero lives. Their results script must
+    // finish restoring character lighting and process Retry / Quit / Back.
+    if ((runner && runner->cfg.gameType == 2) || TypingDrillGameActive(*this))
+        return player[0].state == 5 || player[1].state == 5;
     if ((player[0].lives >= 1 && player[0].state == 5) || (player[1].lives >= 1 && player[1].state == 5)) return true;
     return NonInteractive();
 }
@@ -362,7 +375,9 @@ void World::Impl::UpdateRank() {
 
 // 0x004606D0: one stage frame (task run, rank, rank timer, per-player hit timers)
 void World::Impl::StageFrame() {
+    AdvanceNativeVisualEffects();
     ts.RunFrame();  // Task_RunFrom 0x004A7240
+    UpdateNativeDeathBlood();  // Follow this frame's posed nodes, including a new lethal hit.
     UpdateRank();
     if (rankTimerOn) ++rankTimer;
     for (Player& P : player)
@@ -371,6 +386,8 @@ void World::Impl::StageFrame() {
 
 // Game_SetState 0x0040E850 (0x007C17A0) applied at the end of the frame by Game_ApplyState 0x0040E860
 void World::Impl::SetGameMode(int m) {
+    nativeVisualEffects.clear();
+    nativeBloodEmitters.clear();
     if (m != 6 && prototype) { prototype.reset(); animLight = 1; }
     if (m == 3 || m == 4 || m == 15) RandomizerBegin(*this, false);
     stageResults = {};
@@ -482,6 +499,8 @@ void World::Impl::PlayerInit(Task& t, int row) {
     const uint32_t r = kRowTable + 0x18 * static_cast<uint32_t>(row);
     const uint32_t flags = exe.U32(r);
     const int gt = runner ? runner->cfg.gameType : 0;
+    if (gt == 3 && modes && cfg.portFeatures && !cfg.portNetworkRoom)
+        modes->bossJoinedPlayers |= static_cast<uint8_t>(1u << p);
     if ((flags & 1) || (1 < gt && gt < 4)) {  // game types 0 / 1 by the row (types 2 / 3 always)
         P.lives = static_cast<int16_t>(cfg.livesSetting);
         P.livesShown = P.lives;

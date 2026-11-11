@@ -316,6 +316,7 @@ struct World::Impl : public EventHost, public CrtRand::Observer {
     std::string gameDir;
     TypingReference typingReference;
     bool typingReferenceActive = false;
+    float typingInstructionFade = 0;
     struct TypingChallengeCtl {
         bool active = false, inputBlocked = false, success = false, rewardPending = false, keyActivity = false;
         int state = 0, shared = 0, deadline = 0, interval = 0, maximum = 0, quota = 0;
@@ -323,6 +324,7 @@ struct World::Impl : public EventHost, public CrtRand::Observer {
         int instruction = -1, instructionFrames = 0, instructionAge = 0, instructionTarget = 0;
         uint64_t startingErrors = 0;
         std::vector<uint32_t> records;
+        std::vector<uint32_t> enemies;
         std::vector<int> weighted;
     } typingChallenge;
     int typingSavedRank = 0;          // reference A372A8: rank before the most recent item
@@ -720,6 +722,17 @@ struct World::Impl : public EventHost, public CrtRand::Observer {
 
     // outputs of the current frame
     std::vector<WorldDraw> draws;
+    std::vector<NativeVisualEffect> nativeVisualEffects;
+    struct NativeBloodEmitter {
+        uint32_t owner = 0;
+        int node = 0, ticks = 0;
+    };
+    std::vector<NativeBloodEmitter> nativeBloodEmitters;
+    uint64_t nativeVisualSerial = 0;
+    void AdvanceNativeVisualEffects();
+    void EmitNativePolygonBlood(const EnemyTask& enemy, int node);
+    void StartNativeDeathBlood(int node);
+    void UpdateNativeDeathBlood();
     // While a skeleton node callback runs (AnimNode) it gets the node's model-view matrix (the original's matrix-stack
     // top, built from the view) and every draw is recorded as model-view (viewSpace).
     bool drawMv = false;
@@ -869,6 +882,7 @@ struct World::Impl : public EventHost, public CrtRand::Observer {
     void EnemyBeh34(EnemyTask& e);      // 0x0045A890 walk to the civilian
     void EnemyBeh35(EnemyTask& e);      // 0x0045AAA0 motion list (attacks the civilian)
     void EnemyBeh45(EnemyTask& e);      // 0x0045C7D0 short idle, then the saved behaviour
+    void EnemyBeh44(EnemyTask& e);      // 0x0045C2E0 crawler leaps at its civilian, then drops back
     void EnemyBeh42(EnemyTask& e);      // 0x0045BFD0 keep AI running until the scripted camera checkpoint
     void EnemyBeh40(EnemyTask& e);      // 0x0045BCB0 walk past a point
     bool EnemyPointBehind(const EnemyTask& e, const float pt[3]);  // 0x0045BC10
@@ -971,6 +985,7 @@ struct World::Impl : public EventHost, public CrtRand::Observer {
     int TypingChallengeStatus() override;
     void TypingClearActorSlots() override;
     void TypingChallengeStep();
+    int LoadTypingModel(int model);
     void TypingSprite(int rawId, float x, float y, float alpha = 1, float depth = .1f,
                       uint32_t flags = 0xA, uint32_t source = 0);
     void TypingSound(uint32_t id) override;

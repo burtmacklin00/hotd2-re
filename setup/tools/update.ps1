@@ -104,7 +104,8 @@ try {
         Copy-Item -LiteralPath $f.FullName -Destination $dst -Force; $copied++
     }
     # Files earlier releases had that are now gone or moved.
-    foreach ($old in 'Hook of the Reaper\defaultLG\hod2re - notes.txt', 'Hook of the Reaper\hod2re - notes.txt') {
+    foreach ($old in 'Hook of the Reaper\defaultLG\hod2re - notes.txt', 'Hook of the Reaper\hod2re - notes.txt',
+                     'Toggle 2x Graphics.bat', 'tools\graphics_2x.ps1') {
         $o = Join-Path $root $old
         if (Test-Path -LiteralPath $o) { Remove-Item -LiteralPath $o -Force -ErrorAction SilentlyContinue }
     }

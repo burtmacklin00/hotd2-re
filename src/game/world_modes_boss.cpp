@@ -205,6 +205,13 @@ void TaskBossSelect(Task& tk) {
     ModesState& m = *w.modes;
     const ExeImage& exe = w.exe;
     if (b.step == 0) {
+        // Returning to the chooser begins a fresh attempt. Players retained
+        // by the retry/result flow already own their slots; the other player
+        // can join here or after the fight starts.
+        m.bossJoinedPlayers = 0;
+        for (int p = 0; p < 2; ++p)
+            if (w.player[p].state != 9 && w.player[p].state != 6)
+                m.bossJoinedPlayers |= static_cast<uint8_t>(1u << p);
         // textures 0x14E / 0x16F / 0x173, pol 0xBF, model 0x1A4C, motion file 0x30, flush, 0x00413DA0, BGM BOSS_MOD
         for (const World::Impl::Request& r : { World::Impl::Request{ 0x54, 0x14E }, World::Impl::Request{ 0x54, 0x16F },
                                                World::Impl::Request{ 0x54, 0x173 }, World::Impl::Request{ 0x52, 0xBF },
@@ -562,6 +569,15 @@ bool SpawnModes(World::Impl& w, Task& t, SpawnTask& s) {
     case 0x23:  // training lesson 4: the mount alone (variant 2, world_st1b_boss.cpp)
         if (w.runner->cfg.gameType != 2) return false;
         return SpawnMount23(w, t, s.rec);
+    case 0x47:  // Enemy Sweep: one leech crossing the alley
+        if (w.runner->cfg.gameType != 2) return false;
+        SpawnTrainBat(w, s.rec);
+        w.ts.KillCurrent();
+        return true;
+    case 0x48:  // Enemy Sweep: one flying enemy and its carried body
+        if (w.runner->cfg.gameType != 2) return false;
+        SpawnTrainBird(w, t, s.rec);
+        return true;
     case 0x1A: case 0x1B:  // training: the lessons' spawners (world_modes_train.cpp)
         if (w.runner->cfg.gameType != 2) return false;
         return SpawnLessonActor(w, t, s);

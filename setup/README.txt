@@ -28,7 +28,6 @@ WHICH FILE DOES WHAT
   Toggle Cartoon.bat        Cartoon look (comic outlines + flat shading) on <-> off.
   Graphics - Max.bat        Best quality (DLSS on NVIDIA RTX, FSR 3 otherwise).
   Graphics - Low.bat        For older graphics cards.
-  Toggle 2x Graphics.bat    Downloads (first time) and switches the official 2x texture pack.
   hotd2-outputs64.exe       The game, 64-bit (used automatically on 64-bit Windows).
   hotd2-outputs.exe         The game, 32-bit (for 32-bit Windows).
   You never need to run the hotd2-outputs exes directly - use Play HOTD2.
@@ -38,8 +37,7 @@ UPDATING
   release from github.com/burtmacklin00/hotd2-re/releases, checks it, and copies it over this
   folder. It never replaces your own files:
     LightgunHID.ini, Play HOTD2.ini, hotd2re_settings.ini, saves / records (hotd2re_*),
-    4x3\bezel.png, logo.png, Play HOTD2.ahk (a customized launcher script stays as it is)
-    and installed texture packs.
+    4x3\bezel.png, logo.png and Play HOTD2.ahk (a customized launcher script stays as it is).
   If you edited one of the shipped files (e.g. "Graphics Max\settings.ini" or a .bat), the old
   copy is saved in backup\<date>\ before the new one goes in.
   "Update HOTD2.bat" check   only tells you whether an update is available.
@@ -50,10 +48,11 @@ UPDATING
   Manual install still works too: extracting the zip over the folder is safe, because the zip
   doesn't contain any of your own files (their defaults are in defaults\).
 
-TEXTURE PACKS
-  The only released pack is the official 2x pack (Toggle 2x Graphics.bat). Options > Graphics >
-  Packs also shows Material Detail / Model Smoothing: those need a pack with material maps or
-  model rules, and none has been released yet - "Needs pack" there is normal.
+NAOMI ARCADE GRAPHICS AND AUDIO (official 2.0+)
+  The game looks and sounds like the Naomi arcade original by default. Options > Graphics >
+  Graphics Mode switches between Naomi and the PC graphics. The data files (game\naomi_visuals.bank,
+  game\naomi_audio.bank, plus game\typing_reference.bank for Typing of the Dead) come in this
+  package, so the game never downloads anything. Texture packs (the old 2x pack) are no longer used.
 
 64-BIT VERSION (hotd2-outputs64.exe) - recommended on 64-bit Windows
   Same game + outputs + lightgunHID, plus the 64-bit graphics features: native Direct3D 12,
@@ -97,7 +96,7 @@ CARTOON LOOK
                     (100-2000, default 400 = 0.4 s). They fade out as the camera moves on.
   "Toggle Cartoon.bat" switches both on / off. The level used for On is in
   "Cartoon On\settings.ini" (cartoon=1, 2 or 3; comic_popups=0 Off, 1 Subtle, 2 Bold).
-  Looks best with the 2x texture pack. Gameplay and aiming are unchanged.
+  Gameplay and aiming are unchanged.
 
 GRAPHICS PRESETS
   "Graphics - Max.bat"  Direct3D 12, DLSS (NVIDIA RTX) or FSR 3 at Native AA, ray shadows,
@@ -105,7 +104,7 @@ GRAPHICS PRESETS
                         No frame generation (it adds aim delay with light guns).
   "Graphics - Low.bat"  For older cards: Direct3D 11, 2x resolution, FXAA, extra effects off.
   Each sets only the lines in "Graphics Max\settings.ini" / "Graphics Low\settings.ini";
-  edit those to taste. Aspect, crosshairs, 2x textures and volume are not touched.
+  edit those to taste. Aspect, crosshairs and volume are not touched.
 
 HOW TOOLS CONNECT
   Protocol : MAME network outputs (same as MAME / DemulShooter)
@@ -162,10 +161,6 @@ HOOK OF THE REAPER
   the Reaper is installed (or merge this "Hook of the Reaper" folder into that install).
   Recoil: P1_CtmRecoil (Recoil or Recoil_Value) or ammo-based (Ammo_Value).
   Damage -> Damage (rumble), Life -> Death_Value + Display_Life, Ammo -> Display_Ammo.
-
-2X GRAPHICS
-  "Toggle 2x Graphics.bat" downloads the official 2x pack the first time (about 720 MB,
-  checked against its SHA-256), then switches it on / off with the assets= setting.
 
 ONLINE PLAY
   Your own gun is always P1 outputs, even when you joined someone else's room as
@@ -344,7 +339,7 @@ Online players should assign their local gun to Player 1. Light-gun hardware tes
 
 GRAPHICS AND DISPLAY
 Open a graphics shortcut in Options, or Pause > Graphics Options. The full menu has nine
-categories: Display, Image, Lighting, Performance, Packs, Color, Resolution, CRT and Advanced.
+categories: Display, Image, Lighting, Performance, Color, Resolution, CRT and Advanced.
 Keyboard: Up/Down selects a row, Left/Right changes a setting, Enter selects/changes it,
 and Esc/Backspace returns. Click a category tab, or use Left/Right on Back to change category.
 
@@ -352,7 +347,7 @@ Display: windowed, borderless or exclusive Fullscreen; monitor, window size, asp
 Fit/Stretch, integer scaling and menu theme. Night Shift's Menu Opacity changes background
 strength while text remains readable; Classic labels this option Night Shift only.
 Display > Reset All Graphics asks for confirmation, saves defaults and preserves your
-pack, menu theme, game rules, audio and controls. Some renderer changes need a restart.
+menu theme, game rules, audio and controls. Some renderer changes need a restart.
 
 Image: image presets, MSAA/post AA/TAA, texture filtering, anisotropy, Sharp HUD,
 sharpening and Gameplay Crosshairs. Setting Gameplay Crosshairs Off hides both players'
@@ -364,15 +359,13 @@ Image Preset > Original changes image options and downsampling only; it is not R
 Lighting: pixel lighting, supported smoke blending/contact shading, raster/ray shadows,
 bloom, volumetric fog, reflections and cutscene blur. These are optional effects.
 Performance: VSync, frame limit, supported tearing/latency controls and statistics.
-Packs: installed visual-pack choice, material detail and model smoothing. Material maps
-and smoothing require a compatible authored pack. Pack changes apply on the next launch.
 Color: brightness, gamma, contrast, saturation, color grading, Blood Color, HDR and test
 patterns. Blood Color switches Green/Red immediately and saves locally; online players
 choose independently.
 HDR uses scRGB and needs Windows HDR enabled; the original art remains SDR.
 Resolution: internal render scale, output matching/SSAA, dynamic resolution, downsampling
 and FSR 1 spatial upscaling. Render Scale 2x/3x/4x renders more pixels at runtime and
-needs no texture-pack download. A separate optional 2x texture pack replaces artwork.
+needs no download.
 CRT: scanlines, phosphor masks, curvature and glow. Curvature is disabled for raw light
 guns and active frame generation so their input/display requirements remain intact.
 Advanced: renderer, supported vendor upscaling, upscale quality, frame generation and
