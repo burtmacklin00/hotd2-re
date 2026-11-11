@@ -52,7 +52,7 @@ NAOMI ARCADE GRAPHICS AND AUDIO (official 2.0+)
   The game looks and sounds like the Naomi arcade original by default. Options > Graphics >
   Graphics Mode switches between Naomi and the PC graphics. The data files (game\naomi_visuals.bank,
   game\naomi_audio.bank, plus game\typing_reference.bank for Typing of the Dead) come in this
-  package, so the game never downloads anything. Texture packs (the old 2x pack) are no longer used.
+  package, so the game never downloads anything. Texture packs are no longer used; the updater deletes the old remaster-2x folder.
 
 64-BIT VERSION (hotd2-outputs64.exe) - recommended on 64-bit Windows
   Same game + outputs + lightgunHID, plus the 64-bit graphics features: native Direct3D 12,

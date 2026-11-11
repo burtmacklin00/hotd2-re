@@ -109,6 +109,12 @@ try {
         $o = Join-Path $root $old
         if (Test-Path -LiteralPath $o) { Remove-Item -LiteralPath $o -Force -ErrorAction SilentlyContinue }
     }
+    # The old official 2x texture pack (remaster-2x, about 700 MB): the game no longer uses texture packs (official 2.0+).
+    $pack = Join-Path $root 'remaster-2x'
+    if ((Test-Path -LiteralPath $pack -PathType Container) -and (Test-Path -LiteralPath (Join-Path $pack 'tex'))) {
+        Remove-Item -LiteralPath $pack -Recurse -Force -ErrorAction SilentlyContinue
+        if (-not (Test-Path -LiteralPath $pack)) { Write-Host 'Removed the old 2x texture pack (no longer used), freeing about 700 MB.' }
+    }
     # Fill in any of your own files that don't exist yet from defaults\.
     # The launcher script ships as defaults\Play HOTD2.ahk (never in the main folder, so no updater, old or new,
     # replaces a customized one); put it in place only when there is none.
