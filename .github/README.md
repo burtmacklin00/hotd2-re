@@ -10,7 +10,7 @@ An unofficial add-on for [HOTD2RE](https://github.com/GitFist/hotd2-re), the nat
 - **House of the Dead 2 bezel and "Rebuild" title logo** included
 - **Updater** that keeps your settings, gun setup, saves and bezel
 
-<!-- release -->**Current release: 1.9 LG** (`outputs-v2026.11.02-a`)<!-- /release -->
+<!-- release -->**Current release: 2.3 LG** (`outputs-v2026.11.10-a`)<!-- /release -->
 
 All the game code and data come from the official HOTD2RE project. This edition adds the light-gun features on top. New official releases are merged in automatically and published after testing.
 
@@ -18,7 +18,7 @@ All the game code and data come from the official HOTD2RE project. This edition 
 
 ## Install (new users)
 
-1. **Get the official game.** Download the official Windows x64 zip (named like **`HOTD2RE-1.9-Windows-x64.zip`**) from the official releases:
+1. **Get the official game.** Download the official Windows x64 zip (named like **`HOTD2RE-2.3-Windows-x64.zip`**) from the official releases:
    👉 https://github.com/GitFist/hotd2-re/releases/latest
    Extract it into a normal, writable folder (for example `C:\Games\HOTD2`, not inside *Program Files*). You get a `hotd2re` folder.
 
